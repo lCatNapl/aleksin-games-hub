@@ -1,88 +1,74 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игровой Хаб Назар</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Игровой Хаб</title>
+    <style>
+        body { background: linear-gradient(45deg, #667eea, #764ba2); color: white; font-family: Arial; text-align: center; padding: 50px; }
+        button { font-size: 24px; padding: 20px 40px; margin: 20px; border: none; border-radius: 20px; cursor: pointer; }
+        .register-btn { background: #4ecdc4; color: white; }
+        .login-btn { background: #45b7aa; color: white; }
+        .logout-btn { background: #ff4757; color: white; }
+        .game-btn { background: #ff6b6b; font-size: 28px; padding: 25px 50px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; }
+        .modal-content { background: white; color: black; padding: 40px; border-radius: 20px; width: 400px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; font-size: 18px; border-radius: 10px; border: 2px solid #ddd; }
+        #user-status { font-size: 28px; margin: 20px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 20px; display: inline-block; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎮 Игровой Хаб Назар</h1>
-        <div id="user-status">Гость 😴</div>
-        
-        <!-- 🔥 РЕГИСТРАЦИЯ ЗДЕСЬ 🔥 -->
-        <div style="margin: 20px 0;">
-            <button onclick="showAuth('register')" style="font-size: 1.2em; padding: 15px 30px;">📝 РЕГИСТРАЦИЯ</button>
-            <button onclick="showAuth('login')" style="font-size: 1.2em; padding: 15px 30px;">🔑 ВХОД</button>
-            <button onclick="logout()" id="logout-btn" style="display: none; background: #ff4757;">🚪 Выйти</button>
-        </div>
-        
-        <div class="games">
-            <button class="game-btn" onclick="playGame('guess')">🎯 Угадай число</button>
-            <button class="game-btn" onclick="playGame('snake')">🐍 Змейка</button>
-        </div>
-        
-        <div id="game-area" style="display: none;"></div>
-        <div id="leaderboard"></div>
+    <h1 style="font-size: 48px; margin-bottom: 30px;">🎮 Игровой Хаб Назар</h1>
+    
+    <div id="user-status">👋 Гость</div>
+    
+    <!-- 🔥 КНОПКИ ОГРОМНЫЕ 🔥 -->
+    <div>
+        <button class="register-btn" onclick="showAuth('register')">📝 РЕГИСТРАЦИЯ</button>
+        <button class="login-btn" onclick="showAuth('login')">🔑 ВХОД</button>
+        <button class="logout-btn" onclick="logout()" id="logout-btn" style="display:none">🚪 Выйти</button>
     </div>
+    
+    <div style="margin: 50px 0;">
+        <button class="game-btn" onclick="playGame('guess')">🎯 УГАДАЙ ЧИСЛО</button>
+        <button class="game-btn" onclick="playGame('snake')">🐍 ЗМЕЙКА</button>
+    </div>
+    
+    <div id="leaderboard" style="margin-top: 50px;"></div>
 
-    <!-- 🔥 МОДАЛКА РЕГИСТРАЦИИ 🔥 -->
+    <!-- МОДАЛКА -->
     <div id="auth-modal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeAuth()">&times;</span>
-            <h3 id="modal-title">РЕГИСТРАЦИЯ</h3>
-            <input id="username" placeholder="Имя (минимум 3 символа)" maxlength="20">
-            <input id="password" type="password" placeholder="Пароль (минимум 6 символов)" maxlength="30">
-            <br><br>
-            <button onclick="authUser()" style="font-size: 1.3em; padding: 15px 40px;">✅ ГОТОВО</button>
-            <div id="auth-error" style="color: #ff6b6b; margin-top: 10px;"></div>
+            <h2 id="modal-title">РЕГИСТРАЦИЯ</h2>
+            <input id="username" placeholder="Имя (nazar)" maxlength="20">
+            <input id="password" type="password" placeholder="Пароль (123456)" maxlength="30">
+            <br><button onclick="authUser()" style="width: 100%; font-size: 20px; padding: 15px; margin-top: 20px;">✅ РЕГИСТРИРОВАТЬСЯ / ВОЙТИ</button>
+            <div id="auth-error" style="color: red; margin-top: 15px;"></div>
         </div>
     </div>
 
     <script>
-        let currentGame = '', isLoggedIn = false, currentUsername = '';
-
-        // ПРОВЕРКА СТАТУСА
-        async function checkUserStatus() {
-            try {
-                const res = await fetch('/api/user_status');
-                const status = await res.json();
-                if (status.logged_in) {
-                    isLoggedIn = true;
-                    currentUsername = status.username;
-                    document.getElementById('user-status').textContent = `👋 ${currentUsername}`;
-                    document.getElementById('logout-btn').style.display = 'inline-block';
-                }
-            } catch(e) {}
-        }
-
-        // ПОКАЗАТЬ МОДАЛКУ
+        let isLoggedIn = false;
+        
         function showAuth(type) {
-            document.getElementById('modal-title').textContent = type === 'register' ? '📝 РЕГИСТРАЦИЯ' : '🔑 ВХОД';
+            document.getElementById('modal-title').innerText = type === 'register' ? '📝 РЕГИСТРАЦИЯ' : '🔑 ВХОД';
             document.getElementById('auth-modal').style.display = 'flex';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            document.getElementById('auth-error').textContent = '';
         }
-
+        
         function closeAuth() {
             document.getElementById('auth-modal').style.display = 'none';
         }
-
-        // РЕГИСТРАЦИЯ/ЛОГИН
+        
         async function authUser() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
+            if (username.length < 3 || password.length < 6) {
+                return document.getElementById('auth-error').innerText = 'Имя ≥3, пароль ≥6!';
+            }
             
-            if (username.length < 3) return document.getElementById('auth-error').textContent = 'Имя ≥ 3 символа!';
-            if (password.length < 6) return document.getElementById('auth-error').textContent = 'Пароль ≥ 6 символов!';
-            
-            const isRegister = document.getElementById('modal-title').textContent.includes('РЕГИСТРАЦИЯ');
-            const endpoint = isRegister ? '/api/register' : '/api/login';
+            const isRegister = document.getElementById('modal-title').innerText.includes('РЕГИСТРАЦИЯ');
+            const url = isRegister ? '/api/register' : '/api/login';
             
             try {
-                const res = await fetch(endpoint, {
+                const res = await fetch(url, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({username, password})
@@ -90,45 +76,31 @@
                 const data = await res.json();
                 
                 if (data.success) {
-                    isLoggedIn = true;
-                    currentUsername = data.username || username;
-                    document.getElementById('user-status').textContent = `👋 ${currentUsername} ✅`;
+                    document.getElementById('user-status').innerText = `👋 ${data.username || username} ✅`;
                     document.getElementById('logout-btn').style.display = 'inline-block';
                     closeAuth();
-                    location.reload(); // Обновить лидерборд
+                    alert('✅ Успех! Играй и бей рекорды!');
                 } else {
-                    document.getElementById('auth-error').textContent = data.error || 'Ошибка!';
+                    document.getElementById('auth-error').innerText = data.error;
                 }
             } catch(e) {
-                document.getElementById('auth-error').textContent = 'Нет связи с сервером';
+                document.getElementById('auth-error').innerText = 'Сервер недоступен';
             }
         }
-
+        
         async function logout() {
             await fetch('/api/logout', {method: 'POST'});
             location.reload();
         }
-
-        async function loadLeaderboard(game) {
-            const res = await fetch(`/api/leaderboard/${game}`);
-            const leaders = await res.json();
-            let html = '<h3>🏆 ТОП-10</h3><ol>';
-            leaders.forEach((l, i) => {
-                html += `<li>${i+1}. ${l.username}: <b>${l.score}</b> (${l.plays} игр)</li>`;
-            });
-            html += '</ol>';
-            document.getElementById('leaderboard').innerHTML = html;
-        }
-
+        
         function playGame(game) {
-            currentGame = game;
-            loadLeaderboard(game);
-            alert(`${game.toUpperCase()} запущена! ${isLoggedIn ? 'Рекорды сохранятся!' : 'Залогинься для топа'}`);
+            alert(`🎮 ${game.toUpperCase()}! ${isLoggedIn ? 'Рекорды сохранятся!' : 'Залогинься для топа!'}`);
         }
-
-        // СТАРТ
-        checkUserStatus();
-        document.addEventListener('click', e => e.target.focus());
+        
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeAuth();
+            if (document.getElementById('auth-modal').style.display === 'flex' && e.key === 'Enter') authUser();
+        });
     </script>
 </body>
 </html>
