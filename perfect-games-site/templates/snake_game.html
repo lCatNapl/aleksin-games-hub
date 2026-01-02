@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🪱 Змейка</title>
+    <style>
+        body { 
+            background: #000; 
+            color: #0ff; 
+            font-family: Arial; 
+            text-align: center; 
+            padding: 20px;
+            margin: 0;
+        }
+        canvas { 
+            border: 3px solid #0ff; 
+            background: #111; 
+            display: block; 
+            margin: 20px auto;
+            max-width: 95vw;
+            max-height: 60vh;
+            touch-action: none;
+        }
+        #info { 
+            color: #ff0; 
+            font-size: 24px; 
+            margin: 20px 0;
+        }
+        button { 
+            padding: 15px 30px; 
+            font-size: 18px; 
+            background: #111; 
+            color: #0ff; 
+            border: 2px solid #0ff; 
+            border-radius: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>🪱 Змейка (стрелки/WASD/свайпы)</h1>
+    <div id="info">Счёт: <span id="score">0</span> | Рекорд: <span id="highScore">0</span></div>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <br>
+    <button onclick="resetGame()">🔄 Новая игра</button>
+    <br><br>
+    <a href="/" style="color:#0ff; font-size:20px;">🏠 Главная</a>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const box = 20;
+        
+        let snake = [{x: 10, y: 10}];
+        let dx = 0, dy = 0;
+        let food = {};
+        let score = 0;
+        let highScore = localStorage.getItem('snakeScore') || 0;
+        document.getElementById('highScore').innerText = highScore;
+
+        // Создать еду
+        function createFood() {
+            food.x = Math.floor(Math.random() * 19);
+            food.y = Math.floor(Math.random() * 19);
+        }
+        createFood();
+
+        // Отрисовка
+        function draw() {
+            // Фон
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Еда
+            ctx.fillStyle = 'lime';
+            ctx.fillRect(food.x * box, food.y * box, box - 2, box - 2);
+
+            // Змейка
+            for (let i = 0; i < snake.length; i++) {
+                ctx.fillStyle = (i === 0) ? 'cyan' : '#0aa';
+                ctx.fillRect(snake[i].x * box, snake[i].y * box, box - 2, box - 2);
+            }
+
+            let snakeX = snake[0].x;
+            let snakeY = snake[0].y;
+
+            // Движение
+            if (dx === 1) snakeX++;
+            if (dx === -1) snakeX--;
+            if (dy === 1) snakeY++;
+            if (dy === -1) snakeY--;
+
+            // Стены
+            if (snakeX >= 20 || snakeX < 0 || snakeY >= 20 || snakeY < 0) {
+                gameOver();
+                return;
+            }
+
+            // Сам в себя
+            for (let i = 1; i < snake.length; i++) {
+                if (snakeX === snake[i].x && snakeY === snake[i].y) {
+                    gameOver();
+                    return;
+                }
+            }
+
+            snake.unshift({x: snakeX, y: snakeY});
+
+            // Еда
+            if (snakeX === food.x && snakeY === food.y) {
+                score++;
+                document.getElementById('score').innerText = score;
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('snakeScore', highScore);
+                    document.getElementById('highScore').innerText = highScore;
+                }
+                createFood();
+            } else {
+                snake.pop();
+            }
+        }
+
+        function gameOver() {
+            alert(`ИГРА ОКОНЧЕНА!\nСчёт: ${score}\nРекорд: ${highScore}`);
+            resetGame();
+        }
+
+        function resetGame() {
+            snake = [{x: 10, y: 10}];
+            dx = 0;
+            dy = 0;
+            score = 0;
+            document.getElementById('score').innerText = 0;
+            createFood();
+        }
+
+        // Управление
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { dx = -1; dy = 0; }
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { dx = 0; dy = -1; }
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { dx = 1; dy = 0; }
+            if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { dx = 0; dy = 1; }
+        });
+
+        // Touch свайпы для телефона
+        let startX, startY;
+        canvas.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+        canvas.addEventListener('touchend', (e) => {
+            let endX = e.changedTouches[0].clientX;
+            let endY = e.changedTouches[0].clientY;
+            let deltaX = endX - startX;
+            let deltaY = endY - startY;
+            
+            if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                dx = deltaX > 0 ? 1 : -1; dy = 0;
+            } else {
+                dy = deltaY > 0 ? 1 : -1; dx = 0;
+            }
+        });
+
+        setInterval(draw, 150);  // Скорость игры
+    </script>
+</body>
+</html>

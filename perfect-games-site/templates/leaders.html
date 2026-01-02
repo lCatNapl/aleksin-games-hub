@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Лидерборд</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='universal.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 Топ-10 Угадайщиков</h1>
+        <p>Минимум попыток = лучше!</p>
+        
+        {% if leaders %}
+            <ol class="leader-list">
+                {% for leader in leaders %}
+                <li>
+                    <span class="rank">#{{ loop.index }}</span>
+                    <span class="name">{{ leader.name }}</span>
+                    <span class="score">{{ leader.attempts }} попыток</span>
+                </li>
+                {% endfor %}
+            </ol>
+            <div class="stats">Всего игроков: {{ leaders|length }}</div>
+        {% else %}
+            <div class="message">
+                👤 Никто ещё не играл!<br>
+                🎯 Будь первым в таблице!
+            </div>
+        {% endif %}
+        
+        <div class="actions">
+            <a href="/guess?name=Назар" class="game-btn">🎯 Играть снова!</a>
+            <a href="/" class="back-btn">🏠 Главная</a>
+        </div>
+    </div>
+</body>
+</html>
