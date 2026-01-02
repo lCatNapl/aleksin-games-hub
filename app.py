@@ -94,14 +94,19 @@ def save():
     return jsonify({'ok': 1})
 
 @app.route('/top/<game>')
-def top(game):
+def top(game):  # ← ЭТО РОУТ ТОПА!
     conn = get_db()
-    leaders = conn.execute(
-        "SELECT u.username, MAX(s.score) score FROM scores s JOIN users u ON s.user_id=u.id WHERE s.game=? GROUP BY u.id ORDER BY score DESC LIMIT 10",
-        (game,)
-    ).fetchall()
-    conn.close()
-    return jsonify([dict(r) for r in leaders])
+    leaders = conn.execute("""
+        SELECT u.username, MAX(s.score) score 
+        FROM scores s 
+        JOIN users u ON s.user_id=u.id 
+        WHERE s.game=? 
+        GROUP BY u.id 
+        ORDER BY score DESC 
+        LIMIT 10
+    """, (game,)).fetchall()
+    return jsonify(leaders)
+
 
 @app.route('/status')
 def status():
