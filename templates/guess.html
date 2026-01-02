@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Угадай Число</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='universal.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Угадай 1-100!</h1>
+        <div class="stats">
+            <div>👤 {{ name }}</div>
+            <div>⚡ {{ attempts|default(0) }} попыток</div>
+        </div>
+        <form method="POST" action="/guess_check">
+            <input type="number" name="num" placeholder="Твоё число" min="1" max="100" required>
+            <button type="submit" class="big-btn">ПРОВЕРИТЬ!</button>
+        </form>
+        {% if message %}<div class="message">{{ message }}</div>{% endif %}
+        <a href="/" class="back-btn">🏠 Главная</a>
+    </div>
+</body>
+</html>
