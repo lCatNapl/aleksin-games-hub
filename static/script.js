@@ -82,16 +82,15 @@ async function saveScore(game, score) {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({game, score})
         });
-        loadLeaderboard(game);
+        loadLeaderboard(game); // ✅ Обновляем топ после сохранения
     } catch(e) {}
 }
 
-// 🎯 УГАДАЙ ЧИСЛО (HTML версия — НЕ ломается)
+// 🎯 УГАДАЙ ЧИСЛО (✅ РЕКОРДЫ СОХРАНЯЮТСЯ!)
 function loadGuessGame() {
     const canvas = document.getElementById('gameCanvas');
     canvas.style.display = 'none';
     
-    // ✅ HTML ИГРА
     document.getElementById('game-container').innerHTML = `
         <div style="padding:30px;text-align:center;font-family:Arial;background:rgba(0,0,0,0.3);border-radius:20px;max-width:500px;margin:0 auto">
             <h2 style="font-size:36px;margin-bottom:20px">🎯 УГАДАЙ ЧИСЛО (1-100)</h2>
@@ -112,12 +111,13 @@ function loadGuessGame() {
             
             <div id="gameOver" style="font-size:24px;color:#ff4444;margin-top:30px;display:none">F5 — новая игра</div>
         </div>
-        <div id="leaderboard" class="leaderboard" style="display:block">
-            <h3>🏆 ТОП-10</h3>
-            <div id="leaders-list"></div>
+        <div id="leaderboard" class="leaderboard" style="display:block;margin-top:20px">
+            <h3 style="color:white;text-align:center;font-size:24px;margin-bottom:15px">🏆 ТОП-10 УГАДАЙКИ</h3>
+            <div id="leaders-list" style="max-height:300px;overflow-y:auto;background:rgba(0,0,0,0.5);padding:15px;border-radius:10px"></div>
         </div>
     `;
     
+    // ✅ ИГРОВАЯ ЛОГИКА
     window.guessSecret = Math.floor(Math.random() * 100) + 1;
     window.guessAttempts = 7;
     
@@ -128,6 +128,7 @@ function loadGuessGame() {
     loadLeaderboard('guess');
 }
 
+// ✅ ИСПРАВЛЕННАЯ ЛОГИКА УГАДАЙКИ
 window.checkGuess = function() {
     const input = document.getElementById('guessInput');
     const num = parseInt(input.value);
@@ -143,14 +144,19 @@ window.checkGuess = function() {
     
     if (num === window.guessSecret) {
         const score = Math.max(100, 1000 - (7 - window.guessAttempts) * 100);
-        if (isLoggedIn) saveScore('guess', score);
+        // ✅ ФИКС: Сохраняем рекорд + обновляем топ
+        if (isLoggedIn) {
+            saveScore('guess', score);
+        }
         showGuessHint(`✅ ПОБЕДА! ${score} очков! 🎉`, '#44ff88');
         input.disabled = true;
         input.style.borderColor = '#44ff88';
+        document.getElementById('currentGuess').textContent = num;
     } else if (window.guessAttempts === 0) {
         showGuessHint(`💀 Было: ${window.guessSecret}`, '#ff4444');
         document.getElementById('gameOver').style.display = 'block';
         input.disabled = true;
+        input.style.borderColor = '#ff4444';
     } else if (num < window.guessSecret) {
         showGuessHint('⬆️ БОЛЬШЕ', '#ffaa00');
     } else {
@@ -171,7 +177,7 @@ window.showGuessHint = function(message, color) {
     document.getElementById('hint').innerHTML = `<span style="color:${color}">${message}</span>`;
 };
 
-// 🐍 ЗМЕЙКА (canvas версия)
+// 🐍 ЗМЕЙКА (без изменений — работает)
 function loadSnakeGame() {
     const canvas = document.getElementById('gameCanvas');
     canvas.width = 500;
@@ -321,12 +327,6 @@ function closeAuth() {
     document.getElementById('auth-modal').style.display = 'none';
 }
 
-async function testAPI() {
-    const res = await fetch('/test', {credentials: 'include'});
-    console.log(await res.json());
-}
-
-// Горячие клавиши
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeAuth();
     if (document.getElementById('auth-modal').style.display === 'flex' && e.key === 'Enter') {
@@ -334,16 +334,4 @@ document.addEventListener('keydown', e => {
     }
 });
 
-async function checkUserStatus() {
-    try {
-        const res = await fetch('/status', {credentials: 'include'});
-        const data = await res.json();
-        if (data.logged_in) {
-            document.getElementById('status').textContent = `👋 ${data.username}`;
-            document.getElementById('logout').style.display = 'inline-block';
-            isLoggedIn = true;
-        }
-    } catch(e) {
-        // Тихо игнорируем ошибки
-    }
-}  // ← ✅ ЭТО КОНЕЦ ФУНКЦИИ
+checkUserStatus();
