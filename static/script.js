@@ -1,6 +1,12 @@
 let currentGame = '';
 let isLoggedIn = false;
-let gameData = { score: 0, highscore: 0 };
+let gameData = {score: 0, highscore: 0};
+let gameInterval = null;
+let snake = {x:10,y:10,dx:0,dy:0,cells:[],maxCells:4};
+let food = {x:15,y:15};
+let secretNumber = 0;
+let attempts = 0;
+let maxAttempts = 7;
 
 async function checkUserStatus() {
     try {
@@ -8,78 +14,63 @@ async function checkUserStatus() {
         const data = await res.json();
         if (data.logged_in) {
             document.getElementById('status').textContent = `👋 ${data.username}`;
-            document.querySelector('.auth-buttons').style.display = 'none';
-            document.getElementById('logout').style.display = 'inline-block';
+            document.getElementById('auth-buttons').style.display = 'none';
+            document.getElementById('games-grid').style.display = 'grid';
+            document.getElementById('logout-btn').style.display = 'block';
+            document.getElementById('leaderboard-container').style.display = 'block';
             isLoggedIn = true;
             loadLeaderboard();
+        } else {
+            document.getElementById('status').textContent = '👋 Гость';
+            document.getElementById('auth-buttons').style.display = 'flex';
+            document.getElementById('games-grid').style.display = 'none';
+            document.getElementById('logout-btn').style.display = 'none';
+            document.getElementById('leaderboard-container').style.display = 'none';
         }
     } catch (e) {
-        console.log('👋 Гость');
+        console.error('Status check failed:', e);
     }
 }
 
 async function authUser() {
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
-    const mode = document.getElementById('modal-title').dataset.mode;
     const errorDiv = document.getElementById('error');
-    
-    if (username.length < 3) {
-        errorDiv.textContent = '❌ Имя слишком короткое (минимум 3 символа)';
-        return;
-    }
-    if (password.length < 6) {
-        errorDiv.textContent = '❌ Пароль слишком короткий (минимум 6 символов)';
-        return;
-    }
-    
+    errorDiv.textContent = '';
+
     try {
-        const res = await fetch('/auth', {
+        const endpoint = document.getElementById('submit-btn').dataset.mode === 'register' ? '/register' : '/login';
+        const res = await fetch(endpoint, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
             credentials: 'include',
-            body: JSON.stringify({username, password, mode})
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username, password})
         });
         const data = await res.json();
+
         if (data.success) {
             closeAuth();
             checkUserStatus();
-            loadLeaderboard();
         } else {
-            errorDiv.textContent = data.message || '❌ Ошибка авторизации';
+            errorDiv.textContent = data.error || 'Ошибка авторизации';
         }
     } catch (e) {
-        errorDiv.textContent = '❌ Ошибка сети';
+        errorDiv.textContent = 'Ошибка сети';
+        console.error('Auth failed:', e);
     }
 }
 
-async function logout() {
-    await fetch('/logout', {credentials: 'include'});
-    isLoggedIn = false;
-    document.getElementById('status').textContent = '👋 Гость';
-    document.querySelector('.auth-buttons').style.display = 'flex';
-    document.getElementById('logout').style.display = 'none';
-    document.getElementById('leaders-list').innerHTML = '';
-    document.getElementById('leaderboard').style.display = 'none';
-}
-
 function showAuth(mode) {
-    console.log('🔧 showAuth вызвана:', mode); // ✅ ОТЛАДКА
-    
     document.getElementById('auth-modal').style.display = 'flex';
-    const modalTitle = document.getElementById('modal-title');
-    modalTitle.textContent = mode === 'register' ? '📝 РЕГИСТРАЦИЯ' : '🔑 ВХОД';
-    modalTitle.dataset.mode = mode;
+    document.getElementById('modal-title').textContent = mode === 'register' ? '📝 Регистрация' : '🔑 Вход';
+    document.getElementById('submit-btn').textContent = mode === 'register' ? 'Зарегистрироваться' : 'Войти';
+    document.getElementById('submit-btn').dataset.mode = mode;
     
-    // ✅ ПРЕДУПРЕЖДЕНИЕ — ГАРАНТИРОВАННО РАБОТАЕТ
     const warning = document.getElementById('warning-text');
-    console.log('🔧 Warning найден:', warning); // ✅ ОТЛАДКА
-    
-    if (warning) {
-        warning.style.display = (mode === 'register') ? 'block' : 'none';
-        console.log('🔧 Warning видимость:', warning.style.display); // ✅ ОТЛАДКА
+    if (mode === 'register') {
+        warning.style.display = 'block';
     } else {
-        console.error('❌ #warning-text НЕ НАЙДЕН!');
+        warning.style.display = 'none';
     }
     
     document.getElementById('username').value = '';
@@ -92,162 +83,248 @@ function closeAuth() {
     document.getElementById('auth-modal').style.display = 'none';
 }
 
-async function loadLeaderboard() {
+async function logout() {
     try {
-        const res = await fetch('/leaderboard', {credentials: 'include'});
-        const data = await res.json();
-        const list = document.getElementById('leaders-list');
-        list.innerHTML = '';
-        
-        data.slice(0, 10).forEach((player, i) => {
-            const div = document.createElement('div');
-            div.className = 'leader-item';
-            div.innerHTML = `<span style="color:#44ff44">${i+1}. ${player.username}</span><span style="color:#ffaa00">${player.highscore}</span>`;
-            list.appendChild(div);
-        });
-        document.getElementById('leaderboard').style.display = 'block';
-    } catch (e) {
-        console.log('Лидерборд недоступен');
-    }
+        await fetch('/logout', {credentials: 'include', method: 'POST'});
+    } catch (e) {}
+    location.reload();
 }
 
-function loadGame(game) {
-    currentGame = game;
-    document.querySelector('.games-grid').style.display = 'none';
-    document.getElementById('game-container').style.display = 'block';
-    document.getElementById('leaderboard').style.display = 'none';
-    
-    if (game === 'guess') loadGuessNumber();
-    else if (game === 'snake') loadSnake();
+async function loadLeaderboard() {
+    try {
+        const [snakeRes, guessRes] = await Promise.all([
+            fetch('/top/snake', {credentials: 'include'}),
+            fetch('/top/guess', {credentials: 'include'})
+        ]);
+        const snakeData = await snakeRes.json();
+        const guessData = await guessRes.json();
+
+        document.getElementById('snake-leaderboard').innerHTML = `
+            <h4>🐍 Змейка</h4>
+            ${snakeData.map((p, i) => `<div class="leader-item"><span>#${i+1} ${p.username}</span><span>${p.score}</span></div>`).join('')}
+        `;
+        document.getElementById('guess-leaderboard').innerHTML = `
+            <h4>🎯 Угадайка</h4>
+            ${guessData.map((p, i) => `<div class="leader-item"><span>#${i+1} ${p.username}</span><span>${p.score}</span></div>`).join('')}
+        `;
+    } catch (e) {
+        console.error('Leaderboard load failed:', e);
+    }
 }
 
 function backToMenu() {
-    document.querySelector('.games-grid').style.display = 'grid';
-    document.getElementById('game-container').style.display = 'none';
-    document.getElementById('gameCanvas').style.display = 'none';
-    currentGame = '';
+    if (gameInterval) {
+        clearInterval(gameInterval);
+        gameInterval = null;
+    }
+    location.reload();
 }
 
-function loadGuessNumber() {
-    document.getElementById('gameCanvas').style.display = 'none';
-    document.getElementById('game-container').innerHTML = `
-        <div style="text-align:center;padding:40px;background:linear-gradient(145deg, rgba(0,50,0,0.95), rgba(0,30,0,0.95));border-radius:25px;border:3px solid #44ff44;box-shadow:0 0 40px rgba(68,255,68,0.5)">
-            <h2 style="color:#44ff44;font-size:28px;margin:0 0 20px 0;text-shadow:0 0 15px #44ff44">🎯 УГАДАЙ ЧИСЛО (1-100)</h2>
-            <p style="color:#ccc;font-size:18px">Твоя лучшая попытка: <strong id="best-guess" style="color:#ffaa00">${gameData.highscore || 0}</strong></p>
-            <input type="number" id="guess-input" min="1" max="100" style="padding:20px;font-size:22px;width:250px;border-radius:15px;border:3px solid #44ff44;background:#000;color:#44ff44;margin:25px 0">
-            <br>
-            <button onclick="checkGuess()" style="padding:20px 40px;font-size:22px;background:linear-gradient(45deg, #44ff44, #00ff88);color:black;border:none;border-radius:15px;cursor:pointer;font-weight:bold;box-shadow:0 8px 25px rgba(68,255,68,0.5)">✅ УГАДАТЬ</button>
-            <br><br>
-            <p id="guess-feedback" style="font-size:22px;color:#ffaa00;font-weight:bold;margin:20px 0"></p>
-            <button onclick="backToMenu()" style="padding:15px 30px;background:#ff4444;color:white;border:none;border-radius:15px;cursor:pointer;font-size:18px;font-weight:bold">🔙 В МЕНЮ</button>
+function loadSnakeGame() {
+    currentGame = 'snake';
+    document.querySelector('.container').innerHTML = `
+        <h1>🐍 Змейка</h1>
+        <div id="game-info">Счёт: <span id="score">0</span> | Рекорд: <span id="highscore">0</span></div>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div style="text-align:center;margin:20px">
+            <p>📱 Телефон: свайпы | 💻 Компьютер: стрелки</p>
+            <button class="auth-btn" onclick="backToMenu()" style="width:200px">🏠 В меню</button>
         </div>
     `;
-    document.getElementById('guess-input').focus();
+    
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    snake = {x:10,y:10,dx:0,dy:0,cells:[],maxCells:4};
+    food = {x:Math.floor(Math.random()*38)+1,y:Math.floor(Math.random()*38)+1};
+    gameData.score = 0;
+    gameData.highscore = 0;
+
+    canvas.addEventListener('click', restartSnake);
+    
+    document.addEventListener('keydown', (e) => {
+        if (currentGame !== 'snake') return;
+        if (e.key === 'ArrowLeft' && snake.dx === 0) { snake.dx = -1; snake.dy = 0; }
+        if (e.key === 'ArrowUp' && snake.dy === 0) { snake.dx = 0; snake.dy = -1; }
+        if (e.key === 'ArrowRight' && snake.dx === 0) { snake.dx = 1; snake.dy = 0; }
+        if (e.key === 'ArrowDown' && snake.dy === 0) { snake.dx = 0; snake.dy = 1; }
+    });
+
+    let touchStartX = 0, touchStartY = 0;
+    canvas.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    });
+    canvas.addEventListener('touchend', (e) => {
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const diffX = touchStartX - touchEndX;
+        const diffY = touchStartY - touchEndY;
+        
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+            if (diffX > 0 && snake.dx === 0) { snake.dx = -1; snake.dy = 0; }
+            else if (diffX < 0 && snake.dx === 0) { snake.dx = 1; snake.dy = 0; }
+        } else {
+            if (diffY > 0 && snake.dy === 0) { snake.dx = 0; snake.dy = -1; }
+            else if (diffY < 0 && snake.dy === 0) { snake.dx = 0; snake.dy = 1; }
+        }
+    });
+
+    function updateSnake() {
+        snake.x += snake.dx;
+        snake.y += snake.dy;
+
+        if (snake.x < 0 || snake.x >= 40 || snake.y < 0 || snake.y >= 40) gameOver();
+        
+        for (let cell of snake.cells) {
+            if (snake.x === cell.x && snake.y === cell.y) gameOver();
+        }
+
+        snake.cells.unshift({x: snake.x, y: snake.y});
+
+        if (snake.x === food.x && snake.y === food.y) {
+            gameData.score++;
+            document.getElementById('score').textContent = gameData.score;
+            food = {x:Math.floor(Math.random()*38)+1,y:Math.floor(Math.random()*38)+1};
+        } else {
+            snake.cells.pop();
+        }
+
+        if (snake.cells.length > snake.maxCells) snake.maxCells++;
+
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, 400, 400);
+
+        ctx.fillStyle = '#ff4444';
+        ctx.fillRect(food.x*10, food.y*10, 10, 10);
+
+        ctx.fillStyle = '#44ff44';
+        for (let cell of snake.cells) {
+            ctx.fillRect(cell.x*10, cell.y*10, 10, 10);
+        }
+
+        ctx.fillStyle = '#00ff88';
+        ctx.fillRect(snake.x*10, snake.y*10, 10, 10);
+    }
+
+    function gameOver() {
+        clearInterval(gameInterval);
+        if (gameData.score > gameData.highscore) {
+            gameData.highscore = gameData.score;
+            document.getElementById('highscore').textContent = gameData.highscore;
+            if (isLoggedIn) saveScore('snake');
+        }
+        ctx.fillStyle = 'rgba(255,0,0,0.7)';
+        ctx.fillRect(0, 0, 400, 400);
+        ctx.fillStyle = 'white';
+        ctx.font = '30px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('GAME OVER', 200, 190);
+        ctx.fillText(`Счёт: ${gameData.score}`, 200, 230);
+        ctx.fillText('Кликни для рестарта', 200, 270);
+    }
+
+    function restartSnake() {
+        if (gameInterval) clearInterval(gameInterval);
+        snake = {x:10,y:10,dx:0,dy:0,cells:[],maxCells:4};
+        food = {x:Math.floor(Math.random()*38)+1,y:Math.floor(Math.random()*38)+1};
+        gameData.score = 0;
+        gameInterval = setInterval(updateSnake, 200);
+    }
+
+    gameInterval = setInterval(updateSnake, 200);
+}
+
+function loadGuessGame() {
+    currentGame = 'guess';
+    secretNumber = Math.floor(Math.random() * 100) + 1;
+    attempts = 0;
+    
+    document.querySelector('.container').innerHTML = `
+        <h1>🎯 Угадай число</h1>
+        <div id="game-info">
+            Попытка <span id="attempts">0</span>/7 | Рекорд: <span id="highscore">0</span>
+        </div>
+        <canvas id="guessCanvas" width="400" height="200" style="cursor:pointer"></canvas>
+        <div style="text-align:center;margin:20px">
+            <input type="number" id="guessInput" min="1" max="100" placeholder="1-100" style="padding:15px;font-size:20px;border:3px solid #44ff44;border-radius:10px;background:#2a2a2a;color:white;width:200px">
+            <br><br>
+            <button class="auth-btn" onclick="checkGuess()" style="width:150px;margin:5px">✅ Проверить</button>
+            <button class="auth-btn" onclick="clearGuess()" style="width:150px;margin:5px;background:#666">🔄 Очистить</button>
+            <br><br>
+            <button class="auth-btn" onclick="backToMenu()" style="width:200px">🏠 В меню</button>
+        </div>
+    `;
+    
+    gameData.highscore = 0;
+    updateGuessCanvas();
+    
+    document.getElementById('guessInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') checkGuess();
+    });
+    
+    document.getElementById('guessCanvas').addEventListener('click', checkGuess);
+}
+
+function updateGuessCanvas() {
+    const canvas = document.getElementById('guessCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, 400, 200);
+    
+    ctx.fillStyle = '#44ff44';
+    ctx.font = '24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Загадай число от 1 до 100`, 200, 50);
+    ctx.fillText(`Попыток: ${attempts}/${maxAttempts}`, 200, 100);
 }
 
 function checkGuess() {
-    const guess = parseInt(document.getElementById('guess-input').value);
-    const feedback = document.getElementById('guess-feedback');
-    
-    if (isNaN(guess) || guess < 1 || guess > 100) {
-        feedback.textContent = '❌ Число от 1 до 100!';
+    const guess = parseInt(document.getElementById('guessInput').value);
+    if (!guess || guess < 1 || guess > 100) {
+        alert('Введи число от 1 до 100');
         return;
     }
-    
-    const target = Math.floor(Math.random() * 100) + 1;
-    let message = '';
-    
-    if (guess === target) {
-        message = `🎉 УГАДАЛ! Было ${target}`;
-        if (guess < gameData.highscore || gameData.highscore === 0) {
-            gameData.highscore = guess;
-            saveScore();
+
+    attempts++;
+    document.getElementById('attempts').textContent = attempts;
+    document.getElementById('guessInput').value = '';
+
+    if (guess === secretNumber) {
+        if (attempts < maxAttempts - 2) {
+            gameData.highscore = Math.max(gameData.highscore, 8 - attempts);
+            document.getElementById('highscore').textContent = gameData.highscore;
+            if (isLoggedIn) saveScore('guess');
         }
-    } else if (guess < target) {
-        message = `📈 Загаданное число БОЛЬШЕ`;
+        alert(`✅ Угадал за ${attempts} попыток! Рекорд: ${gameData.highscore}`);
+        loadGuessGame();
+    } else if (attempts >= maxAttempts) {
+        alert(`💀 Проиграл! Было ${secretNumber}`);
+        loadGuessGame();
     } else {
-        message = `📉 Загаданное число МЕНЬШЕ`;
+        const hint = guess < secretNumber ? 'Больше!' : 'Меньше!';
+        alert(hint);
     }
-    
-    feedback.textContent = message;
+    updateGuessCanvas();
 }
 
-function loadSnake() {
-    const canvas = document.getElementById('gameCanvas');
-    canvas.style.display = 'block';
-    const ctx = canvas.getContext('2d');
-    const grid = 20;
-    let snake = [{x: 10, y: 10}];
-    let food = {x: 15, y: 15};
-    let dx = 0, dy = 0;
-    let score = 0;
-    
-    function draw() {
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#44ff44';
-        snake.forEach(part => ctx.fillRect(part.x * grid, part.y * grid, grid - 2, grid - 2));
-        ctx.fillStyle = '#ff4444';
-        ctx.fillRect(food.x * grid, food.y * grid, grid - 2, grid - 2);
-        ctx.fillStyle = '#44ff44';
-        ctx.font = '24px Arial';
-        ctx.fillText(`Очки: ${score}`, 20, 30);
-    }
-    
-    function update() {
-        const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-        if (head.x < 0 || head.x >= 25 || head.y < 0 || head.y >= 20) {
-            gameOver(score);
-            return;
-        }
-        for (let part of snake) {
-            if (head.x === part.x && head.y === part.y) {
-                gameOver(score);
-                return;
-            }
-        }
-        snake.unshift(head);
-        if (head.x === food.x && head.y === food.y) {
-            score++;
-            food = {x: Math.floor(Math.random() * 25), y: Math.floor(Math.random() * 20)};
-        } else {
-            snake.pop();
-        }
-        draw();
-    }
-    
-    function gameOver(finalScore) {
-        if (finalScore > gameData.highscore) {
-            gameData.highscore = finalScore;
-            saveScore();
-        }
-        alert(`🐍 Игра окончена! Очки: ${finalScore}`);
-        backToMenu();
-    }
-    
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowUp' && dy !== 1) { dx = 0; dy = -1; }
-        if (e.key === 'ArrowDown' && dy !== -1) { dx = 0; dy = 1; }
-        if (e.key === 'ArrowLeft' && dx !== 1) { dx = -1; dy = 0; }
-        if (e.key === 'ArrowRight' && dx !== -1) { dx = 1; dy = 0; }
-    });
-    
-    draw();
-    setInterval(update, 150);
+function clearGuess() {
+    document.getElementById('guessInput').value = '';
+    document.getElementById('guessInput').focus();
 }
 
-async function saveScore() {
-    if (!isLoggedIn) return;
+async function saveScore(game) {
     try {
-        await fetch('/save-score', {
+        await fetch(`/save_score/${game}`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
             credentials: 'include',
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({highscore: gameData.highscore})
         });
         loadLeaderboard();
     } catch (e) {}
 }
 
-// ✅ СТАРТ
-checkUserStatus();
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('submit-btn').onclick = authUser;
+    checkUserStatus();
+});
