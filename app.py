@@ -5,7 +5,6 @@ from flask import Flask, request, jsonify, session, render_template
 from flask_session import Session
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# ✅ ПЕРСЕСТИНТНЫЕ СЕССИИ
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'aleksin-games-hub-2026-super-secret-key!'
 app.config['SESSION_TYPE'] = 'filesystem'
@@ -14,7 +13,6 @@ app.config['SESSION_FILE_DIR'] = os.path.join(os.getcwd(), 'flask_session')
 os.makedirs(app.config['SESSION_FILE_DIR'], exist_ok=True)
 Session(app)
 
-# ✅ ПЕРСЕСТИНТНАЯ БАЗА ДАННЫХ
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 INSTANCE_DIR = os.path.join(BASE_DIR, 'instance')
 os.makedirs(INSTANCE_DIR, exist_ok=True)
@@ -42,8 +40,6 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )''')
-        
-        # ✅ ТЕСТОВЫЙ ПОЛЬЗОВАТЕЛЬ
         c.execute("SELECT id FROM users WHERE username = 'test'")
         if not c.fetchone():
             c.execute("INSERT INTO users (username, password) VALUES (?, ?)",
@@ -59,7 +55,6 @@ def status():
     user_id = session.get('user_id')
     if not user_id:
         return jsonify({'logged_in': False})
-    
     with get_db() as db:
         c = db.cursor()
         c.execute("SELECT username FROM users WHERE id = ?", (user_id,))
@@ -73,25 +68,21 @@ def register():
     data = request.get_json()
     username = data.get('username', '').strip()
     password = data.get('password', '')
-    
     if not username or len(username) < 3 or len(password) < 6:
         return jsonify({'success': False, 'error': 'Имя 3+ символа, пароль 6+'}), 400
-    
     try:
         with get_db() as db:
             c = db.cursor()
             c.execute("SELECT id FROM users WHERE username = ?", (username,))
             if c.fetchone():
                 return jsonify({'success': False, 'error': 'Пользователь существует'}), 400
-            
             c.execute("INSERT INTO users (username, password) VALUES (?, ?)",
                      (username, generate_password_hash(password)))
             user_id = c.lastrowid
             db.commit()
-            
         session['user_id'] = user_id
         return jsonify({'success': True, 'username': username})
-    except Exception as e:
+    except Exception:
         return jsonify({'success': False, 'error': 'Ошибка сервера'}), 500
 
 @app.route('/login', methods=['POST'])
@@ -99,12 +90,10 @@ def login():
     data = request.get_json()
     username = data.get('username', '').strip()
     password = data.get('password', '')
-    
     with get_db() as db:
         c = db.cursor()
         c.execute("SELECT id, password FROM users WHERE username = ?", (username,))
         user = c.fetchone()
-        
         if user and check_password_hash(user['password'], password):
             session['user_id'] = user['id']
             return jsonify({'success': True, 'username': username})
@@ -122,28 +111,45 @@ def top(game):
         c = db.cursor()
         c.execute('''
             SELECT u.username, MAX(s.score) as score 
-            FROM scores s 
-            JOIN users u ON s.user_id = u.id 
-            WHERE s.game = ? 
-            GROUP BY s.user_id, u.username 
-            ORDER BY score DESC 
-            LIMIT ?
+            FROM scores s JOIN users u ON s.user_id = u.id 
+            WHERE s.game = ? GROUP BY s.user_id, u.username 
+            ORDER BY score DESC LIMIT ?
         ''', (game, limit))
         leaders = [{'username': row['username'], 'score': row['score']} for row in c.fetchall()]
     return jsonify(leaders)
+
+@app.route('/stats')
+def stats():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'user': {}, 'global': {'players': 0}})
+    with get_db() as db:
+        c = db.cursor()
+        c.execute('''
+            SELECT game, COUNT(*) as games_played, AVG(score) as avg_score, MAX(score) as best_score
+            FROM scores WHERE user_id = ? GROUP BY game
+        ''', (user_id,))
+        stats = {}
+        for row in c.fetchall():
+            game = row['game']
+            stats[game] = {
+                'played': row['games_played'],
+                'avg': round(row['avg_score'] or 0),
+                'best': row['best_score'] or 0
+            }
+        c.execute('SELECT COUNT(DISTINCT user_id) as total_players FROM scores')
+        total_players = c.fetchone()['total_players'] or 0
+        return jsonify({'user': stats, 'global': {'players': total_players}})
 
 @app.route('/save_score', methods=['POST'])
 def save_score():
     if not session.get('user_id'):
         return jsonify({'success': False, 'error': 'Не авторизован'}), 401
-    
     data = request.get_json()
     game = data.get('game')
     score = data.get('score')
-    
     if not game or score is None:
         return jsonify({'success': False, 'error': 'Неверные данные'}), 400
-    
     try:
         with get_db() as db:
             c = db.cursor()
@@ -151,7 +157,7 @@ def save_score():
                      (session['user_id'], game, score))
             db.commit()
         return jsonify({'success': True})
-    except Exception as e:
+    except Exception:
         return jsonify({'success': False, 'error': 'Ошибка сохранения'}), 500
 
 @app.route('/test')
