@@ -1,9 +1,7 @@
-from flask import Flask, render_template_string, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session
 import sqlite3
 import hashlib
 import os
-import random
-from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'aleksin-games-hub-2026-final-fixed')
@@ -19,12 +17,10 @@ def init_db():
     conn.commit()
     conn.close()
 
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
-
 @app.route('/')
 def index():
-    return render_template_string(HTML_TEMPLATE)
+    init_db()
+    return render_template('index.html')
 
 @app.route('/status')
 def status():
@@ -45,7 +41,7 @@ def register():
     c = conn.cursor()
     try:
         c.execute("INSERT INTO users (username, password) VALUES (?, ?)", 
-                 (username, hash_password(password)))
+                 (username, hashlib.sha256(password.encode()).hexdigest()))
         conn.commit()
         return jsonify({'success': True})
     except sqlite3.IntegrityError:
@@ -62,7 +58,7 @@ def login():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     c.execute("SELECT username FROM users WHERE username=? AND password=?", 
-             (username, hash_password(password)))
+             (username, hashlib.sha256(password.encode()).hexdigest()))
     user = c.fetchone()
     conn.close()
     
@@ -104,7 +100,7 @@ def top(game):
     elif game == 'guess':
         c.execute("SELECT username, highscore_guess as score FROM users ORDER BY score DESC LIMIT 10")
     else:
-        c.execute("SELECT username, 0 as score FROM users LIMIT 1000000")
+        c.execute("SELECT username, 0 as score FROM users LIMIT 10")
     scores = [{'username': row[0], 'score': row[1]} for row in c.fetchall()]
     conn.close()
     return jsonify(scores)
