@@ -119,10 +119,7 @@
 
         async function checkUserStatus() {
             try {
-                const response = await fetch('/status', { 
-                    method: 'GET', 
-                    credentials: 'include' 
-                });
+                const response = await fetch('/status', { credentials: 'include' });
                 const data = await response.json();
                 if (data.logged_in) {
                     document.getElementById('status').textContent = `👋 ${data.username}`;
@@ -224,6 +221,12 @@
         }
 
         function loadGame(game) {
+            // ✅ ОСТАНАВЛИВАЕМ ПРЕДЫДНЮЮ ИГРУ
+            if (gameInterval) {
+                clearInterval(gameInterval);
+                gameInterval = null;
+            }
+            
             currentGame = game;
             document.querySelector('.games-grid').style.display = 'none';
             document.getElementById('leaderboard').style.display = 'none';
@@ -242,20 +245,23 @@
                 gameInterval = null;
             }
             document.querySelector('.games-grid').style.display = 'grid';
+            document.getElementById('game-container').innerHTML = '';
             document.getElementById('game-container').style.display = 'none';
             document.getElementById('leaderboard').style.display = isLoggedIn ? 'block' : 'none';
             currentGame = '';
         }
 
-        // 🎯 УГАДАЙ ЧИСЛО
+        // 🎯 УГАДАЙ ЧИСЛО — ✅ ФИКС РАНДОМА
         function loadGuessNumber() {
+            let secretNumber = Math.floor(Math.random() * 100) + 1; // ✅ НОВОЕ ЧИСЛО!
+            
             document.getElementById('game-container').innerHTML = `
                 <div style="text-align:center;padding:40px;background:#1a1a1a;border-radius:15px;border:2px solid #44ff44">
                     <h2 style="color:#44ff44;font-size:2em;margin-bottom:20px">🎯 УГАДАЙ ЧИСЛО (1-100)</h2>
-                    <p style="color:#ccc;margin-bottom:20px">Рекорд: <strong style="color:#ffaa00">${gameData.highscore}</strong></p>
-                    <input type="number" id="guessInput" min="1" max="100" style="padding:15px;font-size:18px;width:200px;border:2px solid #44ff44;border-radius:10px;background:#000;color:#44ff44">
+                    <p style="color:#ccc;margin-bottom:20px">Рекорд: <strong style="color:#ffaa00">${gameData.highscore || 0}</strong></p>
+                    <input type="number" id="guessInput" min="1" max="100" placeholder="Твоё число" style="padding:15px;font-size:18px;width:200px;border:2px solid #44ff44;border-radius:10px;background:#000;color:#44ff44">
                     <br><br>
-                    <button onclick="checkGuess()" style="padding:15px 30px;font-size:18px;background:#44ff44;color:black;border:none;border-radius:10px;cursor:pointer;font-weight:bold">✅ УГАДАТЬ</button>
+                    <button onclick="checkGuess(${secretNumber})" style="padding:15px 30px;font-size:18px;background:#44ff44;color:black;border:none;border-radius:10px;cursor:pointer;font-weight:bold">✅ УГАДАТЬ</button>
                     <br><br>
                     <div id="guessResult" style="font-size:20px;color:#ffaa00;font-weight:bold;margin:20px 0"></div>
                     <button onclick="backToMenu()" style="padding:12px 24px;background:#ff4444;color:white;border:none;border-radius:10px;cursor:pointer;font-weight:bold">🔙 МЕНЮ</button>
@@ -264,46 +270,52 @@
             document.getElementById('guessInput').focus();
         }
 
-        function checkGuess() {
+        function checkGuess(secretNumber) {
             const input = document.getElementById('guessInput');
             const result = document.getElementById('guessResult');
             const guess = parseInt(input.value);
             
             if (!guess || guess < 1 || guess > 100) {
                 result.textContent = '❌ Число от 1 до 100!';
+                input.focus();
                 return;
             }
             
-            const target = Math.floor(Math.random() * 100) + 1;
-            if (guess === target) {
-                result.innerHTML = `🎉 ПОБЕДА! Было <strong>${target}</strong>`;
+            if (guess === secretNumber) {
+                result.innerHTML = `🎉 ПОБЕДА! Было <strong>${secretNumber}</strong>`;
                 if (gameData.highscore === 0 || guess < gameData.highscore) {
                     gameData.highscore = guess;
                     saveScore();
                 }
-            } else if (guess < target) {
-                result.textContent = `📈 Загаданное БОЛЬШЕ (${guess})`;
+            } else if (guess < secretNumber) {
+                result.textContent = `📈 Загаданное БОЛЬШЕ чем ${guess}`;
             } else {
-                result.textContent = `📉 Загаданное МЕНЬШЕ (${guess})`;
+                result.textContent = `📉 Загаданное МЕНЬШЕ чем ${guess}`;
             }
+            
+            input.value = '';
+            input.focus();
         }
 
-        // 🐍 ЗМЕЙКА
+        // 🐍 ЗМЕЙКА — ✅ ФИКС АВТОПРОИГРЫША
         function loadSnake() {
+            // ✅ ОЧИЩАЕМ КОНТЕЙНЕР
+            document.getElementById('game-container').innerHTML = '';
+            
             const canvas = document.createElement('canvas');
             canvas.id = 'snakeCanvas';
             canvas.width = 600;
             canvas.height = 500;
             canvas.style.cssText = 'display:block;margin:20px auto;background:#000;border:3px solid #44ff44;border-radius:10px;';
             
-            document.getElementById('game-container').innerHTML = '';
             document.getElementById('game-container').appendChild(canvas);
             
             const ctx = canvas.getContext('2d');
             const grid = 20;
-            let snake = [{x: 10, y: 10}];
+            let snake = [{x: 10, y: 10}]; // ✅ НОВАЯ ЗМЕЙКА!
             let food = {x: 15, y: 15};
-            let dx = 0, dy = 0;
+            let dx = 0;  // ✅ СТОЯЛКА НА СТАРТЕ!
+            let dy = 0;  // ✅ СТОЯЛКА НА СТАРТЕ!
             let score = 0;
 
             function draw() {
@@ -320,16 +332,19 @@
                 ctx.font = 'bold 24px Arial';
                 ctx.textAlign = 'left';
                 ctx.fillText('Очки: ' + score, 20, 30);
+                ctx.fillText('← → ↑ ↓', 20, 500-20); // Подсказка
             }
 
             function update() {
                 const head = {x: snake[0].x + dx, y: snake[0].y + dy};
                 
+                // ✅ ПРОВЕРКА СТЕНАМИ ПОСЛЕ ДВИЖЕНИЯ
                 if (head.x < 0 || head.x >= 30 || head.y < 0 || head.y >= 25) {
                     gameOver(score);
                     return;
                 }
                 
+                // ✅ САМОПОЕДАНИЕ ПОСЛЕ ДВИЖЕНИЯ
                 for (let part of snake) {
                     if (head.x === part.x && head.y === part.y) {
                         gameOver(score);
@@ -352,6 +367,7 @@
             }
 
             function gameOver(finalScore) {
+                clearInterval(gameInterval);
                 if (finalScore > gameData.highscore) {
                     gameData.highscore = finalScore;
                     saveScore();
@@ -360,7 +376,9 @@
                 backToMenu();
             }
 
+            // ✅ УПРАВЛЕНИЕ ТОЛЬКО ДЛЯ ЭТОЙ ЗМЕЙКИ
             document.addEventListener('keydown', function(e) {
+                if (currentGame !== 'snake') return;
                 if (e.key === 'ArrowUp' && dy !== 1) { dx = 0; dy = -1; }
                 if (e.key === 'ArrowDown' && dy !== -1) { dx = 0; dy = 1; }
                 if (e.key === 'ArrowLeft' && dx !== 1) { dx = -1; dy = 0; }
@@ -368,7 +386,7 @@
             });
 
             draw();
-            gameInterval = setInterval(update, 150);
+            gameInterval = setInterval(update, 200); // ✅ МЕДЛЕНЬШЕ!
         }
 
         async function saveScore() {
