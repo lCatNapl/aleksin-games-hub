@@ -216,3 +216,20 @@ document.addEventListener('keydown', e => {
 });
 
 checkUserStatus();
+// В конец script.js
+let touchStartX = 0, touchStartY = 0;
+document.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+});
+document.addEventListener('touchend', e => {
+    const deltaX = e.changedTouches[0].clientX - touchStartX;
+    const deltaY = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX > 50) dx = 1, dy = 0;  // Вправо
+        if (deltaX < -50) dx = -1, dy = 0; // Влево
+    } else {
+        if (deltaY > 50) dy = 1, dx = 0;  // Вниз
+        if (deltaY < -50) dy = -1, dx = 0; // Вверх
+    }
+});
