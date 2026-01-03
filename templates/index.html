@@ -1,46 +1,53 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎮 Игровой Хаб Назар</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='universal.css') }}">
+    <link rel="stylesheet" href="/static/universal.css">
 </head>
 <body>
-    <h1 class="header">🎮 Игровой Хаб Назар</h1>
-    <div class="status" id="status">👋 Гость</div>
-    
-    <div class="auth-buttons">
-        <button onclick="showAuth('register')">📝 РЕГИСТРАЦИЯ</button>
-        <button onclick="showAuth('login')">🔑 ВХОД</button>
-        <button onclick="logout()" id="logout" style="display:none">🚪 Выйти</button>
-        <button onclick="testAPI()">🧪 ТЕСТ</button>
-    </div>
+    <div class="container">
+        <header>
+            <h1>🎮 Игровой Хаб Назар</h1>
+            <div class="status-bar">
+                <span id="status">👋 Гость</span>
+                <button id="logout" onclick="logout()" style="display:none">🚪 Выйти</button>
+            </div>
+        </header>
 
-    <div class="games-grid">
-        <button onclick="loadGame('guess')">🎯 Угадай число</button>
-        <button onclick="loadGame('snake')">🐍 Змейка</button>
-    </div>
+        <div class="auth-buttons">
+            <button onclick="showAuth('login')">🔑 ВХОД</button>
+            <button onclick="showAuth('register')">📝 РЕГИСТРАЦИЯ</button>
+        </div>
 
-    <div id="game-container" style="display:none; max-width: 600px; margin: 0 auto;">
-        <canvas id="gameCanvas" class="game-canvas" width="500" height="400"></canvas>
+        <div class="games-grid">
+            <button class="game-btn" onclick="loadGame('guess')">🎯 Угадай число</button>
+            <button class="game-btn" onclick="loadGame('snake')">🐍 Змейка</button>
+            <button class="game-btn" onclick="loadStats()" style="background:linear-gradient(45deg,#ffaa00,#ff6b6b)">📊 Статистика</button>
+            <button class="game-btn" onclick="loadSettings()" style="background:linear-gradient(45deg,#667eea,#764ba2)">⚙️ Настройки</button>
+        </div>
+
+        <div id="game-container" style="display:none">
+            <canvas id="gameCanvas" width="500" height="400" style="display:none;background:rgba(0,0,0,0.8);border-radius:15px"></canvas>
+        </div>
+
         <div id="leaderboard" class="leaderboard" style="display:none">
             <h3>🏆 ТОП-10</h3>
             <div id="leaders-list"></div>
         </div>
     </div>
 
-    <div id="auth-modal" class="modal">
+    <!-- МОДАЛЬНОЕ ОКНО АВТОРИЗАЦИИ -->
+    <div id="auth-modal" class="modal" style="display:none">
         <div class="modal-content">
-            <h2 id="modal-title">Регистрация</h2>
-            <input type="text" id="username" placeholder="Имя (nazar)" maxlength="20">
-            <input type="password" id="password" placeholder="Пароль (123456)">
-            <div id="error" class="error"></div>
-            <button onclick="authUser()" class="btn-primary">✅ ГОТОВО</button>
-            <button onclick="closeAuth()" class="btn-secondary">✕</button>
+            <span class="close" onclick="closeAuth()">&times;</span>
+            <h2 id="modal-title">🔑 ВХОД</h2>
+            <input type="text" id="username" placeholder="Имя пользователя">
+            <input type="password" id="password" placeholder="Пароль">
+            <div id="error" style="color:#ff4444;margin:10px 0"></div>
+            <button onclick="authUser()">✅ ГОТОВО</button>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="/static/script.js"></script>
 </body>
 </html>
