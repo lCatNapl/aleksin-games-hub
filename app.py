@@ -1,79 +1,81 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-from flask_cors import CORS
+from flask import Flask, render_template_string, request, jsonify, session
 import sqlite3
 import hashlib
 import os
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'aleksin-hub-super-secret-2026')
+app.secret_key = os.environ.get('SECRET_KEY', 'aleksin-games-hub-2026-super-secret-final-v2')
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_HTTPONLY'] = False
-CORS(app)  # Для фронта
+app.config['SESSION_COOKIE_HTTPONLY'] = False  
+app.config['SESSION_COOKIE_SECURE'] = False
+
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
 
 def get_db():
     conn = sqlite3.connect('gamehub.db')
     conn.row_factory = sqlite3.Row
-    return conn
-
-def init_db():
-    conn = get_db()
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS users (
+    conn.execute('''CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL
     )''')
-    c.execute('''CREATE TABLE IF NOT EXISTS scores (
+    conn.execute('''CREATE TABLE IF NOT EXISTS scores (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER,
         game TEXT,
         score INTEGER,
-        FOREIGN KEY(user_id) REFERENCES users(id)
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id)
     )''')
     conn.commit()
-    conn.close()
-
-init_db()
-
-def hash_password(password):
-    return hashlib.sha256((password + 'aleksin2026').encode()).hexdigest()
+    return conn
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template_string(HTML_TEMPLATE)
+
+@app.route('/test')
+def test():
+    return jsonify({'status': 'API жив!', 'session': bool(session.get('user_id'))})
 
 @app.route('/register', methods=['POST'])
 def register():
-    data = request.json
-    username = data['username'].strip()
-    password = hash_password(data['password'])
+    data = request.get_json()
+    username = data.get('username', '').strip()
+    password = hash_password(data.get('password', ''))
+    
+    if not username or len(username) < 3:
+        return jsonify({'success': False, 'error': 'Имя 3+ символа'}), 400
+    
     conn = get_db()
     try:
-        c = conn.cursor()
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        conn.execute('INSERT INTO users (username, password) VALUES (?, ?)', 
+                    (username, password))
         conn.commit()
-        return jsonify({'success': True, 'message': 'Зарегистрирован!'})
+        session['user_id'] = conn.execute('SELECT id FROM users WHERE username=?', 
+                                        (username,)).fetchone()['id']
+        session['username'] = username
+        return jsonify({'success': True, 'username': username})
     except sqlite3.IntegrityError:
-        return jsonify({'success': False, 'message': 'Имя занято'}), 409
-    finally:
-        conn.close()
+        return jsonify({'success': False, 'error': 'Имя занято'}), 409
 
 @app.route('/login', methods=['POST'])
 def login():
-    data = request.json
-    username = data['username'].strip()
-    password = hash_password(data['password'])
+    data = request.get_json()
+    username = data.get('username', '').strip()
+    password = hash_password(data.get('password', ''))
+    
     conn = get_db()
-    c = conn.cursor()
-    c.execute("SELECT id FROM users WHERE username=? AND password=?", (username, password))
-    user = c.fetchone()
-    conn.close()
+    user = conn.execute('SELECT * FROM users WHERE username=? AND password=?', 
+                       (username, password)).fetchone()
+    
     if user:
         session['user_id'] = user['id']
         session['username'] = username
         return jsonify({'success': True, 'username': username})
-    return jsonify({'success': False, 'message': 'Неверно'}), 401
+    return jsonify({'success': False, 'error': 'Неверный пароль'}), 401
 
 @app.route('/logout', methods=['POST'])
 def logout():
@@ -82,38 +84,35 @@ def logout():
 
 @app.route('/status')
 def status():
-    if 'username' in session:
-        return jsonify({'logged': True, 'username': session['username']})
-    return jsonify({'logged': False})
+    if session.get('username'):
+        return jsonify({'logged_in': True, 'username': session['username']})
+    return jsonify({'logged_in': False, 'username': None})
+
+@app.route('/save_score', methods=['POST'])
+def save_score():
+    if not session.get('user_id'):
+        return jsonify({'success': False, 'error': 'Авторизуйся'}), 401
+    
+    data = request.get_json()
+    game = data.get('game')
+    score = data.get('score', 0)
+    
+    conn = get_db()
+    conn.execute('INSERT INTO scores (user_id, game, score) VALUES (?, ?, ?)',
+                (session['user_id'], game, score))
+    conn.commit()
+    return jsonify({'success': True})
 
 @app.route('/top/<game>')
 def top(game):
     conn = get_db()
-    leaders = conn.execute("""
+    leaders = conn.execute('''
         SELECT u.username, MAX(s.score) as score 
-        FROM scores s JOIN users u ON s.user_id=u.id 
-        WHERE s.game=? GROUP BY u.id ORDER BY score DESC LIMIT 10
-    """, (game,)).fetchall()
-    conn.close()
+        FROM scores s JOIN users u ON s.user_id = u.id 
+        WHERE s.game = ? 
+        GROUP BY u.id ORDER BY score DESC LIMIT 10
+    ''', (game,)).fetchall()
     return jsonify([dict(row) for row in leaders])
 
-@app.route('/save_score', methods=['POST'])
-def save_score():
-    if 'user_id' not in session:
-        return jsonify({'success': False}), 401
-    data = request.json
-    conn = get_db()
-    c = conn.cursor()
-    c.execute("INSERT INTO scores (user_id, game, score) VALUES (?, ?, ?)",
-              (session['user_id'], data['game'], data['score']))
-    conn.commit()
-    conn.close()
-    return jsonify({'success': True})
-
-@app.route('/test')
-def test():
-    return jsonify({'status': 'API жив!', 'session': bool(session)})
-
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
