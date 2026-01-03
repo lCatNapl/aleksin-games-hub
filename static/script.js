@@ -1,6 +1,12 @@
-let currentGame = ''; let isLoggedIn = false; let gameData = {score: 0, highscore: 0};
-let gameInterval = null; let snake = {x:10,y:10,dx:0,dy:0,cells:[],maxCells:4};
-let food = {x:15,y:15}; let secretNumber = 0; let attempts = 0; let maxAttempts = 20;
+let currentGame = ''; 
+let isLoggedIn = false; 
+let gameData = {score: 0, highscore: 0};
+let gameInterval = null; 
+let snake = {x:10,y:10,dx:0,dy:0,cells:[],maxCells:4};
+let food = {x:15,y:15}; 
+let secretNumber = 0; 
+let attempts = 0; 
+let maxAttempts = 20;
 
 async function checkUserStatus() {
     try {
@@ -12,7 +18,8 @@ async function checkUserStatus() {
             document.getElementById('games-grid').style.display = 'grid';
             document.getElementById('logout-btn').style.display = 'block';
             document.getElementById('leaderboard-container').style.display = 'block';
-            isLoggedIn = true; loadLeaderboard();
+            isLoggedIn = true; 
+            loadLeaderboard();
         } else {
             document.getElementById('status').textContent = '👋 Гость';
             document.getElementById('auth-buttons').style.display = 'flex';
@@ -20,26 +27,49 @@ async function checkUserStatus() {
             document.getElementById('logout-btn').style.display = 'none';
             document.getElementById('leaderboard-container').style.display = 'none';
         }
-    } catch (e) { console.error('Status check failed:', e); }
+    } catch (e) { 
+        console.error('Status check failed:', e); 
+    }
 }
 
 async function authUser() {
+    console.log('🚀 authUser() вызвана!');
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
-    const errorDiv = document.getElementById('error'); errorDiv.textContent = '';
-    if (!username || !password) { errorDiv.textContent = 'Заполни все поля'; return; }
+    const errorDiv = document.getElementById('error'); 
+    errorDiv.textContent = '';
+    
+    if (!username || !password) { 
+        errorDiv.textContent = 'Заполни все поля'; 
+        console.log('❌ Поля пустые');
+        return; 
+    }
+    
+    console.log(`🔐 Отправка ${username} на /login`);
     try {
         const mode = document.getElementById('submit-btn').dataset.mode || 'login';
         const endpoint = mode === 'register' ? '/register' : '/login';
+        
         const res = await fetch(endpoint, {
             method: 'POST', credentials: 'include',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({username, password})
         });
         const data = await res.json();
-        if (data.success) { closeAuth(); checkUserStatus(); } 
-        else errorDiv.textContent = data.error || 'Ошибка авторизации';
-    } catch (e) { errorDiv.textContent = 'Ошибка сети'; console.error('Auth failed:', e); }
+        console.log('📡 Ответ сервера:', data);
+        
+        if (data.success) { 
+            closeAuth(); 
+            checkUserStatus(); 
+            console.log('✅ АВТОРИЗАЦИЯ УСПЕШНА!');
+        } else {
+            errorDiv.textContent = data.error || 'Ошибка авторизации';
+            console.log('❌ Ошибка:', data.error);
+        }
+    } catch (e) { 
+        errorDiv.textContent = 'Ошибка сети';
+        console.error('Auth failed:', e);
+    }
 }
 
 function showAuth(mode) {
@@ -48,15 +78,21 @@ function showAuth(mode) {
     document.getElementById('submit-btn').textContent = mode === 'register' ? 'Зарегистрироваться' : 'Войти';
     document.getElementById('submit-btn').dataset.mode = mode;
     document.getElementById('warning-text').style.display = mode === 'register' ? 'block' : 'none';
-    document.getElementById('username').value = ''; document.getElementById('password').value = '';
-    document.getElementById('error').textContent = ''; document.getElementById('username').focus();
+    document.getElementById('username').value = ''; 
+    document.getElementById('password').value = '';
+    document.getElementById('error').textContent = ''; 
+    document.getElementById('username').focus();
 }
 
-function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
+function closeAuth() { 
+    document.getElementById('auth-modal').style.display = 'none'; 
+}
 
 async function logout() {
-    try { await fetch('/logout', {credentials: 'include', method: 'POST'}); }
-    catch (e) {} location.reload();
+    try { 
+        await fetch('/logout', {credentials: 'include', method: 'POST'}); 
+    } catch (e) {} 
+    location.reload();
 }
 
 async function loadLeaderboard() {
@@ -67,6 +103,7 @@ async function loadLeaderboard() {
         ]);
         const snakeData = await snakeRes.json();
         const guessData = await guessRes.json();
+        
         document.getElementById('snake-leaderboard').innerHTML = `
             <h4>🐍 Змейка</h4>
             ${snakeData.length ? snakeData.map((p, i) => `<div class="leader-item"><span>#${i+1} ${p.username}</span><span>${p.score}</span></div>`).join('') : '<div style="color:#666;text-align:center">Пока пусто</div>'}
@@ -83,7 +120,10 @@ async function loadLeaderboard() {
 }
 
 function backToMenu() {
-    if (gameInterval) { clearInterval(gameInterval); gameInterval = null; }
+    if (gameInterval) { 
+        clearInterval(gameInterval); 
+        gameInterval = null; 
+    }
     location.reload();
 }
 
@@ -104,7 +144,8 @@ function loadSnakeGame() {
     const ctx = canvas.getContext('2d');
     snake = {x:10,y:10,dx:0,dy:0,cells:[],maxCells:4};
     food = {x:Math.floor(Math.random()*38)+1,y:Math.floor(Math.random()*38)+1};
-    gameData.score = 0; gameData.highscore = 0;
+    gameData.score = 0; 
+    gameData.highscore = 0;
 
     canvas.addEventListener('click', restartSnake);
     
@@ -118,7 +159,9 @@ function loadSnakeGame() {
 
     let touchStartX = 0, touchStartY = 0;
     canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault(); touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+        e.preventDefault(); 
+        touchStartX = e.touches[0].clientX; 
+        touchStartY = e.touches[0].clientY;
     }, { passive: false });
     
     canvas.addEventListener('touchend', (e) => {
@@ -140,19 +183,28 @@ function loadSnakeGame() {
     }, { passive: false });
 
     function updateSnake() {
-        snake.x += snake.dx; snake.y += snake.dy;
+        snake.x += snake.dx; 
+        snake.y += snake.dy;
         if (snake.x < 0 || snake.x >= 40 || snake.y < 0 || snake.y >= 40) gameOver();
-        for (let cell of snake.cells) { if (snake.x === cell.x && snake.y === cell.y) gameOver(); }
+        for (let cell of snake.cells) { 
+            if (snake.x === cell.x && snake.y === cell.y) gameOver(); 
+        }
         snake.cells.unshift({x: snake.x, y: snake.y});
         if (snake.x === food.x && snake.y === food.y) {
-            gameData.score++; document.getElementById('score').textContent = gameData.score;
+            gameData.score++; 
+            document.getElementById('score').textContent = gameData.score;
             food = {x:Math.floor(Math.random()*38)+1,y:Math.floor(Math.random()*38)+1};
-        } else { snake.cells.pop(); }
+        } else { 
+            snake.cells.pop(); 
+        }
         if (snake.cells.length > snake.maxCells) snake.maxCells++;
+        
         ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 400, 400);
         ctx.fillStyle = '#ff4444'; ctx.fillRect(food.x*10, food.y*10, 10, 10);
-        ctx.fillStyle = '#44ff44'; for (let cell of snake.cells) ctx.fillRect(cell.x*10, cell.y*10, 10, 10);
-        ctx.fillStyle = '#00ff88'; ctx.fillRect(snake.x*10, snake.y*10, 10, 10);
+        ctx.fillStyle = '#44ff44'; 
+        for (let cell of snake.cells) ctx.fillRect(cell.x*10, cell.y*10, 10, 10);
+        ctx.fillStyle = '#00ff88'; 
+        ctx.fillRect(snake.x*10, snake.y*10, 10, 10);
     }
 
     function gameOver() {
@@ -164,7 +216,8 @@ function loadSnakeGame() {
         }
         ctx.fillStyle = 'rgba(255,0,0,0.7)'; ctx.fillRect(0, 0, 400, 400);
         ctx.fillStyle = 'white'; ctx.font = '30px Arial'; ctx.textAlign = 'center';
-        ctx.fillText('GAME OVER', 200, 190); ctx.fillText(`Счёт: ${gameData.score}`, 200, 230);
+        ctx.fillText('GAME OVER', 200, 190); 
+        ctx.fillText(`Счёт: ${gameData.score}`, 200, 230);
         ctx.fillText('Кликни для рестарта', 200, 270);
     }
 
@@ -255,7 +308,6 @@ async function checkGuess() {
     document.getElementById('hint').innerHTML = hint;
 }
 
-// ✅ СОХРАНЕНИЕ ОЧКОВ + ТУРНИРЫ
 async function saveScore(gameType) {
     if (!isLoggedIn) return;
     
@@ -277,10 +329,11 @@ async function saveScore(gameType) {
         }
         loadLeaderboard();
         loadTournament();
-    } catch (e) { console.error('Save failed:', e); }
+    } catch (e) { 
+        console.error('Save failed:', e); 
+    }
 }
 
-// 🏆 ТУРНИРЫ
 async function loadTournament() {
     try {
         const res = await fetch('/tournament', {credentials: 'include'});
@@ -308,29 +361,59 @@ async function loadTournament() {
                 ).join('') + 
                 (data.my_position ? `<div style="color:#44ff44">👤 Ты: #${data.my_position} ${data.my_score}</div>` : '');
         }
-    } catch (e) { console.error('Tournament load failed:', e); }
+    } catch (e) { 
+        console.error('Tournament load failed:', e); 
+    }
 }
 
-// ✅ СТАРТОВЫЙ CSS ФИКС + ИНИЦИАЛИЗАЦИЯ
-document.addEventListener('DOMContentLoaded', () => {
-    // ФИКС КНОПОК АВТОРИЗАЦИИ
-    const submitBtn = document.getElementById('submit-btn');
-    if (submitBtn) {
-        submitBtn.onclick = authUser;
-        submitBtn.addEventListener('click', (e) => {
-            e.preventDefault(); e.stopPropagation(); authUser();
-        });
-        console.log('🔧 Кнопки авторизации привязаны!');
+// 🚨 ЭКСТРЕННЫЙ ТРОЙНОЙ ФИКС КНОПОК ДЛЯ RENDER
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'submit-btn' || e.target.classList.contains('btn-primary')) {
+        e.preventDefault(); e.stopPropagation();
+        console.log('🚨 КНОПКА НАЙДЕНА ПО CLICK!');
+        authUser();
     }
+});
+
+document.addEventListener('pointerdown', function(e) {
+    if (e.target.id === 'submit-btn') {
+        e.preventDefault(); e.stopPropagation();
+        console.log('🚨 КНОПКА НАЙДЕНА ПО POINTERDOWN!');
+        authUser();
+    }
+});
+
+// ГАРАНТИЯ - каждые 2 сек проверяем привязку
+setInterval(() => {
+    const btn = document.getElementById('submit-btn');
+    if (btn && !btn.onclick) {
+        btn.onclick = () => { authUser(); return false; };
+        console.log('🔧 КНОПКА ПЕРЕПРИВЯЗАНА!');
+    }
+}, 2000);
+
+// ✅ ПОЛНАЯ ИНИЦИАЛИЗАЦИЯ
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🎮 Aleksin Games Hub полностью загружен!');
     
     // CSS ФИКС ТОПА
     const style = document.createElement('style');
     style.textContent = `
-        .leader-item { display: flex !important; justify-content: space-between !important; padding: 15px !important;
-            margin: 10px 0 !important; background: #2a2a2a !important; border-radius: 10px !important;
-            font-size: 16px !important; min-height: 20px !important; }
+        .leader-item { 
+            display: flex !important; justify-content: space-between !important; 
+            padding: 15px !important; margin: 10px 0 !important; 
+            background: #2a2a2a !important; border-radius: 10px !important;
+            font-size: 16px !important; min-height: 20px !important; 
+        }
     `;
     document.head.appendChild(style);
+    
+    // ФИКС КНОПОК
+    const submitBtn = document.getElementById('submit-btn');
+    if (submitBtn) {
+        submitBtn.onclick = () => { authUser(); return false; };
+        console.log('🔧 Кнопка авторизации привязана при загрузке!');
+    }
     
     checkUserStatus();
     setInterval(loadTournament, 30000);
