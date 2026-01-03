@@ -234,26 +234,115 @@ function loadSnakeGame() {
     gameInterval = setInterval(updateSnake, 200);
 }
 
+// 🎯 УГАДАЙКА 1-1000 + СЧЁТ ХОДОВ
 function loadGuessGame() {
     currentGame = 'guess';
-    secretNumber = Math.floor(Math.random() * 100) + 1;
+    secretNumber = Math.floor(Math.random() * 1000) + 1; // ✅ 1-1000
     attempts = 0;
     
     document.querySelector('.container').innerHTML = `
-        <h1>🎯 Угадай число</h1>
+        <h1>🎯 Угадай число (1-1000)</h1>
         <div id="game-info">
-            Попытка <span id="attempts">0</span>/7 | Рекорд: <span id="highscore">0</span>
+            <span style="color:#44ff44">Ходов: <span id="attempts">0</span></span> | 
+            <span style="color:#ffaa00">Рекорд: <span id="highscore">0</span></span>
         </div>
-        <canvas id="guessCanvas" width="400" height="200" style="cursor:pointer"></canvas>
+        <canvas id="guessCanvas" width="400" height="250" style="cursor:pointer"></canvas>
         <div style="text-align:center;margin:20px">
-            <input type="number" id="guessInput" min="1" max="100" placeholder="1-100" style="padding:15px;font-size:20px;border:3px solid #44ff44;border-radius:10px;background:#2a2a2a;color:white;width:200px">
+            <input type="number" id="guessInput" min="1" max="1000" placeholder="1-1000" 
+                   style="padding:15px;font-size:20px;border:3px solid #44ff44;border-radius:10px;background:#2a2a2a;color:white;width:220px">
             <br><br>
-            <button class="auth-btn" onclick="checkGuess()" style="width:150px;margin:5px">✅ Проверить</button>
-            <button class="auth-btn" onclick="clearGuess()" style="width:150px;margin:5px;background:#666">🔄 Очистить</button>
+            <button class="auth-btn" onclick="checkGuess()" style="width:160px;margin:5px">✅ Проверить</button>
+            <button class="auth-btn" onclick="clearGuess()" style="width:160px;margin:5px;background:#666">🔄 Очистить</button>
             <br><br>
             <button class="auth-btn" onclick="backToMenu()" style="width:200px">🏠 В меню</button>
         </div>
+        <div id="hint" style="text-align:center;color:#ffaa00;font-size:18px;margin:10px;font-weight:bold"></div>
     `;
+    
+    gameData.highscore = 0;
+    updateGuessCanvas();
+    
+    document.getElementById('guessInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') checkGuess();
+    });
+    
+    document.getElementById('guessCanvas').addEventListener('click', checkGuess);
+}
+
+function updateGuessCanvas() {
+    const canvas = document.getElementById('guessCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, 400, 250);
+    
+    ctx.fillStyle = '#44ff44';
+    ctx.font = 'bold 26px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('🎯 Угадай число от 1 до 1000', 200, 60);
+    ctx.font = 'bold 22px Arial';
+    ctx.fillText(`Ходов: ${attempts}`, 200, 110);
+    
+    // ✅ ПРОГРЕСС-БАР
+    const progress = attempts / 20; // Макс 20 ходов
+    ctx.fillStyle = '#ff4444';
+    ctx.fillRect(50, 140, 300 * progress, 20);
+    ctx.strokeStyle = '#44ff44';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(50, 140, 300, 20);
+    
+    ctx.fillStyle = '#00ff88';
+    ctx.font = '20px Arial';
+    ctx.fillText(`Прогресс: ${Math.round(progress*100)}%`, 200, 190);
+}
+
+function checkGuess() {
+    const guess = parseInt(document.getElementById('guessInput').value);
+    if (!guess || guess < 1 || guess > 1000) { // ✅ 1-1000
+        document.getElementById('hint').textContent = '❌ Число от 1 до 1000!';
+        document.getElementById('hint').style.color = '#ff4444';
+        return;
+    }
+
+    attempts++;
+    document.getElementById('attempts').textContent = attempts; // ✅ СЧИТАЕТ ХОДЫ
+    document.getElementById('guessInput').value = '';
+    document.getElementById('hint').textContent = '';
+
+    if (guess === secretNumber) {
+        // ✅ РЕКОРД = МЕНЬШЕ ХОДОВ = БОЛЬШЕ ОЧКОВ
+        const score = Math.max(0, 1000 - attempts * 30);
+        if (score > gameData.highscore) {
+            gameData.highscore = score;
+            document.getElementById('highscore').textContent = gameData.highscore;
+            if (isLoggedIn) saveScore('guess');
+        }
+        document.getElementById('hint').innerHTML = `🎉 Угадал за <strong>${attempts}</strong> ходов! Очки: <strong>${score}</strong>`;
+        document.getElementById('hint').style.color = '#44ff44';
+        setTimeout(() => loadGuessGame(), 3000);
+    } else if (attempts >= 20) { // ✅ 20 ходов макс
+        document.getElementById('hint').innerHTML = `💀 Проиграл! Было <strong>${secretNumber}</strong>`;
+        document.getElementById('hint').style.color = '#ff4444';
+        setTimeout(() => loadGuessGame(), 3000);
+    } else {
+        // ✅ ТОЧНЫЕ ПОДСКАЗКИ
+        let hintText = guess < secretNumber ? '📈 Больше!' : '📉 Меньше!';
+        const diff = Math.abs(guess - secretNumber);
+        if (diff <= 10) hintText += ' (очень близко!)';
+        else if (diff <= 50) hintText += ' (ближе)';
+        
+        document.getElementById('hint').textContent = hintText;
+        document.getElementById('hint').style.color = '#ffaa00';
+    }
+    
+    updateGuessCanvas();
+}
+
+function clearGuess() {
+    document.getElementById('guessInput').value = '';
+    document.getElementById('guessInput').focus();
+    document.getElementById('hint').textContent = '';
+}
+
     
     gameData.highscore = 0;
     updateGuessCanvas();
