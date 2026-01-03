@@ -9,15 +9,9 @@
         body {
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-            color: white;
-            min-height: 100vh;
-            overflow-x: hidden;
+            color: white; min-height: 100vh; overflow-x: hidden;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         h1 { text-align: center; margin: 30px 0; font-size: 2.5em; text-shadow: 0 0 20px #44ff44; }
         #status { position: fixed; top: 20px; left: 20px; font-size: 18px; }
         #auth-buttons { display: flex; justify-content: center; gap: 15px; margin: 30px 0; }
@@ -28,6 +22,7 @@
             transition: all 0.3s; box-shadow: 0 5px 15px rgba(68,255,68,0.4);
         }
         .auth-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(68,255,68,0.6); }
+        .auth-btn:active { transform: translateY(0); }
         #games-grid {
             display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px; margin-top: 50px;
@@ -57,8 +52,6 @@
             background: #2a2a2a !important; border-radius: 10px !important;
             font-size: 16px !important; min-height: 20px !important;
         }
-        
-        /* МОДАЛКА АВТОРИЗАЦИИ */
         #auth-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;
@@ -70,11 +63,15 @@
         }
         .modal-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 25px; }
         #submit-btn {
-            flex: 1; padding: 15px; background: linear-gradient(45deg, #44ff44, #00ff88);
-            border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer;
+            flex: 1; padding: 15px; background: linear-gradient(45deg, #44ff44, #00ff88) !important;
+            border: none !important; border-radius: 10px !important; font-size: 16px !important;
+            font-weight: bold !important; cursor: pointer !important;
         }
         #error { color: #ff4444; margin-top: 10px; min-height: 20px; }
-        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 2px solid #444; background: #2a2a2e; color: white; font-size: 16px; }
+        input { 
+            width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; 
+            border: 2px solid #444; background: #2a2a2e; color: white; font-size: 16px; 
+        }
     </style>
 </head>
 <body>
@@ -113,7 +110,7 @@
         </div>
     </div>
     
-    <!-- МОДАЛКА АВТОРИЗАЦИИ -->
+    <!-- МОДАЛКА с ТРОЙНЫМ ФИКСОМ -->
     <div id="auth-modal">
         <div class="modal-content">
             <h2 id="modal-title">🔑 Вход</h2>
@@ -124,8 +121,12 @@
             <input id="password" type="password" placeholder="Пароль" maxlength="20">
             <div id="error"></div>
             <div class="modal-buttons">
-                <button class="modal-btn btn-primary" id="submit-btn" onclick="authUser()">Войти</button>
-                <button class="modal-btn btn-secondary" onclick="closeAuth()">Отмена</button>
+                <!-- 🚨 ТРОЙНОЙ ФИКС КНОПОК -->
+                <button class="modal-btn btn-primary" id="submit-btn" 
+                        onclick="authUser();return false;"
+                        onmousedown="authUser();return false;"
+                        onpointerdown="authUser();return false;">Войти</button>
+                <button class="modal-btn btn-secondary" onclick="closeAuth();return false;">Отмена</button>
             </div>
         </div>
     </div>
