@@ -97,6 +97,7 @@ async function logout() {
     location.reload();
 }
 
+// ✅ ФИКС ТОП-10 + ЛОГИ
 async function loadLeaderboard() {
     try {
         const [snakeRes, guessRes] = await Promise.all([
@@ -106,16 +107,20 @@ async function loadLeaderboard() {
         const snakeData = await snakeRes.json();
         const guessData = await guessRes.json();
 
+        console.log('🏆 Топ-10:', snakeData, guessData);
+
         document.getElementById('snake-leaderboard').innerHTML = `
             <h4>🐍 Змейка</h4>
-            ${snakeData.map((p, i) => `<div class="leader-item"><span>#${i+1} ${p.username}</span><span>${p.score}</span></div>`).join('')}
+            ${snakeData.length ? snakeData.map((p, i) => `<div class="leader-item"><span>#${i+1} ${p.username}</span><span>${p.score}</span></div>`).join('') : '<div style="color:#666;text-align:center">Пока пусто</div>'}
         `;
         document.getElementById('guess-leaderboard').innerHTML = `
             <h4>🎯 Угадайка</h4>
-            ${guessData.map((p, i) => `<div class="leader-item"><span>#${i+1} ${p.username}</span><span>${p.score}</span></div>`).join('')}
+            ${guessData.length ? guessData.map((p, i) => `<div class="leader-item"><span>#${i+1} ${p.username}</span><span>${p.score}</span></div>`).join('') : '<div style="color:#666;text-align:center">Пока пусто</div>'}
         `;
     } catch (e) {
-        console.error('Leaderboard load failed:', e);
+        console.error('Leaderboard failed:', e);
+        document.getElementById('snake-leaderboard').innerHTML = '<div style="color:#ff4444">Ошибка загрузки</div>';
+        document.getElementById('guess-leaderboard').innerHTML = '<div style="color:#ff4444">Ошибка загрузки</div>';
     }
 }
 
@@ -127,7 +132,7 @@ function backToMenu() {
     location.reload();
 }
 
-// 🐍 ЗМЕЙКА
+// 🐍 ЗМЕЙКА - ✅ ФИКС СОХРАНЕНИЯ КАЖДЫЙ RAZ
 function loadSnakeGame() {
     currentGame = 'snake';
     document.querySelector('.container').innerHTML = `
@@ -214,13 +219,18 @@ function loadSnakeGame() {
         ctx.fillRect(snake.x*10, snake.y*10, 10, 10);
     }
 
+    // ✅ ФИКС: СОХРАНЯЕМ КАЖДЫЙ gameOver!
     function gameOver() {
         clearInterval(gameInterval);
+        
+        // ✅ СОХРАНЯЕМ ДАЖЕ БЕЗ НОВОГО РЕКОРДА
+        if (isLoggedIn) saveScore('snake');
+        
         if (gameData.score > gameData.highscore) {
             gameData.highscore = gameData.score;
             document.getElementById('highscore').textContent = gameData.highscore;
-            if (isLoggedIn) saveScore('snake');
         }
+        
         ctx.fillStyle = 'rgba(255,0,0,0.7)';
         ctx.fillRect(0, 0, 400, 400);
         ctx.fillStyle = 'white';
@@ -249,22 +259,18 @@ function loadGuessGame() {
     attempts = 0;
     
     document.querySelector('.container').innerHTML = `
-        <h1>🎯 Угадай число (1-1000)</h1>
+                <h1>🎯 Угадай число (1-1000)</h1>
         <div id="game-info">
-            <span style="color:#44ff44">Ходов: <span id="attempts">0</span></span> | 
+            <span style="color:#44ff44">Ходов: <span id="attempts">0</span></span> 
             <span style="color:#ffaa00">Рекорд: <span id="highscore">0</span></span>
         </div>
-        <canvas id="guessCanvas" width="400" height="250" style="cursor:pointer"></canvas>
-        <div style="text-align:center;margin:20px">
-            <input type="number" id="guessInput" min="1" max="1000" placeholder="1-1000" 
-                   style="padding:15px;font-size:20px;border:3px solid #44ff44;border-radius:10px;background:#2a2a2a;color:white;width:220px">
+        <div style="text-align:center;margin:20px 0">
+            <input type="number" id="guessInput" min="1" max="1000" placeholder="1-1000" style="padding:15px;font-size:18px;width:200px;border-radius:10px;border:2px solid #444">
             <br><br>
-            <button class="auth-btn" onclick="checkGuess()" style="width:160px;margin:5px">✅ Проверить</button>
-            <button class="auth-btn" onclick="clearGuess()" style="width:160px;margin:5px;background:#666">🔄 Очистить</button>
-            <br><br>
-            <button class="auth-btn" onclick="backToMenu()" style="width:200px">🏠 В меню</button>
+            <canvas id="guessCanvas" width="400" height=50" style="border:2px solid #44ff44;border-radius:10px;cursor:pointer;margin:20px 0;background:#222"></canvas>
+            <div id="hint" style="text-align:center;color:#ffaa00;font-size:18px;margin:10px;font-weight:bold"></div>
         </div>
-        <div id="hint" style="text-align:center;color:#ffaa00;font-size:18px;margin:10px;font-weight:bold"></div>
+        <button class="auth-btn" onclick="backToMenu()" style="width:200px">🏠 В меню</button>
     `;
     
     gameData.highscore = 0;
@@ -280,194 +286,154 @@ function loadGuessGame() {
 function updateGuessCanvas() {
     const canvas = document.getElementById('guessCanvas');
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, 400, 250);
+    const progress = Math.min(attempts / maxAttempts, 1);
     
+    // Фон
+    ctx.fillStyle = '#222';
+    ctx.fillRect(0, 0, 400, 50);
+    
+    // Зелёная часть (успех)
     ctx.fillStyle = '#44ff44';
-    ctx.font = 'bold 26px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('🎯 Угадай число от 1 до 1000', 200, 60);
-    ctx.font = 'bold 22px Arial';
-    ctx.fillText(`Ходов: ${attempts}`, 200, 110);
+    ctx.fillRect(0, 0, 400 * (1-progress), 50);
     
-    const progress = attempts / 20;
+    // Красная часть (провал)
     ctx.fillStyle = '#ff4444';
-    ctx.fillRect(50, 140, 300 * progress, 20);
-    ctx.strokeStyle = '#44ff44';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(50, 140, 300, 20);
+    ctx.fillRect(400 * (1-progress), 0, 400 * progress, 50);
     
-    ctx.fillStyle = '#00ff88';
+    // Текст
+    ctx.fillStyle = 'white';
     ctx.font = '20px Arial';
-    ctx.fillText(`Прогресс: ${Math.round(progress*100)}%`, 200, 190);
+    ctx.textAlign = 'center';
+    ctx.fillText(`Ход ${attempts}/${maxAttempts}`, 200, 30);
 }
 
-function checkGuess() {
-    const guess = parseInt(document.getElementById('guessInput').value);
-    if (!guess || guess < 1 || guess > 1000) {
-        document.getElementById('hint').textContent = '❌ Число от 1 до 1000!';
-        document.getElementById('hint').style.color = '#ff4444';
+async function checkGuess() {
+    if (attempts >= maxAttempts) {
+        document.getElementById('hint').innerHTML = '<span style="color:#ff4444">⏰ Время вышло!</span>';
+        if (isLoggedIn) saveScore('guess');
         return;
     }
-
+    
+    const guess = parseInt(document.getElementById('guessInput').value);
     attempts++;
     document.getElementById('attempts').textContent = attempts;
     document.getElementById('guessInput').value = '';
-    document.getElementById('hint').textContent = '';
-
+    updateGuessCanvas();
+    
+    let hint = '';
     if (guess === secretNumber) {
         const score = Math.max(0, 1000 - attempts * 30);
-        if (score > gameData.highscore) {
-            gameData.highscore = score;
-            document.getElementById('highscore').textContent = gameData.highscore;
-            if (isLoggedIn) saveScore('guess');
-        }
-        document.getElementById('hint').innerHTML = `🎉 Угадал за <strong>${attempts}</strong> ходов! Очки: <strong>${score}</strong>`;
-        document.getElementById('hint').style.color = '#44ff44';
-        setTimeout(() => loadGuessGame(), 3000);
-    } else if (attempts >= 20) {
-        document.getElementById('hint').innerHTML = `💀 Проиграл! Было <strong>${secretNumber}</strong>`;
-        document.getElementById('hint').style.color = '#ff4444';
-        setTimeout(() => loadGuessGame(), 3000);
+        hint = `<span style="color:#44ff44">🎉 УГАДАЛ за ${attempts} ходов! ${score} очков</span>`;
+        if (isLoggedIn) saveScore('guess');
+    } else if (attempts >= maxAttempts) {
+        hint = `<span style="color:#ff4444">⏰ Не угадано: ${secretNumber}</span>`;
+        if (isLoggedIn) saveScore('guess');
+    } else if (guess < secretNumber) {
+        const diff = secretNumber - guess;
+        hint = diff <= 10 ? '🔥 Больше! (очень близко)' : '📈 Больше!';
     } else {
-        let hintText = guess < secretNumber ? '📈 Больше!' : '📉 Меньше!';
-        const diff = Math.abs(guess - secretNumber);
-        if (diff <= 10) hintText += ' (очень близко!)';
-        else if (diff <= 50) hintText += ' (ближе)';
-        
-        document.getElementById('hint').textContent = hintText;
-        document.getElementById('hint').style.color = '#ffaa00';
+        const diff = guess - secretNumber;
+        hint = diff <= 10 ? '🔥 Меньше! (очень близко)' : '📉 Меньше!';
     }
     
-    updateGuessCanvas();
+    document.getElementById('hint').innerHTML = hint;
 }
 
-function clearGuess() {
-    document.getElementById('guessInput').value = '';
-    document.getElementById('guessInput').focus();
-    document.getElementById('hint').textContent = '';
-}
-
-// 🏆 ТУРНИР
-async function loadTournament() {
-    currentGame = 'tournament';
-    try {
-        const res = await fetch('/tournament');
-        const data = await res.json();
-        
-        document.querySelector('.container').innerHTML = `
-            <h1>🏆 АКТИВНЫЙ ТУРНИР</h1>
-            <div id="tournament-info" style="text-align:center;color:#ffaa00;font-size:18px;margin:20px">
-                <div>🕐 До конца: <span id="countdown">-</span></div>
-                <div>ID: <strong>${data.id}</strong></div>
-            </div>
-            
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin:30px 0">
-                <div class="leaderboard">
-                    <h3>🐍 Змейка</h3>
-                    <div id="tournament-snake-top"></div>
-                    <div style="margin-top:20px;color:#44ff44;font-size:20px">
-                        🎁 <strong>1-е место: 1000 очков</strong><br>
-                        🎁 <strong>2-е место: 500 очков</strong><br>
-                        🎁 <strong>3-е место: 250 очков</strong>
-                    </div>
-                </div>
-                
-                <div class="leaderboard">
-                    <h3>🎯 Угадайка</h3>
-                    <div id="tournament-guess-top"></div>
-                    <div style="margin-top:20px;color:#44ff44;font-size:20px">
-                        🎁 <strong>1-е место: 1000 очков</strong><br>
-                        🎁 <strong>2-е место: 500 очков</strong><br>
-                        🎁 <strong>3-е место: 250 очков</strong>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="text-align:center">
-                <button class="auth-btn" onclick="backToMenu()" style="width:250px;font-size:18px">🏠 В меню</button>
-            </div>
-        `;
-        
-        // ✅ ТОП-3
-        document.getElementById('tournament-snake-top').innerHTML = 
-            data.snake_top.map((p, i) => 
-                `<div class="leader-item"><span>🥇${i+1} ${p[0]}</span><span>${p[1]}</span></div>`
-            ).join('') || '<div style="text-align:center;color:#666">Никто не играл</div>';
-        
-        document.getElementById('tournament-guess-top').innerHTML = 
-            data.guess_top.map((p, i) => 
-                `<div class="leader-item"><span>🥇${i+1} ${p[0]}</span><span>${p[1]}</span></div>`
-            ).join('') || '<div style="text-align:center;color:#666">Никто не играл</div>';
-        
-        // ✅ ТАЙМЕР
-        updateCountdown(data.end_time);
-        setInterval(() => updateCountdown(data.end_time), 1000);
-        
-    } catch (e) {
-        document.querySelector('.container').innerHTML = `
-            <h1>🏆 ТУРНИР</h1>
-            <div style="text-align:center;color:#ff4444">Ошибка загрузки турнира</div>
-            <button class="auth-btn" onclick="backToMenu()" style="width:250px">🏠 В меню</button>
-        `;
-    }
-}
-
-function updateCountdown(endTimeISO) {
-    const endTime = new Date(endTimeISO).getTime();
-    const now = new Date().getTime();
-    const distance = endTime - now;
-    
-    if (distance < 0) {
-        document.getElementById('countdown').textContent = 'Турнир завершён!';
-        return;
-    }
-    
-    const hours = Math.floor(distance / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    
-    document.getElementById('countdown').textContent = 
-        `${hours}ч ${minutes}м ${seconds}с`;
-}
-
-// ✅ УЛУЧШЕННЫЙ saveScore (личный + турнир)
-async function saveScore(game) {
+// ✅ ГЛАВНАЯ ФУНКЦИЯ СОХРАНЕНИЯ - ФИКС ТУРНИРОВ!
+async function saveScore(gameType) {
     if (!isLoggedIn) return;
     
+    const score = gameType === 'snake' ? gameData.score : Math.max(0, 1000 - attempts * 30);
+    console.log(`💾 Сохранение ${gameType}: ${score}`);
+    
     try {
-        // Личная БД
-        await fetch(`/save_score/${game}`, {
+        const res = await fetch('/save', {
             method: 'POST',
             credentials: 'include',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({highscore: gameData.highscore})
+            body: JSON.stringify({game: gameType, score})
         });
+        const data = await res.json();
+        console.log('✅', gameType, 'сохранено:', data);
         
-        // Турнирная БД
-        await fetch(`/save_tournament_score/${game}`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({score: gameData.highscore})
-        });
-        
-        loadLeaderboard();
+        if (data.highscore_updated) {
+            gameData.highscore = data.highscore;
+            document.getElementById('highscore')?.textContent = gameData.highscore;
+        }
+        loadLeaderboard(); // 🔄 Обновляем топ
+        loadTournament();  // 🔄 Обновляем турнир
     } catch (e) {
-        console.error('Save score failed:', e);
+        console.error('Save failed:', e);
     }
 }
 
-// ✅ ИНИЦИАЛИЗАЦИЯ
-document.addEventListener('DOMContentLoaded', function() {
+// 🏆 ТУРНИРЫ С ПРИЗАМИ - НОВЫЙ КОД
+let currentTournament = null;
+
+async function loadTournament() {
+    try {
+        const res = await fetch('/tournament', {credentials: 'include'});
+        const data = await res.json();
+        
+        if (data.active) {
+            currentTournament = data;
+            const timeLeft = Math.max(0, data.ends_at - Date.now());
+            const hours = Math.floor(timeLeft / 3600000);
+            const minutes = Math.floor((timeLeft % 3600000) / 60000);
+            
+            document.getElementById('tournament-container') || createTournamentUI();
+            document.getElementById('tournament-title').textContent = `🏆 Турнир (${hours}ч ${minutes}м)`;
+            document.getElementById('tournament-leaderboard').innerHTML = 
+                data.leaderboard.slice(0, 3).map((p, i) => 
+                    `<div class="leader-item"><span>#${i+1} ${p.username}</span><span>${p.score}</span></div>`
+                ).join('') + 
+                (data.my_position ? `<div class="leader-item"><span>👤 Ты: #${data.my_position} ${data.my_score}</span></div>` : '');
+        }
+    } catch (e) {
+        console.error('Tournament load failed:', e);
+    }
+}
+
+function createTournamentUI() {
+    document.querySelector('.container') || document.body.insertAdjacentHTML('beforeend', `
+        <div id="tournament-container" style="background:#1a1a1a;padding:20px;border-radius:15px;margin:20px 0;border:2px solid #ffaa00">
+            <div id="tournament-title" style="font-size:24px;color:#ffaa00;margin-bottom:15px"></div>
+            <div id="tournament-leaderboard" style="max-height:200px;overflow-y:auto"></div>
+            <div style="color:#666;font-size:14px;margin-top:10px">
+                🥇1-е: +1000 очков | 🥈2-е: +500 | 🥉3-е: +250
+            </div>
+        </div>
+    `);
+}
+
+// 🎮 ГЛАВНОЕ МЕНЮ - ДОБАВИТЬ КНОПКИ
+document.addEventListener('DOMContentLoaded', () => {
+    checkUserStatus();
+    
+    // ✅ ФИКС КНОПОК - ДВОЙНАЯ ПРИВЯЗКА
     const submitBtn = document.getElementById('submit-btn');
     if (submitBtn) {
         submitBtn.onclick = authUser;
-        submitBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            authUser();
-        });
+        submitBtn.addEventListener('click', authUser);
         console.log('✅ Кнопка авторизации привязана!');
     }
-    checkUserStatus();
+    
+    // Обновляем турнир каждые 30 сек
+    setInterval(loadTournament, 30000);
 });
+
+// CSS ФИКС ДЛЯ ТОП-10 (добавить в <style>)
+const style = document.createElement('style');
+style.textContent = `
+    .leader-item {
+        display: flex !important;
+        justify-content: space-between !important;
+        padding: 15px !important;
+        margin: 10px 0 !important;
+        background: #2a2a2a !important;
+        border-radius: 10px !important;
+        font-size: 16px !important;
+        min-height: 20px !important;
+    }
+`;
+document.head.appendChild(style);
