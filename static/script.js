@@ -326,3 +326,7 @@ document.addEventListener('keydown', e => {
 });
 
 checkUserStatus();
+// В конец static/script.js ДОБАВЬ:
+window.addEventListener('beforeunload', function() {
+    fetch('/logout', {method: 'POST', credentials: 'include'});
+});
