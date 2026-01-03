@@ -1,15 +1,11 @@
 let currentGame = '';
 let isLoggedIn = false;
-let gameData = {
-    score: 0,
-    highscore: 0
-};
+let gameData = { score: 0, highscore: 0 };
 
 async function checkUserStatus() {
     try {
         const res = await fetch('/status', {credentials: 'include'});
         const data = await res.json();
-        
         if (data.logged_in) {
             document.getElementById('status').textContent = `👋 ${data.username}`;
             document.querySelector('.auth-buttons').style.display = 'none';
@@ -18,7 +14,7 @@ async function checkUserStatus() {
             loadLeaderboard();
         }
     } catch (e) {
-        console.log('Гость');
+        console.log('👋 Гость');
     }
 }
 
@@ -44,7 +40,6 @@ async function authUser() {
             credentials: 'include',
             body: JSON.stringify({username, password, mode})
         });
-        
         const data = await res.json();
         if (data.success) {
             closeAuth();
@@ -69,15 +64,22 @@ async function logout() {
 }
 
 function showAuth(mode) {
+    console.log('🔧 showAuth вызвана:', mode); // ✅ ОТЛАДКА
+    
     document.getElementById('auth-modal').style.display = 'flex';
     const modalTitle = document.getElementById('modal-title');
     modalTitle.textContent = mode === 'register' ? '📝 РЕГИСТРАЦИЯ' : '🔑 ВХОД';
     modalTitle.dataset.mode = mode;
     
-    // ✅ ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ ТОЛЬКО ПРИ РЕГИСТРАЦИИ
+    // ✅ ПРЕДУПРЕЖДЕНИЕ — ГАРАНТИРОВАННО РАБОТАЕТ
     const warning = document.getElementById('warning-text');
+    console.log('🔧 Warning найден:', warning); // ✅ ОТЛАДКА
+    
     if (warning) {
-        warning.style.display = mode === 'register' ? 'block' : 'none';
+        warning.style.display = (mode === 'register') ? 'block' : 'none';
+        console.log('🔧 Warning видимость:', warning.style.display); // ✅ ОТЛАДКА
+    } else {
+        console.error('❌ #warning-text НЕ НАЙДЕН!');
     }
     
     document.getElementById('username').value = '';
@@ -100,16 +102,12 @@ async function loadLeaderboard() {
         data.slice(0, 10).forEach((player, i) => {
             const div = document.createElement('div');
             div.className = 'leader-item';
-            div.innerHTML = `
-                <span>${i+1}. ${player.username}</span>
-                <span>${player.highscore}</span>
-            `;
+            div.innerHTML = `<span style="color:#44ff44">${i+1}. ${player.username}</span><span style="color:#ffaa00">${player.highscore}</span>`;
             list.appendChild(div);
         });
-        
         document.getElementById('leaderboard').style.display = 'block';
     } catch (e) {
-        console.log('Нет лидерборда');
+        console.log('Лидерборд недоступен');
     }
 }
 
@@ -119,11 +117,8 @@ function loadGame(game) {
     document.getElementById('game-container').style.display = 'block';
     document.getElementById('leaderboard').style.display = 'none';
     
-    if (game === 'guess') {
-        loadGuessNumber();
-    } else if (game === 'snake') {
-        loadSnake();
-    }
+    if (game === 'guess') loadGuessNumber();
+    else if (game === 'snake') loadSnake();
 }
 
 function backToMenu() {
@@ -133,20 +128,18 @@ function backToMenu() {
     currentGame = '';
 }
 
-// 🎯 УГАДАЙ ЧИСЛО
 function loadGuessNumber() {
     document.getElementById('gameCanvas').style.display = 'none';
-    const container = document.getElementById('game-container');
-    container.innerHTML = `
-        <div style="text-align:center;padding:30px;background:rgba(0,50,0,0.9);border-radius:20px">
-            <h2 style="color:#44ff44">🎯 УГАДАЙ ЧИСЛО (1-100)</h2>
-            <p style="color:#ccc">Твоя лучшая попытка: <strong id="best-guess">${gameData.highscore || 0}</strong></p>
-            <input type="number" id="guess-input" min="1" max="100" style="padding:15px;font-size:20px;width:200px;border-radius:10px;border:2px solid #44ff44;background:#000;color:#44ff44">
+    document.getElementById('game-container').innerHTML = `
+        <div style="text-align:center;padding:40px;background:linear-gradient(145deg, rgba(0,50,0,0.95), rgba(0,30,0,0.95));border-radius:25px;border:3px solid #44ff44;box-shadow:0 0 40px rgba(68,255,68,0.5)">
+            <h2 style="color:#44ff44;font-size:28px;margin:0 0 20px 0;text-shadow:0 0 15px #44ff44">🎯 УГАДАЙ ЧИСЛО (1-100)</h2>
+            <p style="color:#ccc;font-size:18px">Твоя лучшая попытка: <strong id="best-guess" style="color:#ffaa00">${gameData.highscore || 0}</strong></p>
+            <input type="number" id="guess-input" min="1" max="100" style="padding:20px;font-size:22px;width:250px;border-radius:15px;border:3px solid #44ff44;background:#000;color:#44ff44;margin:25px 0">
+            <br>
+            <button onclick="checkGuess()" style="padding:20px 40px;font-size:22px;background:linear-gradient(45deg, #44ff44, #00ff88);color:black;border:none;border-radius:15px;cursor:pointer;font-weight:bold;box-shadow:0 8px 25px rgba(68,255,68,0.5)">✅ УГАДАТЬ</button>
             <br><br>
-            <button onclick="checkGuess()" style="padding:15px 30px;font-size:20px;background:#44ff44;color:black;border:none;border-radius:10px;cursor:pointer;font-weight:bold">✅ УГАДАТЬ</button>
-            <br><br>
-            <p id="guess-feedback" style="font-size:18px;color:#ffaa00;font-weight:bold"></p>
-            <button onclick="backToMenu()" style="margin-top:20px;padding:10px 20px;background:#ff4444;color:white;border:none;border-radius:10px;cursor:pointer">🔙 МЕНЮ</button>
+            <p id="guess-feedback" style="font-size:22px;color:#ffaa00;font-weight:bold;margin:20px 0"></p>
+            <button onclick="backToMenu()" style="padding:15px 30px;background:#ff4444;color:white;border:none;border-radius:15px;cursor:pointer;font-size:18px;font-weight:bold">🔙 В МЕНЮ</button>
         </div>
     `;
     document.getElementById('guess-input').focus();
@@ -179,11 +172,9 @@ function checkGuess() {
     feedback.textContent = message;
 }
 
-// 🐍 ЗМЕЙКА
 function loadSnake() {
     const canvas = document.getElementById('gameCanvas');
     canvas.style.display = 'block';
-    
     const ctx = canvas.getContext('2d');
     const grid = 20;
     let snake = [{x: 10, y: 10}];
@@ -194,48 +185,34 @@ function loadSnake() {
     function draw() {
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Змейка
         ctx.fillStyle = '#44ff44';
-        snake.forEach(part => {
-            ctx.fillRect(part.x * grid, part.y * grid, grid - 2, grid - 2);
-        });
-        
-        // Еда
+        snake.forEach(part => ctx.fillRect(part.x * grid, part.y * grid, grid - 2, grid - 2));
         ctx.fillStyle = '#ff4444';
         ctx.fillRect(food.x * grid, food.y * grid, grid - 2, grid - 2);
+        ctx.fillStyle = '#44ff44';
+        ctx.font = '24px Arial';
+        ctx.fillText(`Очки: ${score}`, 20, 30);
     }
     
     function update() {
         const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-        
-        // Стены
         if (head.x < 0 || head.x >= 25 || head.y < 0 || head.y >= 20) {
             gameOver(score);
             return;
         }
-        
-        // Самопоедание
         for (let part of snake) {
             if (head.x === part.x && head.y === part.y) {
                 gameOver(score);
                 return;
             }
         }
-        
         snake.unshift(head);
-        
-        // Еда
         if (head.x === food.x && head.y === food.y) {
             score++;
-            food = {
-                x: Math.floor(Math.random() * 25),
-                y: Math.floor(Math.random() * 20)
-            };
+            food = {x: Math.floor(Math.random() * 25), y: Math.floor(Math.random() * 20)};
         } else {
             snake.pop();
         }
-        
         draw();
     }
     
@@ -244,7 +221,7 @@ function loadSnake() {
             gameData.highscore = finalScore;
             saveScore();
         }
-        alert(`Игра окончена! Очки: ${finalScore}`);
+        alert(`🐍 Игра окончена! Очки: ${finalScore}`);
         backToMenu();
     }
     
@@ -261,7 +238,6 @@ function loadSnake() {
 
 async function saveScore() {
     if (!isLoggedIn) return;
-    
     try {
         await fetch('/save-score', {
             method: 'POST',
@@ -273,5 +249,5 @@ async function saveScore() {
     } catch (e) {}
 }
 
-// Инициализация
+// ✅ СТАРТ
 checkUserStatus();
