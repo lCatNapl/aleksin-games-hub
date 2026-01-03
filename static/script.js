@@ -1,270 +1,71 @@
 let currentGame = '';
 let isLoggedIn = false;
+let gameData = {
+    score: 0,
+    highscore: 0
+};
 
 async function checkUserStatus() {
     try {
         const res = await fetch('/status', {credentials: 'include'});
         const data = await res.json();
+        
         if (data.logged_in) {
             document.getElementById('status').textContent = `👋 ${data.username}`;
+            document.querySelector('.auth-buttons').style.display = 'none';
             document.getElementById('logout').style.display = 'inline-block';
             isLoggedIn = true;
+            loadLeaderboard();
         }
-    } catch(e) {}
+    } catch (e) {
+        console.log('Гость');
+    }
 }
 
 async function authUser() {
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
-    const modalTitle = document.getElementById('modal-title');
-    const mode = modalTitle.dataset.mode || (modalTitle.textContent.includes('РЕГИСТРАЦИЯ') ? 'register' : 'login');
-    const endpoint = mode === 'register' ? '/register' : '/login';
+    const mode = document.getElementById('modal-title').dataset.mode;
+    const errorDiv = document.getElementById('error');
     
-    document.getElementById('error').textContent = '';
+    if (username.length < 3) {
+        errorDiv.textContent = '❌ Имя слишком короткое (минимум 3 символа)';
+        return;
+    }
+    if (password.length < 6) {
+        errorDiv.textContent = '❌ Пароль слишком короткий (минимум 6 символов)';
+        return;
+    }
+    
     try {
-        const res = await fetch(endpoint, {
-            method: 'POST', credentials: 'include',
+        const res = await fetch('/auth', {
+            method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({username, password})
+            credentials: 'include',
+            body: JSON.stringify({username, password, mode})
         });
-        const data = await res.json();
         
+        const data = await res.json();
         if (data.success) {
-            document.getElementById('status').textContent = `👋 ${data.username}`;
-            document.getElementById('logout').style.display = 'inline-block';
             closeAuth();
-            isLoggedIn = true;
+            checkUserStatus();
+            loadLeaderboard();
         } else {
-            document.getElementById('error').textContent = data.error || 'Ошибка';
+            errorDiv.textContent = data.message || '❌ Ошибка авторизации';
         }
-    } catch(e) {
-        document.getElementById('error').textContent = 'Сервер недоступен';
+    } catch (e) {
+        errorDiv.textContent = '❌ Ошибка сети';
     }
 }
 
 async function logout() {
-    await fetch('/logout', {method: 'POST', credentials: 'include'});
-    document.getElementById('status').textContent = '👋 Гость';
-    document.getElementById('logout').style.display = 'none';
+    await fetch('/logout', {credentials: 'include'});
     isLoggedIn = false;
-}
-
-async function loadGame(game) {
-    currentGame = game;
-    document.getElementById('game-container').style.display = 'block';
+    document.getElementById('status').textContent = '👋 Гость';
+    document.querySelector('.auth-buttons').style.display = 'flex';
+    document.getElementById('logout').style.display = 'none';
+    document.getElementById('leaders-list').innerHTML = '';
     document.getElementById('leaderboard').style.display = 'none';
-    if (game === 'guess') loadGuessGame();
-    else if (game === 'snake') loadSnakeGame();
-}
-
-async function loadLeaderboard(game) {
-    try {
-        const res = await fetch(`/top/${game}`);
-        const leaders = await res.json();
-        const list = document.getElementById('leaders-list');
-        if (list) {
-            list.innerHTML = leaders.length ? 
-                leaders.map((p,i) => `<div class="leader-item"><span>${i+1}. ${p.username}</span><span>${p.score}</span></div>`).join('') : 
-                '<div style="text-align:center;color:#aaa;">Пока нет рекордов</div>';
-        }
-    } catch(e) {}
-}
-
-async function saveScore(game, score) {
-    if (!isLoggedIn) {
-        alert('🔐 Войди для рекордов!');
-        return;
-    }
-    try {
-        await fetch('/save_score', {
-            method: 'POST', credentials: 'include',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({game, score})
-        });
-        loadLeaderboard(game);
-    } catch(e) {}
-}
-
-// 📊 СТАТИСТИКА
-async function loadStats() {
-    try {
-        const res = await fetch('/stats');
-        const data = await res.json();
-        document.getElementById('game-container').innerHTML = `
-            <div style="padding:30px;text-align:center;max-width:600px;margin:0 auto">
-                <h2 style="color:#44ff88;font-size:36px;margin-bottom:30px">📊 Твоя статистика</h2>
-                ${!data.user || Object.keys(data.user).length === 0 ? 
-                    '<div style="color:#aaa;font-size:24px;padding:40px">Играй и получай статистику! 🎮</div>' : 
-                    Object.entries(data.user).map(([game, stats]) => {
-                        const gameName = game === 'guess' ? '🎯 Угадайка' : '🐍 Змейка';
-                        return `
-                            <div style="background:rgba(0,0,0,0.5);margin:20px auto;padding:25px;border-radius:20px;max-width:450px">
-                                <h3 style="color:#44ff88;margin:0 0 15px 0;font-size:24px">${gameName}</h3>
-                                <div style="font-size:20px;margin:8px 0">🎲 Игр: ${stats.played}</div>
-                                <div style="font-size:20px;margin:8px 0">📈 Средний: ${stats.avg} очков</div>
-                                <div style="color:#ffaa00;font-size:22px;font-weight:bold;margin:15px 0">🏆 Рекорд: ${stats.best}</div>
-                            </div>
-                        `;
-                    }).join('') + `<div style="margin-top:30px;color:#aaa;font-size:20px">
-                        Всего игроков в хабе: ${data.global.players}
-                    </div>`
-                }
-                <button onclick="showGames()" style="font-size:20px;padding:15px 40px;background:#44ff44;color:black;border:none;border-radius:15px;font-weight:bold;margin-top:30px">🏠 К ИГРАМ</button>
-            </div>
-        `;
-        document.getElementById('game-container').style.display = 'block';
-    } catch(e) {
-        document.getElementById('game-container').innerHTML = '<div style="color:#ff4444">Ошибка загрузки статистики</div>';
-    }
-}
-
-// ⚙️ НАСТРОЙКИ
-function loadSettings() {
-    document.getElementById('game-container').innerHTML = `
-        <div style="padding:30px;text-align:center;max-width:500px;margin:0 auto">
-            <h2 style="color:#667eea;font-size:36px;margin-bottom:30px">⚙️ НАСТРОЙКИ</h2>
-            <div style="background:rgba(0,0,0,0.5);padding:25px;border-radius:20px;margin:20px 0">
-                <h3 style="color:#667eea;margin:0 0 20px 0">🎮 Игры</h3>
-                <label style="display:block;margin:15px 0;font-size:18px">
-                    <input type="checkbox" id="hardMode" checked> Сложный режим
-                </label>
-                <label style="display:block;margin:15px 0;font-size:18px">
-                    Скорость: <input type="range" id="speedSlider" min="50" max="300" value="150">
-                    <span id="speedValue">150</span>мс
-                </label>
-            </div>
-            <div style="background:rgba(0,0,0,0.5);padding:25px;border-radius:20px;margin:20px 0">
-                <h3 style="color:#667eea;margin:0 0 20px 0">🎨 Оформление</h3>
-                <select id="themeSelect" style="font-size:18px;padding:10px;border-radius:10px">
-                    <option value="dark">🌙 Темная</option>
-                    <option value="light">☀️ Светлая</option>
-                    <option value="neon">✨ Неон</option>
-                </select>
-            </div>
-            <button onclick="saveSettings()" style="font-size:20px;padding:15px 40px;background:#44ff44;color:black;border:none;border-radius:15px;font-weight:bold">💾 СОХРАНИТЬ</button>
-            <button onclick="showGames()" style="font-size:20px;padding:15px 40px;background:#ff6b6b;color:white;border:none;border-radius:15px;font-weight:bold;margin-left:15px">🏠 К ИГРАМ</button>
-        </div>
-    `;
-    document.getElementById('speedSlider').addEventListener('input', function() {
-        document.getElementById('speedValue').textContent = this.value;
-    });
-    document.getElementById('game-container').style.display = 'block';
-}
-
-function showGames() {
-    document.getElementById('game-container').style.display = 'none';
-    document.getElementById('leaderboard').style.display = 'none';
-}
-
-// 🎯 УГАДАЙ ЧИСЛО
-function loadGuessGame() {
-    const canvas = document.getElementById('gameCanvas');
-    canvas.style.display = 'none';
-    
-    document.getElementById('game-container').innerHTML = `
-        <div style="padding:30px;text-align:center;font-family:Arial;background:rgba(0,0,0,0.3);border-radius:20px;max-width:500px;margin:0 auto">
-            <h2 style="font-size:36px;margin-bottom:20px">🎯 УГАДАЙ ЧИСЛО (1-100)</h2>
-            <div id="currentGuess" style="font-size:48px;font-weight:bold;color:#44ff88;margin:30px 0;min-height:60px">?</div>
-            <div id="attemptsDisplay" style="font-size:28px;color:#ffaa00;margin:20px 0">Попыток: <span id="attempts">7</span></div>
-            <div id="hint" style="font-size:36px;font-weight:bold;margin:40px 0;min-height:70px;line-height:70px"></div>
-            
-            <div style="margin:30px 0">
-                <input id="guessInput" type="number" min="1" max="100" 
-                       style="font-size:28px;padding:25px 20px;width:300px;border-radius:20px;border:3px solid #44ff44;background:rgba(255,255,255,0.95);text-align:center;font-weight:bold"
-                       placeholder="Введите число">
-            </div>
-            
-            <div style="margin:40px 0">
-                <button onclick="checkGuess()" style="font-size:24px;padding:20px 50px;margin:10px;border:none;border-radius:20px;background:#44ff44;color:black;font-weight:bold;min-width:200px;cursor:pointer">✅ ПРОВЕРИТЬ</button>
-                <button onclick="clearGuess()" style="font-size:24px;padding:20px 50px;margin:10px;border:none;border-radius:20px;background:#ff6b6b;color:white;font-weight:bold;min-width:200px;cursor:pointer">🗑️ ОЧИСТИТЬ</button>
-            </div>
-            
-            <div id="gameOver" style="font-size:24px;color:#ff4444;margin-top:30px;display:none">F5 — новая игра</div>
-        </div>
-        <div id="leaderboard" class="leaderboard" style="display:block;margin-top:20px">
-            <h3 style="color:white;text-align:center;font-size:24px;margin-bottom:15px">🏆 ТОП-10 УГАДАЙКИ</h3>
-            <div id="leaders-list" style="max-height:300px;overflow-y:auto;background:rgba(0,0,0,0.5);padding:15px;border-radius:10px"></div>
-        </div>
-    `;
-    
-    window.guessSecret = Math.floor(Math.random() * 100) + 1;
-    window.guessAttempts = 7;
-    
-    document.getElementById('guessInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') checkGuess();
-    });
-    document.getElementById('guessInput').focus();
-    loadLeaderboard('guess');
-}
-
-window.checkGuess = function() {
-    const input = document.getElementById('guessInput');
-    const num = parseInt(input.value);
-    
-    if (isNaN(num) || num < 1 || num > 100) {
-        showGuessHint('❌ Число от 1 до 100!', '#ff4444');
-        input.style.borderColor = '#ff4444';
-        return;
-    }
-    
-    window.guessAttempts--;
-    document.getElementById('attempts').textContent = window.guessAttempts;
-    
-    if (num === window.guessSecret) {
-        const score = Math.max(100, 1000 - (7 - window.guessAttempts) * 100);
-        if (isLoggedIn) {
-            saveScore('guess', score);
-        }
-        showGuessHint(`✅ ПОБЕДА! ${score} очков! 🎉`, '#44ff88');
-        input.disabled = true;
-        input.style.borderColor = '#44ff88';
-        document.getElementById('currentGuess').textContent = num;
-    } else if (window.guessAttempts === 0) {
-        showGuessHint(`💀 Было: ${window.guessSecret}`, '#ff4444');
-        document.getElementById('gameOver').style.display = 'block';
-        input.disabled = true;
-        input.style.borderColor = '#ff4444';
-    } else if (num < window.guessSecret) {
-        showGuessHint('⬆️ БОЛЬШЕ', '#ffaa00');
-    } else {
-        showGuessHint('⬇️ МЕНЬШЕ', '#ffaa00');
-    }
-    input.value = '';
-    input.style.borderColor = '#44ff44';
-};
-window.clearGuess = function() {
-    const input = document.getElementById('guessInput');
-    input.value = '';
-    document.getElementById('hint').innerHTML = '';
-    input.style.borderColor = '#44ff44';
-};
-
-window.showGuessHint = function(message, color) {
-    document.getElementById('hint').innerHTML = `<span style="color:${color}">${message}</span>`;
-};
-
-// 🐍 ЗМЕЙКА (полная функция - без изменений)
-function loadSnakeGame() {
-    const canvas = document.getElementById('gameCanvas');
-    canvas.width = 500;
-    canvas.height = 400;
-    canvas.style.display = 'block';
-    const ctx = canvas.getContext('2d');
-    
-    let snake = [{x: 10, y: 10}];
-    let dx = 1, dy = 0;
-    let food = {x: 15, y: 15};
-    let score = 0;
-    let gameRunning = true;
-    
-    const GRID_WIDTH = 25;
-    const GRID_HEIGHT = 20;
-    const CELL_SIZE = 20;
-    
-    // ... змейка логика (как раньше) ...
-    
-    gameLoop();
-    loadLeaderboard('snake');
 }
 
 function showAuth(mode) {
@@ -272,6 +73,13 @@ function showAuth(mode) {
     const modalTitle = document.getElementById('modal-title');
     modalTitle.textContent = mode === 'register' ? '📝 РЕГИСТРАЦИЯ' : '🔑 ВХОД';
     modalTitle.dataset.mode = mode;
+    
+    // ✅ ПОКАЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ ТОЛЬКО ПРИ РЕГИСТРАЦИИ
+    const warning = document.getElementById('warning-text');
+    if (warning) {
+        warning.style.display = mode === 'register' ? 'block' : 'none';
+    }
+    
     document.getElementById('username').value = '';
     document.getElementById('password').value = '';
     document.getElementById('error').textContent = '';
@@ -282,12 +90,188 @@ function closeAuth() {
     document.getElementById('auth-modal').style.display = 'none';
 }
 
-document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeAuth();
-    if (document.getElementById('auth-modal').style.display === 'flex' && e.key === 'Enter') {
-        authUser();
+async function loadLeaderboard() {
+    try {
+        const res = await fetch('/leaderboard', {credentials: 'include'});
+        const data = await res.json();
+        const list = document.getElementById('leaders-list');
+        list.innerHTML = '';
+        
+        data.slice(0, 10).forEach((player, i) => {
+            const div = document.createElement('div');
+            div.className = 'leader-item';
+            div.innerHTML = `
+                <span>${i+1}. ${player.username}</span>
+                <span>${player.highscore}</span>
+            `;
+            list.appendChild(div);
+        });
+        
+        document.getElementById('leaderboard').style.display = 'block';
+    } catch (e) {
+        console.log('Нет лидерборда');
     }
-});
+}
 
-// ✅ ПОСЛЕДНЯЯ СТРОКА
+function loadGame(game) {
+    currentGame = game;
+    document.querySelector('.games-grid').style.display = 'none';
+    document.getElementById('game-container').style.display = 'block';
+    document.getElementById('leaderboard').style.display = 'none';
+    
+    if (game === 'guess') {
+        loadGuessNumber();
+    } else if (game === 'snake') {
+        loadSnake();
+    }
+}
+
+function backToMenu() {
+    document.querySelector('.games-grid').style.display = 'grid';
+    document.getElementById('game-container').style.display = 'none';
+    document.getElementById('gameCanvas').style.display = 'none';
+    currentGame = '';
+}
+
+// 🎯 УГАДАЙ ЧИСЛО
+function loadGuessNumber() {
+    document.getElementById('gameCanvas').style.display = 'none';
+    const container = document.getElementById('game-container');
+    container.innerHTML = `
+        <div style="text-align:center;padding:30px;background:rgba(0,50,0,0.9);border-radius:20px">
+            <h2 style="color:#44ff44">🎯 УГАДАЙ ЧИСЛО (1-100)</h2>
+            <p style="color:#ccc">Твоя лучшая попытка: <strong id="best-guess">${gameData.highscore || 0}</strong></p>
+            <input type="number" id="guess-input" min="1" max="100" style="padding:15px;font-size:20px;width:200px;border-radius:10px;border:2px solid #44ff44;background:#000;color:#44ff44">
+            <br><br>
+            <button onclick="checkGuess()" style="padding:15px 30px;font-size:20px;background:#44ff44;color:black;border:none;border-radius:10px;cursor:pointer;font-weight:bold">✅ УГАДАТЬ</button>
+            <br><br>
+            <p id="guess-feedback" style="font-size:18px;color:#ffaa00;font-weight:bold"></p>
+            <button onclick="backToMenu()" style="margin-top:20px;padding:10px 20px;background:#ff4444;color:white;border:none;border-radius:10px;cursor:pointer">🔙 МЕНЮ</button>
+        </div>
+    `;
+    document.getElementById('guess-input').focus();
+}
+
+function checkGuess() {
+    const guess = parseInt(document.getElementById('guess-input').value);
+    const feedback = document.getElementById('guess-feedback');
+    
+    if (isNaN(guess) || guess < 1 || guess > 100) {
+        feedback.textContent = '❌ Число от 1 до 100!';
+        return;
+    }
+    
+    const target = Math.floor(Math.random() * 100) + 1;
+    let message = '';
+    
+    if (guess === target) {
+        message = `🎉 УГАДАЛ! Было ${target}`;
+        if (guess < gameData.highscore || gameData.highscore === 0) {
+            gameData.highscore = guess;
+            saveScore();
+        }
+    } else if (guess < target) {
+        message = `📈 Загаданное число БОЛЬШЕ`;
+    } else {
+        message = `📉 Загаданное число МЕНЬШЕ`;
+    }
+    
+    feedback.textContent = message;
+}
+
+// 🐍 ЗМЕЙКА
+function loadSnake() {
+    const canvas = document.getElementById('gameCanvas');
+    canvas.style.display = 'block';
+    
+    const ctx = canvas.getContext('2d');
+    const grid = 20;
+    let snake = [{x: 10, y: 10}];
+    let food = {x: 15, y: 15};
+    let dx = 0, dy = 0;
+    let score = 0;
+    
+    function draw() {
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Змейка
+        ctx.fillStyle = '#44ff44';
+        snake.forEach(part => {
+            ctx.fillRect(part.x * grid, part.y * grid, grid - 2, grid - 2);
+        });
+        
+        // Еда
+        ctx.fillStyle = '#ff4444';
+        ctx.fillRect(food.x * grid, food.y * grid, grid - 2, grid - 2);
+    }
+    
+    function update() {
+        const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+        
+        // Стены
+        if (head.x < 0 || head.x >= 25 || head.y < 0 || head.y >= 20) {
+            gameOver(score);
+            return;
+        }
+        
+        // Самопоедание
+        for (let part of snake) {
+            if (head.x === part.x && head.y === part.y) {
+                gameOver(score);
+                return;
+            }
+        }
+        
+        snake.unshift(head);
+        
+        // Еда
+        if (head.x === food.x && head.y === food.y) {
+            score++;
+            food = {
+                x: Math.floor(Math.random() * 25),
+                y: Math.floor(Math.random() * 20)
+            };
+        } else {
+            snake.pop();
+        }
+        
+        draw();
+    }
+    
+    function gameOver(finalScore) {
+        if (finalScore > gameData.highscore) {
+            gameData.highscore = finalScore;
+            saveScore();
+        }
+        alert(`Игра окончена! Очки: ${finalScore}`);
+        backToMenu();
+    }
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowUp' && dy !== 1) { dx = 0; dy = -1; }
+        if (e.key === 'ArrowDown' && dy !== -1) { dx = 0; dy = 1; }
+        if (e.key === 'ArrowLeft' && dx !== 1) { dx = -1; dy = 0; }
+        if (e.key === 'ArrowRight' && dx !== -1) { dx = 1; dy = 0; }
+    });
+    
+    draw();
+    setInterval(update, 150);
+}
+
+async function saveScore() {
+    if (!isLoggedIn) return;
+    
+    try {
+        await fetch('/save-score', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
+            body: JSON.stringify({highscore: gameData.highscore})
+        });
+        loadLeaderboard();
+    } catch (e) {}
+}
+
+// Инициализация
 checkUserStatus();
