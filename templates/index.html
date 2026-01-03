@@ -18,6 +18,8 @@
         .games-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:25px;margin:40px 0}
         .game-btn{width:100%;padding:30px;font-size:20px;background:linear-gradient(145deg,#44ff44,#00ff88);color:black;border:none;border-radius:20px;cursor:pointer;font-weight:bold;box-shadow:0 10px 30px rgba(68,255,68,0.3);transition:all 0.3s}
         .game-btn:hover{transform:translateY(-5px);box-shadow:0 15px 40px rgba(68,255,68,0.5)}
+        .tournament-btn{background:linear-gradient(145deg,#ffaa00,#ff6600) !important;box-shadow:0 10px 30px rgba(255,170,0,0.5) !important}
+        .tournament-btn:hover{background:linear-gradient(145deg,#ffdd44,#ff8800) !important;box-shadow:0 15px 40px rgba(255,170,0,0.7) !important}
         .leaderboard{background:#1a1a1a;border-radius:20px;padding:30px;margin:30px 0;border:3px solid #44ff44;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
         .leaderboard h3{color:#44ff44;text-align:center;font-size:1.8em;margin-bottom:20px}
         .leader-item{display:flex;justify-content:space-between;padding:15px;margin:10px 0;background:#2a2a2a;border-radius:10px}
@@ -56,6 +58,7 @@
         <div class="games-grid" id="games-grid" style="display:none">
             <button class="game-btn" onclick="loadSnakeGame()">🐍 Змейка</button>
             <button class="game-btn" onclick="loadGuessGame()">🎯 Угадай число</button>
+            <button class="game-btn tournament-btn" onclick="loadTournament()">🏆 ТУРНИР</button>
         </div>
 
         <div class="leaderboard" id="leaderboard-container" style="display:none">
@@ -69,7 +72,8 @@
         <div class="modal-content">
             <h3 id="modal-title">Авторизация</h3>
             <div id="warning-text" class="warning-text">
-                ⚠️ Если система вас не видит - значит провелись работы, котрое перезагружают сайт и удаляют логины (имена) и рекорды (у зарегестрированных)
+                ⚠️ Привет! Сайт бесплатный, но иногда засыпает (15 мин без активности). 
+                Рекорды сохраняются навсегда! Первый заход разбудит сервер за 1 минуту 😊
             </div>
             <div class="form-group">
                 <label>Логин:</label>
@@ -81,7 +85,6 @@
             </div>
             <div id="error"></div>
             <div class="modal-buttons">
-                <!-- ✅ ФИКС: onclick="authUser()" -->
                 <button class="modal-btn btn-primary" id="submit-btn" onclick="authUser()">Войти</button>
                 <button class="modal-btn btn-secondary" onclick="closeAuth()">Отмена</button>
             </div>
@@ -91,4 +94,3 @@
     <script src="/static/script.js"></script>
 </body>
 </html>
-
