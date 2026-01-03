@@ -22,8 +22,6 @@
         <div class="games-grid">
             <button class="game-btn" onclick="loadGame('guess')">🎯 Угадай число</button>
             <button class="game-btn" onclick="loadGame('snake')">🐍 Змейка</button>
-            <button class="game-btn" onclick="loadStats()" style="background:linear-gradient(45deg,#ffaa00,#ff6b6b)">📊 Статистика</button>
-            <button class="game-btn" onclick="loadSettings()" style="background:linear-gradient(45deg,#667eea,#764ba2)">⚙️ Настройки</button>
         </div>
 
         <div id="game-container" style="display:none">
@@ -36,15 +34,23 @@
         </div>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО АВТОРИЗАЦИИ -->
+    <!-- ✅ МОДАЛЬНОЕ ОКНО С ПРЕДУПРЕЖДЕНИЕМ -->
     <div id="auth-modal" class="modal" style="display:none">
         <div class="modal-content">
             <span class="close" onclick="closeAuth()">&times;</span>
             <h2 id="modal-title">🔑 ВХОД</h2>
-            <input type="text" id="username" placeholder="Имя пользователя">
-            <input type="password" id="password" placeholder="Пароль">
-            <div id="error" style="color:#ff4444;margin:10px 0"></div>
-            <button onclick="authUser()">✅ ГОТОВО</button>
+            
+            <!-- ⚠️ ПРЕДУПРЕЖДЕНИЕ ПРИ РЕГИСТРАЦИИ -->
+            <div id="warning-text" style="display:none;background:rgba(255,165,0,0.2);border:2px solid #ffaa00;border-radius:15px;padding:20px;margin:15px 0;color:#ff8800;font-size:16px;text-align:left;max-width:400px;box-shadow:0 4px 15px rgba(255,170,0,0.3)">
+                <strong>⚠️ ВАЖНОЕ СООБЩЕНИЕ:</strong><br>
+                Если при входе в аккаунт вас <strong>не замечают</strong> — значит провелись работы, которые полностью перезагружают сайт, в том числе рекорды и логины.<br>
+                <strong>Благодарим за чтение! 🙏</strong>
+            </div>
+            
+            <input type="text" id="username" placeholder="Имя пользователя (минимум 3 символа)">
+            <input type="password" id="password" placeholder="Пароль (минимум 6 символов)">
+            <div id="error" style="color:#ff4444;margin:10px 0;font-weight:bold"></div>
+            <button onclick="authUser()" style="width:100%;padding:15px;font-size:18px;background:#44ff44;color:black;border:none;border-radius:10px;font-weight:bold;cursor:pointer">✅ ГОТОВО</button>
         </div>
     </div>
 
