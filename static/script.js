@@ -7,6 +7,7 @@ let food = {x:15,y:15};
 let secretNumber = 0;
 let attempts = 0;
 let maxAttempts = 20;
+let currentTournament = null;
 
 async function checkUserStatus() {
     try {
@@ -97,7 +98,6 @@ async function logout() {
     location.reload();
 }
 
-// ✅ ФИКС ТОП-10 + ЛОГИ
 async function loadLeaderboard() {
     try {
         const [snakeRes, guessRes] = await Promise.all([
@@ -132,15 +132,15 @@ function backToMenu() {
     location.reload();
 }
 
-// 🐍 ЗМЕЙКА - ✅ ФИКС СОХРАНЕНИЯ КАЖДЫЙ RAZ
+// 🐍 ЗМЕЙКА С ФИКСОМ СВАЙПОВ
 function loadSnakeGame() {
     currentGame = 'snake';
     document.querySelector('.container').innerHTML = `
         <h1>🐍 Змейка</h1>
         <div id="game-info">Счёт: <span id="score">0</span> | Рекорд: <span id="highscore">0</span></div>
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <canvas id="gameCanvas" width="400" height="400" style="border:2px solid #44ff44;border-radius:10px;background:#111;touch-action:none;"></canvas>
         <div style="text-align:center;margin:20px">
-            <p>📱 Телефон: свайпы | 💻 Компьютер: стрелки</p>
+            <p>📱 Свайпы | 💻 Стрелки</p>
             <button class="auth-btn" onclick="backToMenu()" style="width:200px">🏠 В меню</button>
         </div>
     `;
@@ -154,6 +154,7 @@ function loadSnakeGame() {
 
     canvas.addEventListener('click', restartSnake);
     
+    // Клавиатура
     document.addEventListener('keydown', (e) => {
         if (currentGame !== 'snake') return;
         if (e.key === 'ArrowLeft' && snake.dx === 0) { snake.dx = -1; snake.dy = 0; }
@@ -162,25 +163,32 @@ function loadSnakeGame() {
         if (e.key === 'ArrowDown' && snake.dy === 0) { snake.dx = 0; snake.dy = 1; }
     });
 
+    // ✅ ФИКС СВАЙПОВ - БЕЗ ПРОКРУТКИ
     let touchStartX = 0, touchStartY = 0;
+    
     canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
-    });
+    }, { passive: false });
+    
     canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
         const touchEndX = e.changedTouches[0].clientX;
         const touchEndY = e.changedTouches[0].clientY;
         const diffX = touchStartX - touchEndX;
         const diffY = touchStartY - touchEndY;
         
-        if (Math.abs(diffX) > Math.abs(diffY)) {
-            if (diffX > 0 && snake.dx === 0) { snake.dx = -1; snake.dy = 0; }
-            else if (diffX < 0 && snake.dx === 0) { snake.dx = 1; snake.dy = 0; }
-        } else {
-            if (diffY > 0 && snake.dy === 0) { snake.dx = 0; snake.dy = -1; }
-            else if (diffY < 0 && snake.dy === 0) { snake.dx = 0; snake.dy = 1; }
+        if (Math.abs(diffX) > 30 || Math.abs(diffY) > 30) {
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                if (diffX > 0 && snake.dx === 0) { snake.dx = -1; snake.dy = 0; }
+                else if (diffX < 0 && snake.dx === 0) { snake.dx = 1; snake.dy = 0; }
+            } else {
+                if (diffY > 0 && snake.dy === 0) { snake.dx = 0; snake.dy = -1; }
+                else if (diffY < 0 && snake.dy === 0) { snake.dx = 0; snake.dy = 1; }
+            }
         }
-    });
+    }, { passive: false });
 
     function updateSnake() {
         snake.x += snake.dx;
@@ -219,11 +227,8 @@ function loadSnakeGame() {
         ctx.fillRect(snake.x*10, snake.y*10, 10, 10);
     }
 
-    // ✅ ФИКС: СОХРАНЯЕМ КАЖДЫЙ gameOver!
     function gameOver() {
         clearInterval(gameInterval);
-        
-        // ✅ СОХРАНЯЕМ ДАЖЕ БЕЗ НОВОГО РЕКОРДА
         if (isLoggedIn) saveScore('snake');
         
         if (gameData.score > gameData.highscore) {
@@ -259,7 +264,7 @@ function loadGuessGame() {
     attempts = 0;
     
     document.querySelector('.container').innerHTML = `
-                <h1>🎯 Угадай число (1-1000)</h1>
+        <h1>🎯 Угадай число (1-1000)</h1>
         <div id="game-info">
             <span style="color:#44ff44">Ходов: <span id="attempts">0</span></span> 
             <span style="color:#ffaa00">Рекорд: <span id="highscore">0</span></span>
@@ -267,7 +272,7 @@ function loadGuessGame() {
         <div style="text-align:center;margin:20px 0">
             <input type="number" id="guessInput" min="1" max="1000" placeholder="1-1000" style="padding:15px;font-size:18px;width:200px;border-radius:10px;border:2px solid #444">
             <br><br>
-            <canvas id="guessCanvas" width="400" height=50" style="border:2px solid #44ff44;border-radius:10px;cursor:pointer;margin:20px 0;background:#222"></canvas>
+            <canvas id="guessCanvas" width="400" height="50" style="border:2px solid #44ff44;border-radius:10px;cursor:pointer;margin:20px 0;background:#222"></canvas>
             <div id="hint" style="text-align:center;color:#ffaa00;font-size:18px;margin:10px;font-weight:bold"></div>
         </div>
         <button class="auth-btn" onclick="backToMenu()" style="width:200px">🏠 В меню</button>
@@ -288,19 +293,15 @@ function updateGuessCanvas() {
     const ctx = canvas.getContext('2d');
     const progress = Math.min(attempts / maxAttempts, 1);
     
-    // Фон
     ctx.fillStyle = '#222';
     ctx.fillRect(0, 0, 400, 50);
     
-    // Зелёная часть (успех)
     ctx.fillStyle = '#44ff44';
     ctx.fillRect(0, 0, 400 * (1-progress), 50);
     
-    // Красная часть (провал)
     ctx.fillStyle = '#ff4444';
     ctx.fillRect(400 * (1-progress), 0, 400 * progress, 50);
     
-    // Текст
     ctx.fillStyle = 'white';
     ctx.font = '20px Arial';
     ctx.textAlign = 'center';
@@ -339,7 +340,6 @@ async function checkGuess() {
     document.getElementById('hint').innerHTML = hint;
 }
 
-// ✅ ГЛАВНАЯ ФУНКЦИЯ СОХРАНЕНИЯ - ФИКС ТУРНИРОВ!
 async function saveScore(gameType) {
     if (!isLoggedIn) return;
     
@@ -360,15 +360,12 @@ async function saveScore(gameType) {
             gameData.highscore = data.highscore;
             document.getElementById('highscore')?.textContent = gameData.highscore;
         }
-        loadLeaderboard(); // 🔄 Обновляем топ
-        loadTournament();  // 🔄 Обновляем турнир
+        loadLeaderboard();
+        loadTournament();
     } catch (e) {
         console.error('Save failed:', e);
     }
 }
-
-// 🏆 ТУРНИРЫ С ПРИЗАМИ - НОВЫЙ КОД
-let currentTournament = null;
 
 async function loadTournament() {
     try {
@@ -381,36 +378,35 @@ async function loadTournament() {
             const hours = Math.floor(timeLeft / 3600000);
             const minutes = Math.floor((timeLeft % 3600000) / 60000);
             
-            document.getElementById('tournament-container') || createTournamentUI();
+            // Создаём UI если нет
+            if (!document.getElementById('tournament-container')) {
+                document.body.insertAdjacentHTML('beforeend', `
+                    <div id="tournament-container" style="position:fixed;top:10px;right:10px;background:#1a1a1a;padding:15px;border-radius:15px;border:2px solid #ffaa00;max-width:300px;z-index:1000">
+                        <div id="tournament-title" style="font-size:20px;color:#ffaa00;margin-bottom:10px"></div>
+                        <div id="tournament-leaderboard" style="max-height:150px;overflow-y:auto;font-size:14px"></div>
+                        <div style="color:#666;font-size:12px;margin-top:10px">
+                            🥇1-е: +1000 | 🥈2-е: +500 | 🥉3-е: +250
+                        </div>
+                    </div>
+                `);
+            }
+            
             document.getElementById('tournament-title').textContent = `🏆 Турнир (${hours}ч ${minutes}м)`;
             document.getElementById('tournament-leaderboard').innerHTML = 
                 data.leaderboard.slice(0, 3).map((p, i) => 
                     `<div class="leader-item"><span>#${i+1} ${p.username}</span><span>${p.score}</span></div>`
                 ).join('') + 
-                (data.my_position ? `<div class="leader-item"><span>👤 Ты: #${data.my_position} ${data.my_score}</span></div>` : '');
+                (data.my_position ? `<div style="color:#44ff44"><span>👤 Ты: #${data.my_position} ${data.my_score}</span></div>` : '');
         }
     } catch (e) {
         console.error('Tournament load failed:', e);
     }
 }
 
-function createTournamentUI() {
-    document.querySelector('.container') || document.body.insertAdjacentHTML('beforeend', `
-        <div id="tournament-container" style="background:#1a1a1a;padding:20px;border-radius:15px;margin:20px 0;border:2px solid #ffaa00">
-            <div id="tournament-title" style="font-size:24px;color:#ffaa00;margin-bottom:15px"></div>
-            <div id="tournament-leaderboard" style="max-height:200px;overflow-y:auto"></div>
-            <div style="color:#666;font-size:14px;margin-top:10px">
-                🥇1-е: +1000 очков | 🥈2-е: +500 | 🥉3-е: +250
-            </div>
-        </div>
-    `);
-}
-
-// 🎮 ГЛАВНОЕ МЕНЮ - ДОБАВИТЬ КНОПКИ
+// ✅ ИНИЦИАЛИЗАЦИЯ
 document.addEventListener('DOMContentLoaded', () => {
     checkUserStatus();
     
-    // ✅ ФИКС КНОПОК - ДВОЙНАЯ ПРИВЯЗКА
     const submitBtn = document.getElementById('submit-btn');
     if (submitBtn) {
         submitBtn.onclick = authUser;
@@ -418,22 +414,23 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('✅ Кнопка авторизации привязана!');
     }
     
-    // Обновляем турнир каждые 30 сек
+    // CSS ФИКС ТОПА
+    const style = document.createElement('style');
+    style.textContent = `
+        .leader-item {
+            display: flex !important;
+            justify-content: space-between !important;
+            padding: 15px !important;
+            margin: 10px 0 !important;
+            background: #2a2a2a !important;
+            border-radius: 10px !important;
+            font-size: 16px !important;
+            min-height: 20px !important;
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Автообновление турнира
     setInterval(loadTournament, 30000);
+    loadTournament();
 });
-
-// CSS ФИКС ДЛЯ ТОП-10 (добавить в <style>)
-const style = document.createElement('style');
-style.textContent = `
-    .leader-item {
-        display: flex !important;
-        justify-content: space-between !important;
-        padding: 15px !important;
-        margin: 10px 0 !important;
-        background: #2a2a2a !important;
-        border-radius: 10px !important;
-        font-size: 16px !important;
-        min-height: 20px !important;
-    }
-`;
-document.head.appendChild(style);
