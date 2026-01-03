@@ -6,7 +6,7 @@ let snake = {x:10,y:10,dx:0,dy:0,cells:[],maxCells:4};
 let food = {x:15,y:15};
 let secretNumber = 0;
 let attempts = 0;
-let maxAttempts = 7;
+let maxAttempts = 20;
 
 async function checkUserStatus() {
     try {
@@ -120,6 +120,7 @@ function backToMenu() {
     location.reload();
 }
 
+// 🐍 ЗМЕЙКА (БЕЗ ИЗМЕНЕНИЙ)
 function loadSnakeGame() {
     currentGame = 'snake';
     document.querySelector('.container').innerHTML = `
@@ -234,7 +235,7 @@ function loadSnakeGame() {
     gameInterval = setInterval(updateSnake, 200);
 }
 
-// 🎯 УГАДАЙКА 1-1000 + СЧЁТ ХОДОВ
+// 🎯 УГАДАЙКА 1-1000 + СЧЁТ ХОДОВ (НОВАЯ!)
 function loadGuessGame() {
     currentGame = 'guess';
     secretNumber = Math.floor(Math.random() * 1000) + 1; // ✅ 1-1000
@@ -297,19 +298,18 @@ function updateGuessCanvas() {
 
 function checkGuess() {
     const guess = parseInt(document.getElementById('guessInput').value);
-    if (!guess || guess < 1 || guess > 1000) { // ✅ 1-1000
+    if (!guess || guess < 1 || guess > 1000) {
         document.getElementById('hint').textContent = '❌ Число от 1 до 1000!';
         document.getElementById('hint').style.color = '#ff4444';
         return;
     }
 
     attempts++;
-    document.getElementById('attempts').textContent = attempts; // ✅ СЧИТАЕТ ХОДЫ
+    document.getElementById('attempts').textContent = attempts;
     document.getElementById('guessInput').value = '';
     document.getElementById('hint').textContent = '';
 
     if (guess === secretNumber) {
-        // ✅ РЕКОРД = МЕНЬШЕ ХОДОВ = БОЛЬШЕ ОЧКОВ
         const score = Math.max(0, 1000 - attempts * 30);
         if (score > gameData.highscore) {
             gameData.highscore = score;
@@ -319,12 +319,11 @@ function checkGuess() {
         document.getElementById('hint').innerHTML = `🎉 Угадал за <strong>${attempts}</strong> ходов! Очки: <strong>${score}</strong>`;
         document.getElementById('hint').style.color = '#44ff44';
         setTimeout(() => loadGuessGame(), 3000);
-    } else if (attempts >= 20) { // ✅ 20 ходов макс
+    } else if (attempts >= 20) {
         document.getElementById('hint').innerHTML = `💀 Проиграл! Было <strong>${secretNumber}</strong>`;
         document.getElementById('hint').style.color = '#ff4444';
         setTimeout(() => loadGuessGame(), 3000);
     } else {
-        // ✅ ТОЧНЫЕ ПОДСКАЗКИ
         let hintText = guess < secretNumber ? '📈 Больше!' : '📉 Меньше!';
         const diff = Math.abs(guess - secretNumber);
         if (diff <= 10) hintText += ' (очень близко!)';
@@ -341,64 +340,6 @@ function clearGuess() {
     document.getElementById('guessInput').value = '';
     document.getElementById('guessInput').focus();
     document.getElementById('hint').textContent = '';
-}
-
-    
-    gameData.highscore = 0;
-    updateGuessCanvas();
-    
-    document.getElementById('guessInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') checkGuess();
-    });
-    
-    document.getElementById('guessCanvas').addEventListener('click', checkGuess);
-}
-
-function updateGuessCanvas() {
-    const canvas = document.getElementById('guessCanvas');
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, 400, 200);
-    
-    ctx.fillStyle = '#44ff44';
-    ctx.font = '24px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(`Загадай число от 1 до 100`, 200, 50);
-    ctx.fillText(`Попыток: ${attempts}/${maxAttempts}`, 200, 100);
-}
-
-function checkGuess() {
-    const guess = parseInt(document.getElementById('guessInput').value);
-    if (!guess || guess < 1 || guess > 100) {
-        alert('Введи число от 1 до 100');
-        return;
-    }
-
-    attempts++;
-    document.getElementById('attempts').textContent = attempts;
-    document.getElementById('guessInput').value = '';
-
-    if (guess === secretNumber) {
-        if (attempts < maxAttempts - 2) {
-            gameData.highscore = Math.max(gameData.highscore, 8 - attempts);
-            document.getElementById('highscore').textContent = gameData.highscore;
-            if (isLoggedIn) saveScore('guess');
-        }
-        alert(`✅ Угадал за ${attempts} попыток! Рекорд: ${gameData.highscore}`);
-        loadGuessGame();
-    } else if (attempts >= maxAttempts) {
-        alert(`💀 Проиграл! Было ${secretNumber}`);
-        loadGuessGame();
-    } else {
-        const hint = guess < secretNumber ? 'Больше!' : 'Меньше!';
-        alert(hint);
-    }
-    updateGuessCanvas();
-}
-
-function clearGuess() {
-    document.getElementById('guessInput').value = '';
-    document.getElementById('guessInput').focus();
 }
 
 async function saveScore(game) {
