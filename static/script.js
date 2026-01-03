@@ -62,10 +62,12 @@ async function loadLeaderboard(game) {
         const res = await fetch(`/top/${game}`);
         const leaders = await res.json();
         const list = document.getElementById('leaders-list');
-        list.innerHTML = leaders.length ? 
-            leaders.map((p,i) => `<div class="leader-item"><span>${i+1}. ${p.username}</span><span>${p.score}</span></div>`).join('') : 
-            '<div style="text-align:center;color:#aaa;">Пока нет рекордов</div>';
-        document.getElementById('leaderboard').style.display = 'block';
+        if (list) {
+            list.innerHTML = leaders.length ? 
+                leaders.map((p,i) => `<div class="leader-item"><span>${i+1}. ${p.username}</span><span>${p.score}</span></div>`).join('') : 
+                '<div style="text-align:center;color:#aaa;">Пока нет рекордов</div>';
+            document.getElementById('leaderboard').style.display = 'block';
+        }
     } catch(e) {}
 }
 
@@ -84,82 +86,97 @@ async function saveScore(game, score) {
     } catch(e) {}
 }
 
-// 🎯 УГАДАЙ ЧИСЛО (✅ ПОЛЕ + КНОПКИ)
+// 🎯 УГАДАЙ ЧИСЛО (HTML версия — НЕ ломается)
 function loadGuessGame() {
     const canvas = document.getElementById('gameCanvas');
-    canvas.innerHTML = `
-        <div style="padding:20px;text-align:center;font-family:Arial;">
-            <div style="font-size:36px;margin:30px 0;font-weight:bold">🎯 УГАДАЙ ЧИСЛО</div>
-            <div style="font-size:32px;margin:20px 0;color:#44ff88" id="currentGuess">?</div>
-            <div style="font-size:24px;color:#ffaa00;margin:10px 0">Попыток осталось: <span id="attempts">7</span></div>
-            <div id="hint" style="font-size:28px;margin:30px 0;height:50px;line-height:50px"></div>
-            <input id="guessInput" type="number" min="1" max="100" 
-                   style="font-size:24px;padding:20px;width:250px;border-radius:15px;border:2px solid #44ff44;background:rgba(255,255,255,0.9);text-align:center"
-                   placeholder="Введи число 1-100">
+    canvas.style.display = 'none';
+    
+    // ✅ HTML ИГРА
+    document.getElementById('game-container').innerHTML = `
+        <div style="padding:30px;text-align:center;font-family:Arial;background:rgba(0,0,0,0.3);border-radius:20px;max-width:500px;margin:0 auto">
+            <h2 style="font-size:36px;margin-bottom:20px">🎯 УГАДАЙ ЧИСЛО (1-100)</h2>
+            <div id="currentGuess" style="font-size:48px;font-weight:bold;color:#44ff88;margin:30px 0;min-height:60px">?</div>
+            <div id="attemptsDisplay" style="font-size:28px;color:#ffaa00;margin:20px 0">Попыток: <span id="attempts">7</span></div>
+            <div id="hint" style="font-size:36px;font-weight:bold;margin:40px 0;min-height:70px;line-height:70px"></div>
+            
             <div style="margin:30px 0">
-                <button onclick="checkGuess()" 
-                        style="font-size:24px;padding:20px 40px;margin:10px;border:none;border-radius:15px;background:#44ff44;color:black;font-weight:bold;min-width:150px">✅ ПРОВЕРИТЬ</button>
-                <button onclick="clearGuess()" 
-                        style="font-size:24px;padding:20px 40px;margin:10px;border:none;border-radius:15px;background:#ff6b6b;color:white;font-weight:bold;min-width:150px">🗑️ ОЧИСТИТЬ</button>
+                <input id="guessInput" type="number" min="1" max="100" 
+                       style="font-size:28px;padding:25px 20px;width:300px;border-radius:20px;border:3px solid #44ff44;background:rgba(255,255,255,0.95);text-align:center;font-weight:bold"
+                       placeholder="Введите число">
             </div>
-            <div style="font-size:18px;color:#aaa;margin-top:20px">F5 для новой игры</div>
+            
+            <div style="margin:40px 0">
+                <button onclick="checkGuess()" style="font-size:24px;padding:20px 50px;margin:10px;border:none;border-radius:20px;background:#44ff44;color:black;font-weight:bold;min-width:200px;cursor:pointer">✅ ПРОВЕРИТЬ</button>
+                <button onclick="clearGuess()" style="font-size:24px;padding:20px 50px;margin:10px;border:none;border-radius:20px;background:#ff6b6b;color:white;font-weight:bold;min-width:200px;cursor:pointer">🗑️ ОЧИСТИТЬ</button>
+            </div>
+            
+            <div id="gameOver" style="font-size:24px;color:#ff4444;margin-top:30px;display:none">F5 — новая игра</div>
+        </div>
+        <div id="leaderboard" class="leaderboard" style="display:block">
+            <h3>🏆 ТОП-10</h3>
+            <div id="leaders-list"></div>
         </div>
     `;
     
-    let secret = Math.floor(Math.random() * 100) + 1;
-    let attempts = 7;
+    window.guessSecret = Math.floor(Math.random() * 100) + 1;
+    window.guessAttempts = 7;
     
-    function drawHint(message, color = '#ffaa00') {
-        document.getElementById('hint').innerHTML = `<span style="color:${color};font-weight:bold">${message}</span>`;
-    }
-    
-    window.checkGuess = function() {
-        const input = document.getElementById('guessInput');
-        const num = parseInt(input.value);
-        
-        if (isNaN(num) || num < 1 || num > 100) {
-            drawHint('❌ ЧИСЛО от 1 до 100!', '#ff4444');
-            input.style.borderColor = '#ff4444';
-            return;
-        }
-        
-        attempts--;
-        document.getElementById('attempts').textContent = attempts;
-        
-        if (num === secret) {
-            const score = Math.max(100, 1000 - (7-attempts)*100);
-            if (isLoggedIn) saveScore('guess', score);
-            drawHint(`✅ ПОБЕДА! Рекорд: ${score} очков!`, '#44ff88');
-            input.disabled = true;
-            input.style.borderColor = '#44ff88';
-        } else if (attempts === 0) {
-            drawHint(`💀 Было: ${secret}`, '#ff4444');
-            input.disabled = true;
-            input.style.borderColor = '#ff4444';
-        } else if (num < secret) {
-            drawHint('⬆️ НАДО БОЛЬШЕ', '#ffaa00');
-        } else {
-            drawHint('⬇️ НАДО МЕНЬШЕ', '#ffaa00');
-        }
-        input.value = '';
-        input.style.borderColor = '#44ff44';
-    };
-    
-    window.clearGuess = function() {
-        document.getElementById('guessInput').value = '';
-        document.getElementById('hint').innerHTML = '';
-        document.getElementById('guessInput').style.borderColor = '#44ff44';
-    };
-    
+    document.getElementById('guessInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') checkGuess();
+    });
     document.getElementById('guessInput').focus();
+    loadLeaderboard('guess');
 }
 
-// 🐍 ЗМЕЙКА (✅ ГРАНИЦЫ + САМОЕДЕНИЕ)
+window.checkGuess = function() {
+    const input = document.getElementById('guessInput');
+    const num = parseInt(input.value);
+    
+    if (isNaN(num) || num < 1 || num > 100) {
+        showGuessHint('❌ Число от 1 до 100!', '#ff4444');
+        input.style.borderColor = '#ff4444';
+        return;
+    }
+    
+    window.guessAttempts--;
+    document.getElementById('attempts').textContent = window.guessAttempts;
+    
+    if (num === window.guessSecret) {
+        const score = Math.max(100, 1000 - (7 - window.guessAttempts) * 100);
+        if (isLoggedIn) saveScore('guess', score);
+        showGuessHint(`✅ ПОБЕДА! ${score} очков! 🎉`, '#44ff88');
+        input.disabled = true;
+        input.style.borderColor = '#44ff88';
+    } else if (window.guessAttempts === 0) {
+        showGuessHint(`💀 Было: ${window.guessSecret}`, '#ff4444');
+        document.getElementById('gameOver').style.display = 'block';
+        input.disabled = true;
+    } else if (num < window.guessSecret) {
+        showGuessHint('⬆️ БОЛЬШЕ', '#ffaa00');
+    } else {
+        showGuessHint('⬇️ МЕНЬШЕ', '#ffaa00');
+    }
+    input.value = '';
+    input.style.borderColor = '#44ff44';
+};
+
+window.clearGuess = function() {
+    const input = document.getElementById('guessInput');
+    input.value = '';
+    document.getElementById('hint').innerHTML = '';
+    input.style.borderColor = '#44ff44';
+};
+
+window.showGuessHint = function(message, color) {
+    document.getElementById('hint').innerHTML = `<span style="color:${color}">${message}</span>`;
+};
+
+// 🐍 ЗМЕЙКА (canvas версия)
 function loadSnakeGame() {
     const canvas = document.getElementById('gameCanvas');
     canvas.width = 500;
     canvas.height = 400;
-    canvas.style.background = 'rgba(0,0,0,0.3)';
+    canvas.style.display = 'block';
     const ctx = canvas.getContext('2d');
     
     let snake = [{x: 10, y: 10}];
@@ -192,7 +209,6 @@ function loadSnakeGame() {
             return;
         }
         
-        // Змейка (голова ярче)
         snake.forEach((part, i) => {
             ctx.fillStyle = i === 0 ? '#44ff88' : '#44ff44';
             ctx.shadowColor = '#44ff44';
@@ -201,7 +217,6 @@ function loadSnakeGame() {
             ctx.shadowBlur = 0;
         });
         
-        // Еда
         ctx.fillStyle = '#ff4444';
         ctx.shadowColor = '#ff4444';
         ctx.shadowBlur = 15;
@@ -210,12 +225,10 @@ function loadSnakeGame() {
         ctx.fill();
         ctx.shadowBlur = 0;
         
-        // Счёт
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 36px Arial';
         ctx.fillText(`🐍 ${score}`, 20, 45);
         
-        // Границы поля
         ctx.strokeStyle = '#444444';
         ctx.lineWidth = 4;
         ctx.strokeRect(0, 0, GRID_WIDTH*CELL_SIZE, GRID_HEIGHT*CELL_SIZE);
@@ -226,7 +239,6 @@ function loadSnakeGame() {
         
         const head = {x: snake[0].x + dx, y: snake[0].y + dy};
         
-        // ✅ ГРАНИЦЫ
         if (head.x < 0 || head.x >= GRID_WIDTH || head.y < 0 || head.y >= GRID_HEIGHT) {
             gameRunning = false;
             if (isLoggedIn) saveScore('snake', score);
@@ -234,7 +246,6 @@ function loadSnakeGame() {
             return;
         }
         
-        // ✅ САМОЕДЕНИЕ
         for (let i = 0; i < snake.length; i++) {
             if (head.x === snake[i].x && head.y === snake[i].y) {
                 gameRunning = false;
@@ -246,7 +257,6 @@ function loadSnakeGame() {
         
         snake.unshift(head);
         
-        // Еда
         if (head.x === food.x && head.y === food.y) {
             score++;
             food = {
@@ -261,7 +271,6 @@ function loadSnakeGame() {
         setTimeout(gameLoop, 130);
     }
     
-    // Клавиши
     document.addEventListener('keydown', e => {
         if (!gameRunning) return;
         if (e.key === 'ArrowUp' && dy !== 1) dx = 0, dy = -1;
@@ -271,7 +280,6 @@ function loadSnakeGame() {
         e.preventDefault();
     });
     
-    // 📱 Свайпы
     let touchStartX = 0, touchStartY = 0;
     canvas.addEventListener('touchstart', e => {
         touchStartX = e.touches[0].clientX;
@@ -290,12 +298,12 @@ function loadSnakeGame() {
         }
     });
     
-    // Рестарт
     canvas.addEventListener('click', () => {
         if (!gameRunning) loadSnakeGame();
     });
     
     gameLoop();
+    loadLeaderboard('snake');
 }
 
 function showAuth(mode) {
@@ -318,6 +326,7 @@ async function testAPI() {
     console.log(await res.json());
 }
 
+// Горячие клавиши
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeAuth();
     if (document.getElementById('auth-modal').style.display === 'flex' && e.key === 'Enter') {
@@ -325,8 +334,16 @@ document.addEventListener('keydown', e => {
     }
 });
 
-checkUserStatus();
-// В конец static/script.js ДОБАВЬ:
-window.addEventListener('beforeunload', function() {
-    fetch('/logout', {method: 'POST', credentials: 'include'});
-});
+async function checkUserStatus() {
+    try {
+        const res = await fetch('/status', {credentials: 'include'});
+        const data = await res.json();
+        if (data.logged_in) {
+            document.getElementById('status').textContent = `👋 ${data.username}`;
+            document.getElementById('logout').style.display = 'inline-block';
+            isLoggedIn = true;
+        }
+    } catch(e) {
+        // Тихо игнорируем ошибки
+    }
+}  // ← ✅ ЭТО КОНЕЦ ФУНКЦИИ
