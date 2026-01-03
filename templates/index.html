@@ -3,86 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игровой Хаб Назар</title>
+    <title>🎮 Игровой Хаб Назар</title>
     <style>
-        body { background: linear-gradient(45deg, #667eea 0%, #764ba2 100%); color: white; font-family: Arial; text-align: center; padding: 50px; min-height: 100vh; margin: 0; }
-        .container { max-width: 800px; margin: 0 auto; }
-        h1 { font-size: 3em; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        #user-status { font-size: 1.5em; margin-bottom: 30px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; }
-        button { font-size: 2em; padding: 20px 40px; margin: 15px; border: none; border-radius: 20px; cursor: pointer; background: rgba(255,255,255,0.2); color: white; backdrop-filter: blur(10px); transition: all 0.3s; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%); 
+            color: white; font-family: 'Segoe UI', Arial, sans-serif; 
+            min-height: 100vh; display: flex; flex-direction: column; 
+            align-items: center; padding: 20px;
+        }
+        .header { font-size: clamp(2rem, 8vw, 6rem); margin: 20px 0; text-shadow: 0 0 20px rgba(255,255,255,0.5); }
+        .status { font-size: 1.5rem; margin-bottom: 30px; padding: 15px 30px; background: rgba(255,255,255,0.1); border-radius: 20px; backdrop-filter: blur(10px); }
+        .auth-buttons, .games-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; max-width: 800px; }
+        button { 
+            font-size: clamp(1.2rem, 4vw, 2rem); padding: 20px 40px; border: none; 
+            border-radius: 25px; background: rgba(255,255,255,0.2); color: white; 
+            cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s; min-height: 80px;
+        }
         button:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; }
-        .modal-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,255,255,0.1); padding: 30px; border-radius: 20px; backdrop-filter: blur(10px); width: 300px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: none; border-radius: 10px; font-size: 1.1em; }
-        #error { color: #ff6b6b; margin-top: 10px; }
-        .games { margin: 40px 0; }
-        .game-btn { font-size: 1.5em; width: 250px; height: 80px; }
-        #leaderboard { margin-top: 30px; background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; }
-        #leaderboard h3 { margin: 0 0 20px; }
-        .leader { display: flex; justify-content: space-between; padding: 5px; margin: 5px 0; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-content { background: rgba(255,255,255,0.15); backdrop-filter: blur(20px); padding: 40px; border-radius: 25px; text-align: center; min-width: 300px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        .modal input { width: 100%; padding: 15px; margin: 15px 0; border: none; border-radius: 15px; font-size: 1.1rem; }
+        .error { color: #ff6b6b; margin-top: 10px; }
+        .game-canvas { border: 3px solid rgba(255,255,255,0.3); border-radius: 15px; background: rgba(0,0,0,0.5); margin: 20px 0; }
+        .leaderboard { background: rgba(0,0,0,0.4); padding: 20px; border-radius: 15px; margin: 20px 0; }
+        .leaderboard h3 { margin-bottom: 15px; }
+        .leader-item { display: flex; justify-content: space-between; padding: 8px 0; }
+        @media (max-width: 600px) { .auth-buttons, .games-grid { flex-direction: column; align-items: center; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎮 Игровой Хаб Назар</h1>
-        <div id="user-status">👋 Гость 😴</div>
-        <div>
-            <button id="register-btn" onclick="showAuth('register')">📝 РЕГИСТРАЦИЯ</button>
-            <button id="login-btn" onclick="showAuth('login')">🔑 ВХОД</button>
-            <button id="logout-btn" onclick="logout()" style="display:none;">🚪 Выйти</button>
-            <button onclick="testApi()">🧪 ТЕСТ</button>
+    <h1 class="header">🎮 Игровой Хаб Назар</h1>
+    <div class="status" id="status">👋 Гость</div>
+    
+    <div class="auth-buttons">
+        <button onclick="showAuth('register')">📝 РЕГИСТРАЦИЯ</button>
+        <button onclick="showAuth('login')">🔑 ВХОД</button>
+        <button onclick="logout()" id="logout" style="display:none">🚪 Выйти</button>
+        <button onclick="testAPI()">🧪 ТЕСТ</button>
+    </div>
+
+    <div class="games-grid">
+        <button onclick="loadGame('guess')">🎯 Угадай число</button>
+        <button onclick="loadGame('snake')">🐍 Змейка</button>
+    </div>
+
+    <div id="game-container" style="display:none; max-width: 600px; margin: 0 auto;">
+        <canvas id="gameCanvas" class="game-canvas" width="500" height="400"></canvas>
+        <div id="leaderboard" class="leaderboard" style="display:none">
+            <h3>🏆 ТОП-10</h3>
+            <div id="leaders-list"></div>
         </div>
-        <div class="games">
-            <button class="game-btn" onclick="loadGame('guess')">🎯 Угадай число</button>
-            <button class="game-btn" onclick="loadGame('snake')">🐍 Змейка</button>
-        </div>
-        <div id="game-area"></div>
-        <div id="leaderboard"></div>
     </div>
 
     <div id="auth-modal" class="modal">
         <div class="modal-content">
-            <h2 id="modal-title">Авторизация</h2>
-            <input type="text" id="username" placeholder="Имя (nazar)">
+            <h2 id="modal-title">Регистрация</h2>
+            <input type="text" id="username" placeholder="Имя (nazar)" maxlength="20">
             <input type="password" id="password" placeholder="Пароль (123456)">
-            <button onclick="authUser()" style="width:100%; margin-top:15px;">✅ ГОТОВО</button>
-            <div id="error"></div>
+            <div id="error" class="error"></div>
+            <button onclick="authUser()" style="font-size:1.5rem;">✅ ГОТОВО</button>
+            <button onclick="closeAuth()" style="background:rgba(255,0,0,0.3);">✕</button>
         </div>
     </div>
 
     <script>
         let currentGame = '';
+        let isLoggedIn = false;
+        
         async function checkUserStatus() {
             try {
                 const res = await fetch('/status', {credentials: 'include'});
                 const data = await res.json();
-                const status = document.getElementById('user-status');
-                const logoutBtn = document.getElementById('logout-btn');
-                if (data.logged) {
-                    status.textContent = `👋 ${data.username} ✅`;
-                    logoutBtn.style.display = 'inline-block';
-                } else {
-                    status.textContent = '👋 Гость 😴';
-                    logoutBtn.style.display = 'none';
+                if (data.logged_in) {
+                    document.getElementById('status').textContent = `👋 ${data.username}`;
+                    document.getElementById('logout').style.display = 'inline-block';
+                    isLoggedIn = true;
                 }
-            } catch(e) { console.error(e); }
-        }
-
-        function showAuth(type) {
-            document.getElementById('auth-modal').style.display = 'block';
-            document.getElementById('modal-title').textContent = type === 'register' ? '📝 РЕГИСТРАЦИЯ' : '🔑 ВХОД';
-            document.getElementById('error').textContent = '';
-        }
-
-        function closeAuth() {
-            document.getElementById('auth-modal').style.display = 'none';
+            } catch(e) {}
         }
 
         async function authUser() {
-            const username = document.getElementById('username').value;
+            const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
-            const endpoint = document.getElementById('modal-title').textContent.includes('РЕГИСТРАЦИЯ') ? '/register' : '/login';
+            const isRegister = document.getElementById('modal-title').textContent.includes('Регистрация');
+            const endpoint = isRegister ? '/register' : '/login';
+            
+            document.getElementById('error').textContent = '';
             try {
                 const res = await fetch(endpoint, {
                     method: 'POST',
@@ -91,130 +98,160 @@
                     body: JSON.stringify({username, password})
                 });
                 const data = await res.json();
+                
                 if (data.success) {
-                    checkUserStatus();
+                    document.getElementById('status').textContent = `👋 ${data.username}`;
+                    document.getElementById('logout').style.display = 'inline-block';
                     closeAuth();
-                    loadLeaderboard(currentGame);
+                    isLoggedIn = true;
                 } else {
-                    document.getElementById('error').textContent = data.message || 'Ошибка';
+                    document.getElementById('error').textContent = data.error || 'Ошибка';
                 }
             } catch(e) {
-                document.getElementById('error').textContent = 'Сервер: ' + e.message;
+                document.getElementById('error').textContent = 'Сервер недоступен';
             }
         }
 
         async function logout() {
             await fetch('/logout', {method: 'POST', credentials: 'include'});
-            checkUserStatus();
-            document.getElementById('game-area').innerHTML = '';
-            document.getElementById('leaderboard').innerHTML = '';
+            document.getElementById('status').textContent = '👋 Гость';
+            document.getElementById('logout').style.display = 'none';
+            isLoggedIn = false;
+        }
+
+        async function loadGame(game) {
+            currentGame = game;
+            document.getElementById('game-container').style.display = 'block';
+            if (game === 'guess') loadGuessGame();
+            else if (game === 'snake') loadSnakeGame();
+            loadLeaderboard(game);
         }
 
         async function loadLeaderboard(game) {
             try {
-                const res = await fetch(`/top/${game}`);
+                const res = await fetch(`/top/${game}`, {credentials: 'include'});
                 const leaders = await res.json();
-                const lb = document.getElementById('leaderboard');
-                if (leaders.length) {
-                    lb.innerHTML = '<h3>🏆 ТОП-10</h3>' + leaders.map((l, i) => 
-                        `<div class="leader"> ${i+1}. ${l.username}: ${l.score} </div>`
-                    ).join('');
-                } else {
-                    lb.innerHTML = '<h3>🏆 ТОП-10</h3><p>Никто не играл!</p>';
-                }
-            } catch(e) { console.error(e); }
+                const list = document.getElementById('leaders-list');
+                list.innerHTML = leaders.length ? 
+                    leaders.map((p,i) => `<div class="leader-item"><span>${i+1}. ${p.username}</span><span>${p.score}</span></div>`).join('') : 
+                    '<div>Пока нет рекордов</div>';
+                document.getElementById('leaderboard').style.display = 'block';
+            } catch(e) {}
         }
 
-        function loadGame(game) {
-            currentGame = game;
-            document.getElementById('game-area').innerHTML = `
-                <div id="guess-game" style="display:${game==='guess'?'block':'none'};">
-                    <h2>🎯 Угадай число (1-1000)</h2>
-                    <input type="number" id="guess-input" min="1" max="1000" style="width:200px; padding:10px; font-size:1.2em;">
-                    <button onclick="makeGuess()" style="font-size:1.2em; padding:10px 20px;">УГАДАТЬ</button>
-                    <p id="guess-feedback">Счёт: <span id="guess-score">0</span></p>
-                </div>
-                <canvas id="snake-canvas" width="400" height="400" style="display:${game==='snake'?'block':'none'}; border:1px solid white; background:rgba(0,0,0,0.3);"></canvas>
-            `;
-            loadLeaderboard(game);
-            if (game === 'snake') initSnake();
-        }
-
-        let guessNum = Math.floor(Math.random() * 1000) + 1;
-        let guessScore = 1000;
-        function makeGuess() {
-            const input = document.getElementById('guess-input');
-            const val = parseInt(input.value);
-            const scoreEl = document.getElementById('guess-score');
-            if (val < guessNum) {
-                document.getElementById('guess-feedback').innerHTML += '<br>Больше!';
-            } else if (val > guessNum) {
-                document.getElementById('guess-feedback').innerHTML += '<br>Меньше!';
-            } else {
-                document.getElementById('guess-feedback').innerHTML += '<br>✅ Угадал! Счёт: ' + guessScore;
-                if (sessionStorage.getItem('username')) saveScore('guess', guessScore);
-                guessNum = Math.floor(Math.random() * 1000) + 1;
-                guessScore = 1000;
-            }
-            guessScore -= 10;
-            scoreEl.textContent = guessScore;
-            input.value = '';
-        }
-
-        // Простая змейка (WASD)
-        let snake = [{x:10,y:10}];
-        let dx=0, dy=0; let food={x:15,y:15}; let score=0;
-        function initSnake() {
-            const canvas = document.getElementById('snake-canvas');
+        function loadGuessGame() {
+            const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
+            let secret = Math.floor(Math.random() * 100) + 1;
+            let attempts = 7;
+            let guess = '';
+            
+            canvas.onclick = () => {};
+            
             function draw() {
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                ctx.fillRect(0,0,400,400);
-                ctx.fillStyle = 'lime';
-                snake.forEach(s => ctx.fillRect(s.x*20, s.y*20, 20,20));
-                ctx.fillStyle = 'red';
-                ctx.fillRect(food.x*20, food.y*20, 20,20);
-                requestAnimationFrame(draw);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'white';
+                ctx.font = '24px Arial';
+                ctx.fillText(`Угадай: ${guess || '?'} (0-100)`, 20, 50);
+                ctx.fillText(`Попыток: ${attempts}`, 20, 100);
+                if (attempts === 0) ctx.fillText('Игра окончена! F5 - новая', 20, 200);
             }
+            
+            function checkGuess() {
+                const num = parseInt(guess);
+                if (isNaN(num) || num < 0 || num > 100) return;
+                attempts--;
+                if (num === secret) {
+                    saveScore('guess', 1000 - (7-attempts)*100);
+                    ctx.fillStyle = '#44ff44';
+                    ctx.fillText('✅ ПОБЕДА! Рекорд сохранён', 20, 150);
+                } else if (attempts === 0) {
+                    ctx.fillStyle = '#ff4444';
+                    ctx.fillText(`Было: ${secret}`, 20, 150);
+                } else if (num < secret) ctx.fillText('⬆️ Больше!', 20, 150);
+                else ctx.fillText('⬇️ Меньше!', 20, 150);
+                guess = ''; draw();
+            }
+            
             document.addEventListener('keydown', e => {
-                if (e.key === 'w') {dx=0;dy=-1;}
-                if (e.key === 's') {dx=0;dy=1;}
-                if (e.key === 'a') {dx=-1;dy=0;}
-                if (e.key === 'd') {dx=1;dy=0;}
+                if (e.key >= '0' && e.key <= '9') guess += e.key;
+                else if (e.key === 'Enter') checkGuess();
+                else if (e.key === 'Backspace') guess = guess.slice(0, -1);
+                if (currentGame === 'guess') draw();
             });
-            setInterval(() => {
-                const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-                snake.unshift(head);
-                if (head.x === food.x && head.y === food.y) {
-                    score += 100;
-                    food = {x: Math.floor(Math.random()*20), y: Math.floor(Math.random()*20)};
-                } else {
-                    snake.pop();
-                }
-            }, 150);
             draw();
         }
 
+        function loadSnakeGame() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            let snake = [{x: 10, y: 10}];
+            let dx = 1, dy = 0;
+            let food = {x: 15, y: 15};
+            let score = 0;
+            
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#44ff44';
+                snake.forEach(part => ctx.fillRect(part.x*20, part.y*20, 20, 20));
+                ctx.fillStyle = '#ff4444';
+                ctx.fillRect(food.x*20, food.y*20, 20, 20);
+                ctx.fillStyle = 'white';
+                ctx.font = '24px Arial';
+                ctx.fillText(`Очки: ${score}`, 20, 30);
+            }
+            
+            document.addEventListener('keydown', e => {
+                if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -1; }
+                if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = 1; }
+                if (e.key === 'ArrowLeft' && dx === 0) { dx = -1; dy = 0; }
+                if (e.key === 'ArrowRight' && dx === 0) { dx = 1; dy = 0; }
+            });
+            
+            function gameLoop() {
+                const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+                snake.unshift(head);
+                if (head.x === food.x && head.y === food.y) {
+                    score++;
+                    food = {x: Math.floor(Math.random()*25), y: Math.floor(Math.random()*20)};
+                    if (isLoggedIn) saveScore('snake', score);
+                } else snake.pop();
+                draw();
+                setTimeout(gameLoop, 150);
+            }
+            gameLoop();
+        }
+
         async function saveScore(game, score) {
+            if (!isLoggedIn) { alert('Войди для рекордов!'); return; }
             try {
                 await fetch('/save_score', {
-                    method: 'POST',
-                    credentials: 'include',
+                    method: 'POST', credentials: 'include',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({game, score})
                 });
-                loadLeaderboard(game);
-            } catch(e) { console.error(e); }
+            } catch(e) {}
         }
 
-        async function testApi() {
-            const res = await fetch('/test');
+        function showAuth(mode) {
+            document.getElementById('auth-modal').style.display = 'flex';
+            document.getElementById('modal-title').textContent = mode === 'register' ? '📝 РЕГИСТРАЦИЯ' : '🔑 ВХОД';
+            document.getElementById('username').value = ''; 
+            document.getElementById('password').value = '';
+            document.getElementById('error').textContent = '';
+            document.getElementById('username').focus();
+        }
+
+        function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
+
+        async function testAPI() {
+            const res = await fetch('/test', {credentials: 'include'});
             console.log(await res.json());
         }
 
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') closeAuth();
-            if (document.getElementById('auth-modal').style.display === 'block' && e.key === 'Enter') authUser();
+            if (document.getElementById('auth-modal').style.display === 'flex' && e.key === 'Enter') authUser();
         });
 
         checkUserStatus();
