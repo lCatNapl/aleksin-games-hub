@@ -38,8 +38,15 @@ async function authUser() {
     const errorDiv = document.getElementById('error');
     errorDiv.textContent = '';
 
+    if (!username || !password) {
+        errorDiv.textContent = 'Заполни все поля';
+        return;
+    }
+
     try {
         const endpoint = document.getElementById('submit-btn').dataset.mode === 'register' ? '/register' : '/login';
+        document.getElementById('submit-btn').dataset.mode = endpoint === '/register' ? 'register' : 'login';
+        
         const res = await fetch(endpoint, {
             method: 'POST',
             credentials: 'include',
@@ -64,7 +71,7 @@ function showAuth(mode) {
     document.getElementById('auth-modal').style.display = 'flex';
     document.getElementById('modal-title').textContent = mode === 'register' ? '📝 Регистрация' : '🔑 Вход';
     document.getElementById('submit-btn').textContent = mode === 'register' ? 'Зарегистрироваться' : 'Войти';
-    document.getElementById('submit-btn').dataset.mode = mode;
+    document.getElementById('submit-btn').dataset.mode = mode; // ✅ ФИКС dataset.mode
     
     const warning = document.getElementById('warning-text');
     if (mode === 'register') {
@@ -120,7 +127,7 @@ function backToMenu() {
     location.reload();
 }
 
-// 🐍 ЗМЕЙКА (БЕЗ ИЗМЕНЕНИЙ)
+// 🐍 ЗМЕЙКА
 function loadSnakeGame() {
     currentGame = 'snake';
     document.querySelector('.container').innerHTML = `
@@ -235,10 +242,10 @@ function loadSnakeGame() {
     gameInterval = setInterval(updateSnake, 200);
 }
 
-// 🎯 УГАДАЙКА 1-1000 + СЧЁТ ХОДОВ (НОВАЯ!)
+// 🎯 УГАДАЙКА 1-1000
 function loadGuessGame() {
     currentGame = 'guess';
-    secretNumber = Math.floor(Math.random() * 1000) + 1; // ✅ 1-1000
+    secretNumber = Math.floor(Math.random() * 1000) + 1;
     attempts = 0;
     
     document.querySelector('.container').innerHTML = `
@@ -283,8 +290,7 @@ function updateGuessCanvas() {
     ctx.font = 'bold 22px Arial';
     ctx.fillText(`Ходов: ${attempts}`, 200, 110);
     
-    // ✅ ПРОГРЕСС-БАР
-    const progress = attempts / 20; // Макс 20 ходов
+    const progress = attempts / 20;
     ctx.fillStyle = '#ff4444';
     ctx.fillRect(50, 140, 300 * progress, 20);
     ctx.strokeStyle = '#44ff44';
@@ -354,7 +360,16 @@ async function saveScore(game) {
     } catch (e) {}
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('submit-btn').onclick = authUser;
+// ✅ СУПЕР-ФИКС АВТОРИЗАЦИИ
+document.addEventListener('DOMContentLoaded', function() {
+    const submitBtn = document.getElementById('submit-btn');
+    if (submitBtn) {
+        submitBtn.onclick = authUser;
+        submitBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            authUser();
+        });
+        console.log('✅ Кнопка авторизации привязана!');
+    }
     checkUserStatus();
 });
