@@ -44,8 +44,8 @@ async function authUser() {
     }
 
     try {
-        const endpoint = document.getElementById('submit-btn').dataset.mode === 'register' ? '/register' : '/login';
-        document.getElementById('submit-btn').dataset.mode = endpoint === '/register' ? 'register' : 'login';
+        const mode = document.getElementById('submit-btn').dataset.mode || 'login';
+        const endpoint = mode === 'register' ? '/register' : '/login';
         
         const res = await fetch(endpoint, {
             method: 'POST',
@@ -71,7 +71,7 @@ function showAuth(mode) {
     document.getElementById('auth-modal').style.display = 'flex';
     document.getElementById('modal-title').textContent = mode === 'register' ? '📝 Регистрация' : '🔑 Вход';
     document.getElementById('submit-btn').textContent = mode === 'register' ? 'Зарегистрироваться' : 'Войти';
-    document.getElementById('submit-btn').dataset.mode = mode; // ✅ ФИКС dataset.mode
+    document.getElementById('submit-btn').dataset.mode = mode;
     
     const warning = document.getElementById('warning-text');
     if (mode === 'register') {
@@ -348,19 +348,117 @@ function clearGuess() {
     document.getElementById('hint').textContent = '';
 }
 
-async function saveScore(game) {
+// 🏆 ТУРНИР
+async function loadTournament() {
+    currentGame = 'tournament';
     try {
+        const res = await fetch('/tournament');
+        const data = await res.json();
+        
+        document.querySelector('.container').innerHTML = `
+            <h1>🏆 АКТИВНЫЙ ТУРНИР</h1>
+            <div id="tournament-info" style="text-align:center;color:#ffaa00;font-size:18px;margin:20px">
+                <div>🕐 До конца: <span id="countdown">-</span></div>
+                <div>ID: <strong>${data.id}</strong></div>
+            </div>
+            
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin:30px 0">
+                <div class="leaderboard">
+                    <h3>🐍 Змейка</h3>
+                    <div id="tournament-snake-top"></div>
+                    <div style="margin-top:20px;color:#44ff44;font-size:20px">
+                        🎁 <strong>1-е место: 1000 очков</strong><br>
+                        🎁 <strong>2-е место: 500 очков</strong><br>
+                        🎁 <strong>3-е место: 250 очков</strong>
+                    </div>
+                </div>
+                
+                <div class="leaderboard">
+                    <h3>🎯 Угадайка</h3>
+                    <div id="tournament-guess-top"></div>
+                    <div style="margin-top:20px;color:#44ff44;font-size:20px">
+                        🎁 <strong>1-е место: 1000 очков</strong><br>
+                        🎁 <strong>2-е место: 500 очков</strong><br>
+                        🎁 <strong>3-е место: 250 очков</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align:center">
+                <button class="auth-btn" onclick="backToMenu()" style="width:250px;font-size:18px">🏠 В меню</button>
+            </div>
+        `;
+        
+        // ✅ ТОП-3
+        document.getElementById('tournament-snake-top').innerHTML = 
+            data.snake_top.map((p, i) => 
+                `<div class="leader-item"><span>🥇${i+1} ${p[0]}</span><span>${p[1]}</span></div>`
+            ).join('') || '<div style="text-align:center;color:#666">Никто не играл</div>';
+        
+        document.getElementById('tournament-guess-top').innerHTML = 
+            data.guess_top.map((p, i) => 
+                `<div class="leader-item"><span>🥇${i+1} ${p[0]}</span><span>${p[1]}</span></div>`
+            ).join('') || '<div style="text-align:center;color:#666">Никто не играл</div>';
+        
+        // ✅ ТАЙМЕР
+        updateCountdown(data.end_time);
+        setInterval(() => updateCountdown(data.end_time), 1000);
+        
+    } catch (e) {
+        document.querySelector('.container').innerHTML = `
+            <h1>🏆 ТУРНИР</h1>
+            <div style="text-align:center;color:#ff4444">Ошибка загрузки турнира</div>
+            <button class="auth-btn" onclick="backToMenu()" style="width:250px">🏠 В меню</button>
+        `;
+    }
+}
+
+function updateCountdown(endTimeISO) {
+    const endTime = new Date(endTimeISO).getTime();
+    const now = new Date().getTime();
+    const distance = endTime - now;
+    
+    if (distance < 0) {
+        document.getElementById('countdown').textContent = 'Турнир завершён!';
+        return;
+    }
+    
+    const hours = Math.floor(distance / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    
+    document.getElementById('countdown').textContent = 
+        `${hours}ч ${minutes}м ${seconds}с`;
+}
+
+// ✅ УЛУЧШЕННЫЙ saveScore (личный + турнир)
+async function saveScore(game) {
+    if (!isLoggedIn) return;
+    
+    try {
+        // Личная БД
         await fetch(`/save_score/${game}`, {
             method: 'POST',
             credentials: 'include',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({highscore: gameData.highscore})
         });
+        
+        // Турнирная БД
+        await fetch(`/save_tournament_score/${game}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({score: gameData.highscore})
+        });
+        
         loadLeaderboard();
-    } catch (e) {}
+    } catch (e) {
+        console.error('Save score failed:', e);
+    }
 }
 
-// ✅ СУПЕР-ФИКС АВТОРИЗАЦИИ
+// ✅ ИНИЦИАЛИЗАЦИЯ
 document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submit-btn');
     if (submitBtn) {
