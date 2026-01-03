@@ -82,7 +82,8 @@
             </div>
             <div id="error"></div>
             <div class="modal-buttons">
-                <button class="modal-btn btn-primary" id="submit-btn">Войти</button>
+                <!-- ✅ ФИКС: onclick="authUser()" -->
+                <button class="modal-btn btn-primary" id="submit-btn" onclick="authUser()">Войти</button>
                 <button class="modal-btn btn-secondary" onclick="closeAuth()">Отмена</button>
             </div>
         </div>
