@@ -1,8 +1,7 @@
-from flask import Flask, render_template_string, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session
 import sqlite3
 import hashlib
 import os
-from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'aleksin-games-hub-2026-super-secret-final-v2')
@@ -34,7 +33,7 @@ def get_db():
 
 @app.route('/')
 def index():
-    return render_template_string(HTML_TEMPLATE)
+    return render_template('index.html')
 
 @app.route('/test')
 def test():
