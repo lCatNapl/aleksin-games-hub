@@ -276,55 +276,96 @@
             });
         };
 
-        function checkAuth() {
-            userToken = localStorage.getItem('userToken');
-            currentUser = localStorage.getItem('userName');
-            if (userToken && currentUser) {
-                document.getElementById('authSection').style.display = 'none';
-                document.getElementById('gamesSection').style.display = 'block';
-                document.getElementById('userInfo').style.display = 'flex';
-                document.getElementById('currentUser').textContent = currentUser;
-                updateAllTops();
-            }
-        }
+        // ✅ ИСПРАВЛЕННАЯ АВТОРИЗАЦИЯ
+function checkAuth() {
+    userToken = localStorage.getItem('userToken');
+    currentUser = localStorage.getItem('userName');
+    
+    if (userToken && currentUser) {
+        // ✅ ПРЯМО сразу показываем контент
+        document.getElementById('authSection').style.display = 'none';
+        document.getElementById('gamesSection').style.display = 'block';
+        document.getElementById('userInfo').style.display = 'flex';
+        document.getElementById('currentUser').textContent = currentUser;
+        updateAllTops();
+        return true;
+    }
+    return false;
+}
 
-        function login() {
-            const username = document.getElementById('usernameInput').value.trim();
-            const password = document.getElementById('passwordInput').value;
-            if (!username || password.length < 4) return showStatus('❌ Ник и пароль обязательны!', 'error');
-            
-            const savedPassword = localStorage.getItem(`user_${username}_pass`);
-            if (savedPassword === btoa(password)) {
-                userToken = btoa(username + Date.now());
-                localStorage.setItem('userToken', userToken);
-                localStorage.setItem('userName', username);
-                currentUser = username;
-                showStatus('✅ ВОШЁЛ! Легенда Алексина!', 'success');
-                setTimeout(checkAuth, 1500);
-            } else showStatus('❌ Неверный пароль!', 'error');
-        }
+function login() {
+    const username = document.getElementById('usernameInput').value.trim();
+    const password = document.getElementById('passwordInput').value;
+    
+    if (!username || password.length < 4) {
+        showStatus('❌ Ник и пароль (минимум 4 символа) обязательны!', 'error');
+        return;
+    }
 
-        function register() {
-            const username = document.getElementById('usernameInput').value.trim();
-            const password = document.getElementById('passwordInput').value;
-            if (!username || password.length < 4) return showStatus('❌ Ник и пароль обязательны!', 'error');
-            if (localStorage.getItem(`user_${username}_pass`)) return showStatus('❌ Ник занят!', 'error');
-            localStorage.setItem(`user_${username}_pass`, btoa(password));
-            showStatus('✅ Зарегистрирован! Войди.', 'success');
-        }
+    const savedPassword = localStorage.getItem(`user_${username}_pass`);
+    if (savedPassword && savedPassword === btoa(password)) {
+        // ✅ СОХРАНЯЕМ и сразу переключаем
+        userToken = btoa(username + Date.now());
+        localStorage.setItem('userToken', userToken);
+        localStorage.setItem('userName', username);
+        currentUser = username;
+        
+        showStatus('✅ ВОШЁЛ УСПЕШНО! Добро пожаловать!', 'success');
+        
+        // ✅ ПРЯМО сразу показываем игры БЕЗ setTimeout
+        document.getElementById('authSection').style.display = 'none';
+        document.getElementById('gamesSection').style.display = 'block';
+        document.getElementById('userInfo').style.display = 'flex';
+        document.getElementById('currentUser').textContent = currentUser;
+        updateAllTops();
+        
+    } else {
+        showStatus('❌ Неверный логин или пароль!', 'error');
+        document.getElementById('usernameInput').value = '';
+        document.getElementById('passwordInput').value = '';
+    }
+}
 
-        function logout() {
-            if (confirm('🚪 Выйти?')) {
-                localStorage.removeItem('userToken');
-                location.reload();
-            }
-        }
+function register() {
+    const username = document.getElementById('usernameInput').value.trim();
+    const password = document.getElementById('passwordInput').value;
+    
+    if (!username || password.length < 4) {
+        showStatus('❌ Ник и пароль (минимум 4 символа) обязательны!', 'error');
+        return;
+    }
 
-        function showStatus(msg, type) {
-            const el = document.getElementById('statusMessage');
-            el.textContent = msg;
-            el.style.color = type === 'success' ? '#00ff88' : '#ff4757';
-        }
+    if (localStorage.getItem(`user_${username}_pass`)) {
+        showStatus('❌ Ник уже занят!', 'error');
+        return;
+    }
+
+    localStorage.setItem(`user_${username}_pass`, btoa(password));
+    showStatus('✅ Регистрация успешна! Теперь войди.', 'success');
+}
+
+function logout() {
+    if (confirm('🚪 Выйти из аккаунта?')) {
+        localStorage.removeItem('userToken');
+        localStorage.removeItem('userName');
+        location.reload(); // ✅ Полный рефреш
+    }
+}
+
+function showStatus(message, type) {
+    const statusEl = document.getElementById('statusMessage');
+    statusEl.textContent = message;
+    statusEl.style.color = type === 'success' ? '#00ff88' : '#ff4757';
+    statusEl.style.fontSize = '1.2rem';
+    statusEl.style.fontWeight = 'bold';
+}
+
+// ✅ ИЗМЕНИ window.onload
+window.onload = () => {
+    checkAuth();  // ✅ Проверяем сразу
+    updateAllTops();
+    setInterval(autoSaveSnake, 30000);
+};
 
         // 🐍 ЗМЕЙКА НОВЫЙ ВИД
         function startSnakeGame() {
@@ -582,3 +623,4 @@
     </script>
 </body>
 </html>
+
