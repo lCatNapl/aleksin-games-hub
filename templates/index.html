@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 Aleksin Games Hub</title>
+    <title>🎮 ALEKSIN GAMES HUB</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -13,7 +13,8 @@
             background: linear-gradient(-45deg, #0f0f23, #1a1a2e, #16213e, #0f3460);
             background-size: 400% 400%;
             animation: gradientShift 15s ease infinite;
-            color: #e0e0e0; min-height: 100vh; overflow-x: hidden;
+            height: 100vh; overflow: hidden;
+            position: relative;
         }
         
         @keyframes gradientShift {
@@ -24,252 +25,233 @@
         
         .stars {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: 
-                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
-                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
-                radial-gradient(1px 1px at 90px 40px, #fff, transparent);
-            background-repeat: repeat; background-size: 100px 100px;
-            animation: sparkle 25s linear infinite; z-index: -1;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="10" cy="10" r="1" fill="%23ffffff" opacity="0.8"/><circle cx="90" cy="20" r="0.5" fill="%23ffffff" opacity="0.6"/><circle cx="30" cy="80" r="1.5" fill="%23ffffff" opacity="0.9"/></svg>') repeat;
+            animation: twinkle 3s linear infinite;
+            pointer-events: none;
         }
         
-        @keyframes sparkle { 100% { transform: translateY(50px); } }
+        @keyframes twinkle { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
         
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
-        
-        .logo h1 {
-            text-align: center; margin: 40px 0; font-size: clamp(3em, 8vw, 7em); font-weight: 900;
-            background: linear-gradient(45deg, #44ff44, #00ff88, #44ff44);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 60px rgba(68, 255, 68, 0.6); animation: glow 2s ease-in-out infinite alternate;
+        .container {
+            max-width: 1200px; margin: 0 auto; padding: 20px;
+            display: flex; flex-direction: column; height: 100vh;
         }
         
-        @keyframes glow { 
-            from { filter: drop-shadow(0 0 20px #44ff44); } 
-            to { filter: drop-shadow(0 0 50px #44ff44); } 
+        .header {
+            text-align: center; color: #44ff44; text-shadow: 0 0 20px #44ff44;
+            margin-bottom: 30px; animation: glow 2s ease-in-out infinite alternate;
         }
         
-        .status-bar {
-            background: rgba(0,0,0,0.85); backdrop-filter: blur(25px); border: 2px solid rgba(68,255,68,0.4);
-            border-radius: 25px; padding: 25px; margin-bottom: 40px; display: flex; justify-content: space-between;
-            align-items: center; box-shadow: 0 15px 50px rgba(0,255,0,0.2);
+        @keyframes glow { from { text-shadow: 0 0 20px #44ff44; } to { text-shadow: 0 0 30px #44ff44, 0 0 40px #44ff44; } }
+        
+        h1 { font-size: clamp(2rem, 5vw, 4rem); font-weight: 900; margin-bottom: 10px; }
+        
+        #status {
+            font-size: 1.5rem; padding: 15px 30px; border-radius: 50px;
+            background: linear-gradient(45deg, rgba(68,255,68,0.2), rgba(0,255,0,0.1));
+            border: 2px solid #44ff44; backdrop-filter: blur(10px);
+            display: inline-block; transition: all 0.3s ease;
         }
         
-        .welcome-screen {
-            min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: rgba(255,255,255,0.05); border-radius: 35px; border: 3px solid rgba(68,255,68,0.4);
-            backdrop-filter: blur(30px); text-align: center; padding: 80px 50px; margin-bottom: 40px;
+        #status.logged { background: linear-gradient(45deg, rgba(0,255,0,0.3), rgba(68,255,68,0.4)); }
+        
+        .auth-buttons, .logout-btn {
+            display: inline-flex; gap: 15px; margin: 20px 0;
         }
         
-        .games-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 35px;
-            margin-bottom: 40px;
+        .btn {
+            padding: 15px 30px; border: none; border-radius: 50px; font-family: 'Orbitron', sans-serif;
+            font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease;
+            background: linear-gradient(45deg, #44ff44, #00ff88); color: #000;
+            box-shadow: 0 10px 30px rgba(68,255,68,0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px) scale(1.05); box-shadow: 0 20px 40px rgba(68,255,68,0.6);
+        }
+        
+        .logout-btn { background: linear-gradient(45deg, #ff4444, #ff8888); color: #fff; }
+        
+        #welcomeScreen, #gamesMenu, #dashboard {
+            display: none; background: rgba(0,0,0,0.7); backdrop-filter: blur(20px);
+            border-radius: 30px; padding: 40px; margin: 20px 0; border: 2px solid #44ff44;
+        }
+        
+        #welcomeScreen { display: block; text-align: center; }
+        
+        .games-grid, .dashboard-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px; margin-top: 30px;
         }
         
         .game-card {
             background: linear-gradient(145deg, rgba(26,26,42,0.95), rgba(42,42,68,0.95));
-            border: 3px solid rgba(68,255,68,0.5); border-radius: 30px; padding: 45px; text-align: center;
-            cursor: pointer; transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 3px solid rgba(68,255,68,0.5); border-radius: 30px; padding: 45px;
+            text-align: center; cursor: pointer; transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             backdrop-filter: blur(20px); position: relative; overflow: hidden;
         }
         
-                .game-card::before {
+        .game-card::before {
             content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
             background: linear-gradient(90deg, transparent, rgba(68,255,68,0.3), transparent);
-            transition: left 0.6s; 
+            transition: left 0.6s;
         }
+        
         .game-card:hover::before { left: 100%; }
         .game-card:hover {
             transform: translateY(-20px) scale(1.03); border-color: #44ff44;
             box-shadow: 0 30px 80px rgba(68,255,68,0.5);
         }
         
-        .game-icon { font-size: 5.5em; margin-bottom: 25px; filter: drop-shadow(0 0 25px currentColor); }
-        .game-card h2 { font-size: 2.2em; margin-bottom: 20px; color: #44ff44; }
-        .game-card p { font-size: 1.2em; opacity: 0.95; }
+        .game-title { color: #44ff44; font-size: 1.8rem; font-weight: 700; margin-bottom: 15px; }
+        .game-desc { color: #88ff88; line-height: 1.6; }
         
-        .dashboard { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px; }
         .leaderboard, .tournament {
-            background: linear-gradient(145deg, rgba(0,0,0,0.9), rgba(20,20,50,0.9)); 
-            border: 3px solid rgba(68,255,68,0.4); border-radius: 30px; padding: 40px;
-            backdrop-filter: blur(25px); max-height: 450px; overflow-y: auto;
-            box-shadow: 0 20px 70px rgba(0,0,0,0.6);
+            background: linear-gradient(145deg, rgba(20,20,40,0.95), rgba(40,40,80,0.95));
+            border-radius: 25px; padding: 30px; margin: 20px 0;
         }
         
-        .leader-item, .tournament-item {
-            display: flex; justify-content: space-between; padding: 20px 25px; margin: 15px 0;
-            background: rgba(68,255,68,0.2); border-radius: 20px; font-size: 1.3em;
-            border-left: 5px solid #44ff44; transition: all 0.4s; font-weight: 700;
-        }
-        .leader-item:hover, .tournament-item:hover { 
-            background: rgba(68,255,68,0.35); transform: translateX(15px); 
+        .list-item {
+            display: flex; justify-content: space-between; padding: 15px;
+            background: rgba(68,255,68,0.1); margin: 10px 0; border-radius: 15px;
+            border-left: 4px solid #44ff44;
         }
         
         .modal {
-            display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); backdrop-filter: blur(15px);
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 1000;
         }
+        
         .modal-content {
-            background: linear-gradient(145deg, rgba(15,15,35,0.98), rgba(26,26,42,0.98));
-            margin: 5% auto; padding: 60px; border-radius: 35px; width: 90%; max-width: 550px;
-            border: 3px solid rgba(68,255,68,0.6); box-shadow: 0 40px 100px rgba(68,255,68,0.4);
-            backdrop-filter: blur(30px); animation: modalSlide 0.6s ease;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, #1a1a2e, #16213e); border-radius: 30px;
+            padding: 50px; border: 3px solid #44ff44; width: 90%; max-width: 500px;
+            box-shadow: 0 30px 100px rgba(68,255,68,0.5);
         }
         
-        @keyframes modalSlide { from { opacity: 0; transform: translateY(-60px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .modal-buttons { display: flex; gap: 20px; justify-content: center; margin-top: 35px; }
-        .modal-btn {
-            padding: 22px 50px; border: none; border-radius: 25px; cursor: pointer; font-size: 1.3em;
-            font-weight: 900; flex: 1; font-family: 'Orbitron', monospace; transition: all 0.4s;
-            text-transform: uppercase; letter-spacing: 2px;
+        .input-field {
+            width: 100%; padding: 20px; margin: 20px 0; border: 2px solid #44ff44;
+            border-radius: 25px; background: rgba(0,0,0,0.5); color: #fff;
+            font-family: 'Orbitron', sans-serif; font-size: 1.2rem; backdrop-filter: blur(10px);
         }
-        .btn-primary {
-            background: linear-gradient(45deg, #44ff44, #00ff88); color: #000;
-            box-shadow: 0 15px 45px rgba(68,255,68,0.5);
-        }
-        .btn-primary:hover { transform: translateY(-5px); box-shadow: 0 20px 60px rgba(68,255,68,0.7); }
-        .btn-secondary { background: rgba(100,100,100,0.9); color: white; }
-        #logout { padding: 15px 30px; border-radius: 20px; font-size: 1.1em; margin-left: 15px; }
         
-        input {
-            width: 100%; padding: 25px; font-size: 1.4em; border-radius: 25px; margin: 20px 0;
-            border: 3px solid rgba(68,255,68,0.5); background: rgba(0,0,0,0.8); color: #e0e0e0;
-            font-family: 'Orbitron', monospace; transition: all 0.4s; backdrop-filter: blur(15px);
-            text-align: center;
-        }
-        input:focus { outline: none; border-color: #44ff44; box-shadow: 0 0 30px rgba(68,255,68,0.6); }
+        .modal-buttons { display: flex; gap: 20px; justify-content: center; margin-top: 30px; }
+        .btn-primary { background: linear-gradient(45deg, #44ff44, #00ff88); }
+        .btn-secondary { background: linear-gradient(45deg, #666, #999); color: #fff; }
         
-        #warning-text {
-            background: linear-gradient(45deg, #ff4444, #ff8888); color: #000; padding: 25px;
-            border-radius: 20px; margin: 25px 0; display: none; font-weight: 900; text-align: center;
-            box-shadow: 0 15px 45px rgba(255,68,68,0.5); animation: shake 0.6s;
-        }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px); } 75% { transform: translateX(12px); } }
-        
-        #game-container { min-height: 600px; }
-        canvas { border: 5px solid #44ff44; border-radius: 25px; background: #000; 
-                 display: block; margin: 30px auto; box-shadow: 0 25px 80px rgba(68,255,68,0.5); }
+        canvas { border: 3px solid #44ff44; border-radius: 20px; background: #000; display: block; margin: 20px auto; }
         
         @media (max-width: 768px) {
-            .dashboard { grid-template-columns: 1fr; } .games-grid { grid-template-columns: 1fr; }
-            .status-bar { flex-direction: column; gap: 20px; text-align: center; }
+            .games-grid, .dashboard-grid { grid-template-columns: 1fr; }
+            .modal-content { padding: 30px; margin: 20px; }
         }
     </style>
 </head>
-<body>
-    <div class="stars"></div>
+<body class="stars">
     <div class="container">
-        <div class="logo">
+        <div class="header">
             <h1>🎮 ALEKSIN GAMES HUB</h1>
+            <div id="status">🔒 Гость 😴</div>
+            <div class="auth-buttons">
+                <button class="btn" onclick="showModal('login')">🔑 Вход</button>
+                <button class="btn" onclick="showModal('register')">📝 Регистрация</button>
+            </div>
+            <button id="logout" class="btn logout-btn" style="display:none;" onclick="logoutUser()">🚪 Выход</button>
         </div>
-        
-        <div class="status-bar">
-            <span id="status">🔍 Проверка...</span>
-            <div>
-                <button id="loginBtn" onclick="showAuth('login')" class="modal-btn btn-primary" style="padding:15px 30px;margin:0;">🔑 Вход</button>
-                <button id="registerBtn" onclick="showAuth('register')" class="modal-btn btn-primary" style="padding:15px 30px;margin:0;">📝 Регистрация</button>
-                <button id="logout" onclick="logout()" style="display:none;padding:15px 30px;">🚪 Выход</button>
+
+        <div id="welcomeScreen">
+            <h2>🔒 Зарегистрируйся или войди, чтобы открыть:</h2>
+            <div class="games-grid">
+                <div class="game-card">
+                    <div class="game-title">🐍 Змейка Про</div>
+                    <div class="game-desc">Свайпы 📱 • WASD • Градиент • Телепорт</div>
+                </div>
+                <div class="game-card">
+                    <div class="game-title">🎯 Угадай 1-10000</div>
+                    <div class="game-desc">🔥 Очень близко! • Безлимит • Топ очков</div>
+                </div>
             </div>
         </div>
-        
-        <div id="welcomeScreen" class="welcome-screen">
-            <h2 style="font-size:3.5em;margin-bottom:30px;color:#44ff44;text-shadow:0 0 30px #44ff44;">🚀 Добро пожаловать!</h2>
-            <p style="font-size:1.8em;max-width:700px;line-height:1.6;">
-                Войди или зарегистрируйся чтобы играть в <strong>🐍 Змейку</strong> и <strong>🎯 Угадайку 1-10000</strong>!<br>
-                Отслеживай <strong>🏆 Топ-10</strong> и участвуй в <strong>⚔️ Турнирах 24ч!</strong>
-            </p>
-        </div>
-        
-        <div class="games-grid" id="gamesMenu" style="display:none;">
+
+        <div id="gamesMenu" class="games-grid">
             <div class="game-card" onclick="loadSnakeGame()">
-                <div class="game-icon" style="color:lime;">🐍</div>
-                <h2>Змейка Про</h2>
-                <p>Свайпы 📱 • WASD • Градиент • Телепорт</p>
+                <div class="game-title">🐍 Змейка Про</div>
+                <div class="game-desc">Свайпы 📱 • WASD • Градиент • Телепорт</div>
             </div>
             <div class="game-card" onclick="loadGuessGame()">
-                <div class="game-icon" style="color:#ffaa00;">🎯</div>
-                <h2>Угадай 1-10000</h2>
-                <p>🔥 Очень близко! • Безлимит • Топ очков</p>
+                <div class="game-title">🎯 Угадай 1-10000</div>
+                <div class="game-desc">🔥 Очень близко! • Безлимит • Топ очков</div>
             </div>
         </div>
-        
-        <div id="game-container" style="display:none;"></div>
-        
-        <div class="dashboard" id="dashboard" style="display:none;">
+
+        <div id="dashboard" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
             <div class="leaderboard">
-                <h3 style="color:#44ff44;font-size:2em;margin-bottom:25px;">🏆 Топ-10 игроков</h3>
+                <h3 style="color: #44ff44; margin-bottom: 20px;">🏆 Топ-10 игроков</h3>
                 <div id="leaderboard-list">🔄 Загрузка...</div>
             </div>
             <div class="tournament">
-                <h3 style="color:#ffaa00;font-size:2em;margin-bottom:25px;">⚔️ Турнир (24ч)</h3>
-                <div id="tournament-info">🔄 Загрузка...</div>
+                <h3 style="color: #ffaa00; margin-bottom: 20px;">⚔️ Турнир (24ч)</h3>
+                <div id="tournament-list">🔄 Загрузка...</div>
             </div>
         </div>
     </div>
 
-    <div id="auth-modal" class="modal">
+    <!-- МОДАЛКИ АВТОРИЗАЦИИ -->
+    <div id="authModal" class="modal">
         <div class="modal-content">
-            <span onclick="closeAuth()" style="float:right;cursor:pointer;font-size:3em;color:#44ff44;">×</span>
-            <h2 id="modal-title" style="color:#44ff44;font-size:2.5em;margin-bottom:35px;">Авторизация</h2>
-            <div id="warning-text">⚠️ Этот логин уже существует!</div>
-            <input type="text" id="username" placeholder="👤 Логин (test)" maxlength="20">
-            <input type="password" id="password" placeholder="🔒 Пароль (123456)">
+            <h2 id="modalTitle">🔑 Вход</h2>
+            <input type="text" class="input-field" id="username" placeholder="👤 Имя пользователя">
+            <input type="password" class="input-field" id="password" placeholder="🔒 Пароль">
             <div class="modal-buttons">
-                <button class="modal-btn btn-primary" id="submit-btn">🚀 Войти</button>
-                <button class="modal-btn btn-secondary" onclick="closeAuth()">❌ Отмена</button>
+                <button class="btn btn-primary" id="submit-btn">🚀 Войти</button>
+                <button class="btn btn-secondary" onclick="closeAuth()">❌ Отмена</button>
             </div>
         </div>
     </div>
 
     <script>
-        let currentGame = ''; let isLoggedIn = false; let gameData = {score: 0};
-        let gameInterval = null; 
-        let snake = {x:25,y:25,dx:1,dy:0,cells:[],maxCells:4};
-        let food = {x:15,y:15}; 
-        let secretNumber = 0; 
-        let attempts = 0;
+        let currentGame = ''; let isLoggedIn = false;
+        let gameInterval = null; let snake = {x:20,y:20,dx:1,dy:0,cells:[],maxCells:4};
+        let food = {x:15,y:15}; let secretNumber = 0; let attempts = 0;
+        let statusInterval, leaderboardInterval;
 
-        // 🔥 КРИТИЧЕСКИЙ ФИКС СТАТУСА
+        // 🔥 ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ
+        window.addEventListener('load', () => {
+            console.log('🎮 ЗАПУСК ALEKSIN GAMES HUB');
+            setTimeout(checkUserStatus, 500);
+            statusInterval = setInterval(checkUserStatus, 2000);
+            initButtons();
+            setInterval(initButtons, 1000); // 🔥 НЕУНИЧТОЖИМЫЕ КНОПКИ
+        });
+
+        // 🔥 ПРОВЕРКА СТАТУСА (каждые 2 сек)
         async function checkUserStatus() {
-            console.log('🔍 Проверяем статус...');
             try {
                 const res = await fetch('/status', {credentials: 'include'});
                 const data = await res.json();
-                console.log('✅ СТАТУС ОТ СЕРВЕРА:', data);
+                console.log('✅ СТАТУС:', data);
                 
                 if (data.logged_in && data.username) {
-                    // 🎮 РЕЖИМ ИГРОКА - ВСЁ ПОКАЗЫВАЕМ
-                    document.getElementById('status').innerHTML = `👋 ${data.username} <span style="color:#44ff44;">✓</span>`;
+                    document.getElementById('status').innerHTML = `👋 ${data.username} ✓`;
+                    document.getElementById('status').className = 'logged';
                     document.getElementById('logout').style.display = 'inline-block';
-                    
                     document.getElementById('welcomeScreen').style.display = 'none';
                     document.getElementById('gamesMenu').style.display = 'grid';
                     document.getElementById('dashboard').style.display = 'grid';
-                    document.getElementById('game-container').style.display = 'block';
-                    
-                    isLoggedIn = true;
-                    loadLeaderboard();
-                    loadTournament();
-                    console.log('🎮 ✅ ИГРЫ ОТКРЫТЫ ДЛЯ', data.username);
-                    
+                    if (!leaderboardInterval) {
+                        leaderboardInterval = setInterval(() => { loadLeaderboard(); loadTournament(); }, 30000);
+                        loadLeaderboard(); loadTournament();
+                    }
                 } else {
-                    // 🔒 РЕЖИМ ГОСТЯ - ВСЁ СКРЫВАЕМ
-                    document.getElementById('status').innerHTML = '🔒 Гость - Войди для игр!';
+                    document.getElementById('status').innerHTML = '🔒 Гость 😴';
+                    document.getElementById('status').className = '';
                     document.getElementById('logout').style.display = 'none';
-                    
-                    document.getElementById('welcomeScreen').style.display = 'flex';
+                    document.getElementById('welcomeScreen').style.display = 'block';
                     document.getElementById('gamesMenu').style.display = 'none';
                     document.getElementById('dashboard').style.display = 'none';
-                    document.getElementById('game-container').style.display = 'none';
-                    
-                    isLoggedIn = false;
-                    console.log('🔒 ГОСТЬ - ИГРЫ СКРЫТЫ');
                 }
-            } catch (e) {
-                console.error('❌ ОШИБКА СТАТУСА:', e);
-                document.getElementById('status').textContent = '🔒 ОФФЛАЙН';
-                document.getElementById('gamesMenu').style.display = 'none';
-                isLoggedIn = false;
+            } catch(err) {
+                console.error('Статус:', err);
             }
         }
 
@@ -278,222 +260,241 @@
             const btn = document.getElementById('submit-btn');
             if (btn && !btn.dataset.fixed) {
                 btn.dataset.fixed = 'true';
-                btn.onclick = authUser; 
-                btn.onmousedown = authUser; 
-                btn.ontouchstart = authUser;
-                btn.onpointerdown = authUser;
-                console.log('🔥 КНОПКИ НЕУНИЧТОЖИМЫ!');
+                btn.onclick = submitAuth;
+                btn.onmousedown = submitAuth;
+                btn.ontouchstart = submitAuth;
+                btn.addEventListener('click', submitAuth);
+                btn.addEventListener('pointerdown', submitAuth);
+            }
+            
+            const logoutBtn = document.getElementById('logout');
+            if (logoutBtn) {
+                logoutBtn.onclick = logoutUser;
+                logoutBtn.onmousedown = logoutUser;
+                logoutBtn.ontouchstart = logoutUser;
+                logoutBtn.addEventListener('click', logoutUser);
+                logoutBtn.addEventListener('pointerdown', logoutUser);
             }
         }
 
-        async function authUser() {
-            console.log('🔥 КНОПКА НАЖАТА!');
-            const username = document.getElementById('username').value.trim();
+        function showModal(type) {
+            document.getElementById('authModal').style.display = 'block';
+            document.getElementById('modalTitle').textContent = type === 'login' ? '🔑 Вход' : '📝 Регистрация';
+            document.getElementById('username').focus();
+        }
+
+        function closeAuth() {
+            document.getElementById('authModal').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        async function submitAuth() {
+            const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('warning-text');
-            const mode = document.getElementById('modal-title').textContent;
             
-            if (!username || !password) {
-                errorDiv.textContent = '⚠️ Заполни Логин и Пароль!'; 
-                errorDiv.style.display = 'block'; 
-                return;
-            }
+            if (!username || !password) return alert('👤 Имя и 🔒 пароль обязательны!');
+            
+            const endpoint = document.getElementById('modalTitle').textContent.includes('Вход') ? '/login' : '/register';
             
             try {
-                const endpoint = mode.includes('Вход') ? 'login' : 'register';
-                console.log('📤 Отправляем на:', endpoint, username);
-                
-                const res = await fetch('/' + endpoint, {
-                    method: 'POST', 
-                    credentials: 'include',
+                const res = await fetch(endpoint, {
+                    method: 'POST',
                     headers: {'Content-Type': 'application/json'},
+                    credentials: 'include',
                     body: JSON.stringify({username, password})
                 });
                 const data = await res.json();
-                console.log('📥 Ответ сервера:', data);
                 
                 if (data.success) {
-                    // 🔥 ПРЯМАЯ ПЕРЕЗАГРУЗКА
-                    setTimeout(() => {
-                        checkUserStatus();
-                    }, 300);
-                    closeAuth(); 
-                    console.log('✅ ВОШЁЛ:', data.username);
+                    closeAuth();
+                    checkUserStatus();
                 } else {
-                    errorDiv.textContent = data.error || 'Ошибка сервера!'; 
-                    errorDiv.style.display = 'block';
+                    alert(data.error || '❌ Ошибка сервера');
                 }
-            } catch (e) {
-                console.error('❌ Auth error:', e); 
-                errorDiv.textContent = '❌ Нет связи с сервером!'; 
-                errorDiv.style.display = 'block';
+            } catch(err) {
+                alert('❌ Нет связи с сервером');
             }
         }
 
-        async function logout() {
-            console.log('🚪 Выход...');
+        // 🔥 ГАРАНТИРОВАННЫЙ ВЫХОД
+        async function logoutUser() {
+            console.log('🚪 ВЫХОД...');
             try {
-                await fetch('/logout', {method: 'POST', credentials: 'include'});
-                setTimeout(checkUserStatus, 500);
-                console.log('✅ ВЫШЕЛ');
-            } catch (e) { console.error('Logout error:', e); }
+                const res = await fetch('/logout', {method: 'POST', credentials: 'include'});
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('status').innerHTML = '🔒 Гость 😴';
+                    document.getElementById('status').className = '';
+                    document.getElementById('logout').style.display = 'none';
+                    document.getElementById('welcomeScreen').style.display = 'block';
+                    document.getElementById('gamesMenu').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'none';
+                    if (leaderboardInterval) {
+                        clearInterval(leaderboardInterval);
+                        leaderboardInterval = null;
+                    }
+                    if (gameInterval) {
+                        clearInterval(gameInterval);
+                        gameInterval = null;
+                    }
+                    console.log('✅ ВЫШЕЛ — Гость');
+                }
+            } catch(err) {
+                console.error('Выход:', err);
+                location.reload();
+            }
         }
 
-        function showAuth(mode) {
-            document.getElementById('auth-modal').style.display = 'block';
-            document.getElementById('modal-title').textContent = mode === 'login' ? '🔑 Вход' : '📝 Регистрация';
-            document.getElementById('username').value = ''; 
-            document.getElementById('password').value = '';
-            document.getElementById('warning-text').style.display = 'none'; 
-            setTimeout(initButtons, 100);
-        }
-
-        function closeAuth() { 
-            document.getElementById('auth-modal').style.display = 'none'; 
-        }
-
+        // 🏆 ТОП-10
         async function loadLeaderboard() {
             try {
                 const res = await fetch('/leaderboard');
-                const leaders = await res.json();
-                document.getElementById('leaderboard-list').innerHTML = 
-                    leaders.length ? 
-                    leaders.map((p,i) => `<div class="leader-item">${i+1}️⃣ ${p.username} - ${p.score.toLocaleString()}</div>`).join('') : 
-                    '👥 Никто не играл...';
-            } catch (e) { 
-                document.getElementById('leaderboard-list').innerHTML = '❌ Ошибка загрузки'; 
+                const top = await res.json();
+                const list = document.getElementById('leaderboard-list');
+                list.innerHTML = top.length ? 
+                    top.map((p, i) => `<div class="list-item"><span>#${i+1} ${p.username}</span><span>${p.score}</span></div>`).join('') :
+                    '<div class="list-item">Пусто 😴</div>';
+            } catch(err) {
+                document.getElementById('leaderboard-list').innerHTML = '❌ Ошибка';
             }
         }
 
+        // ⚔️ ТУРНИР 24ч
         async function loadTournament() {
             try {
                 const res = await fetch('/tournament');
-                const data = await res.json();
-                const info = document.getElementById('tournament-info');
-                if (data.active) {
-                    const timeLeft = new Date(data.end_time) - Date.now();
-                    const hours = Math.floor(timeLeft / 3600000);
-                    const minutes = Math.floor((timeLeft % 3600000) / 60000);
-                    info.innerHTML = `⏰ <strong style="color:#44ff44;">${hours}ч ${minutes}м</strong><br>` + 
-                        (Object.entries(data.scores || {}).length ? 
-                         Object.entries(data.scores).slice(0,5).map(([u,s],i) => 
-                            `<div class="tournament-item">${i+1}️⃣ ${u}: <strong style="color:#ffaa00;">${s}</strong></div>`).join('') : 
-                         '🎯 Будь первым!');
-                }
-            } catch (e) { 
-                document.getElementById('tournament-info').innerHTML = '❌ Ошибка'; 
+                const top = await res.json();
+                const list = document.getElementById('tournament-list');
+                list.innerHTML = top.length ? 
+                    top.map((p, i) => `<div class="list-item"><span>#${i+1} ${p.username}</span><span>${p.score}</span></div>`).join('') :
+                    '<div class="list-item">Никто не играл</div>';
+            } catch(err) {
+                document.getElementById('tournament-list').innerHTML = '❌ Ошибка';
             }
         }
 
-        async function saveScore() {
-            if (!isLoggedIn || gameData.score === 0) return;
-            try {
-                await fetch('/save_score', {
-                    method: 'POST', 
-                    credentials: 'include',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({score: gameData.score})
-                });
-                loadLeaderboard(); loadTournament();
-                console.log('💾 Очки сохранены:', gameData.score);
-            } catch (e) { console.error('Save score error:', e); }
-        }
-
-        // 🐍 ЗМЕЙКА (полная)
+        // 🐍 ЗМЕЙКА ПРО
         function loadSnakeGame() {
             currentGame = 'snake';
-            document.getElementById('game-container').innerHTML = `
-                <canvas id="gameCanvas" width="500" height="500"></canvas>
-                <div style="text-align:center;font-size:24px;">
-                    <div style="color:#44ff44;">Счёт: <span id="snakeScore">0</span> | Рекорд: <span id="snakeHighscore">0</span></div>
-                    <div style="color:#e0e0e0;">📱 Свайпы • WASD • Клик=рестарт</div>
+            const html = `
+                <canvas id="gameCanvas" width="400" height="400"></canvas>
+                <div style="text-align:center;color:#44ff44;font-size:1.5rem;margin:20px 0;">
+                    Очки: <span id="snakeScore">0</span> | Счёт: <span id="highScoreSnake">0</span>
+                    <br><small>📱 Свайпы | ↑←↓→ WASD</small>
                 </div>
+                <button class="btn" onclick="saveSnakeScore()" style="margin:20px">💾 Сохранить в топ</button>
             `;
-            
+            document.querySelector('#gamesMenu').innerHTML = html;
+            initSnakeGame();
+        }
+
+        function initSnakeGame() {
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
-            snake = {x:25,y:25,dx:1,dy:0,cells:[],maxCells:4};
-            food = {x:Math.floor(Math.random()*49),y:Math.floor(Math.random()*49)};
-            
-            // Touch controls
-            let touchStartX = 0, touchStartY = 0;
+            let score = 0; let highScore = localStorage.getItem('snakeHigh') || 0;
+            document.getElementById('highScoreSnake').textContent = highScore;
+
+            function createFood() {
+                food.x = Math.floor(Math.random() * 38) + 1;
+                food.y = Math.floor(Math.random() * 38) + 1;
+                for (let cell of snake.cells) {
+                    if (cell.x === food.x && cell.y === food.y) createFood();
+                }
+            }
+
+            function update() {
+                ctx.fillStyle = 'rgb(0,0,0)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.save();
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                gradient.addColorStop(0, '#00ff88');
+                gradient.addColorStop(1, '#44ff44');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(10 + food.x * 10, 10 + food.y * 10, 8, 8);
+                ctx.restore();
+
+                snake.x += snake.dx;
+                snake.y += snake.dy;
+
+                if (snake.x < 0) snake.x = 39;
+                if (snake.x > 39) snake.x = 0;
+                if (snake.y < 0) snake.y = 39;
+                if (snake.y > 39) snake.y = 0;
+
+                snake.cells.unshift({x: snake.x, y: snake.y});
+                if (snake.cells.length > snake.maxCells) snake.cells.pop();
+
+                if (snake.x === food.x && snake.y === food.y) {
+                    snake.maxCells++;
+                    score += 10;
+                    document.getElementById('snakeScore').textContent = score;
+                    createFood();
+                }
+
+                for (let cell of snake.cells) {
+                    ctx.fillStyle = 'lime';
+                    ctx.fillRect(10 + cell.x * 10, 10 + cell.y * 10, 8, 8);
+                }
+
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('snakeHigh', highScore);
+                    document.getElementById('highScoreSnake').textContent = highScore;
+                }
+            }
+
+            gameInterval = setInterval(update, 150);
+
+            let touchStartX, touchStartY;
             canvas.addEventListener('touchstart', (e) => {
-                e.preventDefault(); touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+                e.preventDefault();
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
             }, {passive: false});
+
             canvas.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 const diffX = touchStartX - e.changedTouches[0].clientX;
                 const diffY = touchStartY - e.changedTouches[0].clientY;
                 if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
                     if (diffX > 0 && snake.dx !== 1) { snake.dx = -1; snake.dy = 0; }
-                    else if (diffX < 0 && snake.dx !== -1) { snake.dx = 1;                     snake.dy = 0; }
+                    else if (diffX < 0 && snake.dx !== -1) { snake.dx = 1; snake.dy = 0; }
                 } else if (Math.abs(diffY) > 30) {
                     if (diffY > 0 && snake.dy !== 1) { snake.dx = 0; snake.dy = -1; }
                     else if (diffY < 0 && snake.dy !== -1) { snake.dx = 0; snake.dy = 1; }
                 }
             }, {passive: false});
 
-            // Keyboard
             document.addEventListener('keydown', (e) => {
                 if (currentGame !== 'snake') return;
                 switch(e.key.toLowerCase()) {
-                    case 'arrowleft': case 'a': if (snake.dx !== 1) { snake.dx = -1; snake.dy = 0; } break;
-                    case 'arrowup': case 'w': if (snake.dy !== 1) { snake.dx = 0; snake.dy = -1; } break;
-                    case 'arrowright': case 'd': if (snake.dx !== -1) { snake.dx = 1; snake.dy = 0; } break;
-                    case 'arrowdown': case 's': if (snake.dy !== -1) { snake.dx = 0; snake.dy = 1; } break;
+                    case 'arrowleft':  if (snake.dx !== 1) { snake.dx = -1; snake.dy = 0; } break;
+                    case 'arrowup':    if (snake.dy !== 1) { snake.dx = 0; snake.dy = -1; } break;
+                    case 'arrowright': if (snake.dx !== -1) { snake.dx = 1; snake.dy = 0; } break;
+                    case 'arrowdown':  if (snake.dy !== -1) { snake.dx = 0; snake.dy = 1; } break;
+                    case 'a': if (snake.dx !== 1) { snake.dx = -1; snake.dy = 0; } break;
+                    case 'w': if (snake.dy !== 1) { snake.dx = 0; snake.dy = -1; } break;
+                    case 'd': if (snake.dx !== -1) { snake.dx = 1; snake.dy = 0; } break;
+                    case 's': if (snake.dy !== -1) { snake.dx = 0; snake.dy = 1; } break;
                 }
             });
+        }
 
-            function updateSnake() {
-                snake.x += snake.dx; snake.y += snake.dy;
-                if (snake.x < 0) snake.x = 49; if (snake.y < 0) snake.y = 49;
-                if (snake.x > 49) snake.x = 0; if (snake.y > 49) snake.y = 0;
-                
-                snake.cells.unshift({x: snake.x, y: snake.y});
-                if (snake.cells.length > snake.maxCells) snake.cells.pop();
-                
-                if (snake.x === food.x && snake.y === food.y) {
-                    snake.maxCells++; food.x = Math.floor(Math.random()*50); 
-                    food.y = Math.floor(Math.random()*50);
+        function saveSnakeScore() {
+            const score = parseInt(document.getElementById('snakeScore').textContent) || 0;
+            fetch('/save_score', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
+                body: JSON.stringify({game: 'snake', score})
+            }).then(res => res.json()).then(data => {
+                if (data.success) {
+                    alert(`✅ ${score} очков в топ!`);
+                    loadSnakeGame();
                 }
-                
-                for (let cell of snake.cells.slice(1)) {
-                    if (snake.x === cell.x && snake.y === cell.y) { gameOver(); return; }
-                }
-                
-                ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, 500, 500);
-                const gradient = ctx.createLinearGradient(0, 0, 500, 500);
-                gradient.addColorStop(0, '#44ff44'); gradient.addColorStop(1, '#00ff88');
-                ctx.fillStyle = gradient;
-                snake.cells.forEach((cell, i) => {
-                    ctx.fillRect(cell.x*10+1, cell.y*10+1, 9-(i*0.15), 9-(i*0.15));
-                });
-                
-                ctx.shadowColor = '#ff4444'; ctx.shadowBlur = 20;
-                ctx.fillStyle = '#ff4444';
-                ctx.beginPath(); ctx.arc(food.x*10+5, food.y*10+5, 5+Math.sin(Date.now()*0.01), 0, Math.PI*2);
-                ctx.fill(); ctx.shadowBlur = 0;
-                
-                document.getElementById('snakeScore').textContent = snake.cells.length - 4;
-                gameData.score = snake.cells.length - 4;
-            }
-            
-            function gameOver() {
-                if (gameInterval) clearInterval(gameInterval);
-                ctx.fillStyle = 'rgba(255,68,68,0.9)'; ctx.fillRect(0, 0, 500, 500);
-                ctx.fillStyle = '#fff'; ctx.font = 'bold 40px Orbitron'; ctx.textAlign = 'center';
-                ctx.fillText('GAME OVER', 250, 220); ctx.font = 'bold 32px Orbitron';
-                ctx.fillText(`Счёт: ${gameData.score}`, 250, 270); ctx.font = '26px Orbitron';
-                ctx.fillText('Кликни для рестарта', 250, 320); saveScore();
-            }
-            
-            canvas.onclick = () => {
-                if (gameInterval) clearInterval(gameInterval);
-                snake = {x:25,y:25,dx:1,dy:0,cells:[],maxCells:4};
-                food = {x:Math.floor(Math.random()*49),y:Math.floor(Math.random()*49)};
-                gameData.score = 0; gameInterval = setInterval(updateSnake, 130);
-            };
-            gameInterval = setInterval(updateSnake, 130);
+            });
         }
 
         // 🎯 УГАДАЙКА 1-10000
@@ -501,72 +502,80 @@
             currentGame = 'guess';
             secretNumber = Math.floor(Math.random() * 10000) + 1;
             attempts = 0;
-            document.getElementById('game-container').innerHTML = `
-                <div style="text-align:center;padding:40px;background:rgba(0,0,0,0.9);border-radius:30px;border:4px solid #ffaa00;max-width:600px;margin:30px auto;backdrop-filter:blur(25px);">
-                    <h1 style="font-size:3.5em;background:linear-gradient(45deg,#ffaa00,#44ff44);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:25px;">🎯 Угадай число!</h1>
-                    <div style="font-size:1.8em;margin:30px 0;">
-                        <span style="color:#44ff44;">Ходов: <span id="attempts" style="font-size:2.2em;font-weight:900;">0</span></span>
-                        <span style="color:#ffaa00;"> | Очки: <span id="score" style="font-size:2.2em;font-weight:900;">10000</span></span>
-                    </div>
-                    <div style="margin:40px 0;">
-                        <input type="number" id="guessInput" min="1" max="10000" placeholder="1-10000" 
-                               style="padding:30px 25px;font-size:2em;width:400px;border-radius:25px;border:4px solid #ffaa00;background:rgba(0,0,0,0.95);color:#e0e0e0;text-align:center;font-family:'Orbitron';margin-bottom:25px;">
-                        <br><button id="submitGuess" style="padding:25px 80px;font-size:1.8em;background:linear-gradient(45deg,#ffaa00,#44ff44);color:#000;border:none;border-radius:25px;cursor:pointer;font-weight:900;font-family:'Orbitron';text-transform:uppercase;">🔥 Проверить</button>
-                    </div>
-                    <div id="hint" style="font-size:3em;font-weight:900;min-height:100px;margin:40px 0;"></div>
+            const html = `
+                <h2 style="color:#44ff44;text-align:center;">🎯 Угадай число от 1 до 10000</h2>
+                <canvas id="guessCanvas" width="400" height="200" style="margin:20px auto;display:block;"></canvas>
+                <div style="text-align:center;">
+                    <input type="number" id="guessInput" min="1" max="10000" 
+                           style="padding:15px;width:200px;font-size:1.5rem;border:2px solid #44ff44;border-radius:20px;background:rgba(0,0,0,0.7);color:#44ff44;font-family:'Orbitron';">
+                    <br><button class="btn" onclick="checkGuess()" style="margin:20px;font-size:1.2rem;">🔍 Проверить</button>
+                    <div id="guessFeedback" style="font-size:2rem;color:#44ff44;margin:20px;font-weight:700;"></div>
+                    <div>Ходов: <span id="attempts">0</span> | Очки: <span id="guessScore">10000</span></div>
+                    <button class="btn" onclick="newGame()">🔄 Новая игра</button>
+                    <br><button class="btn" onclick="saveGuessScore()" style="margin-top:20px;">💾 В топ</button>
                 </div>
             `;
-            
-            document.getElementById('submitGuess').onclick = checkGuess;
-            document.getElementById('guessInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') checkGuess();
-            });
+            document.querySelector('#gamesMenu').innerHTML = html;
             document.getElementById('guessInput').focus();
         }
 
         function checkGuess() {
-            const input = document.getElementById('guessInput');
-            const guess = parseInt(input.value); attempts++;
-            
-            if (isNaN(guess) || guess < 1 || guess > 10000) {
-                document.getElementById('hint').innerHTML = '<span style="color:#ff4444;">❌ 1-10000!</span>';
-                input.value = ''; input.focus(); return;
-            }
-            
-            let hint = '', color = '#ffaa00';
-            if (guess === secretNumber) {
-                const score = Math.max(0, 10000 - attempts * 5);
-                gameData.score = score; saveScore();
-                hint = `🎉 <span style="color:#44ff44;">УГДАЛ ЗА ${attempts}!</span><br>⭐ ${score.toLocaleString()}`;
-                setTimeout(() => {
-                    alert(`🎉 ${score.toLocaleString()} ОЧКОВ!\nНовая игра началась!`);
-                    secretNumber = Math.floor(Math.random() * 10000) + 1; attempts = 0;
-                }, 2000);
-            } else if (guess < secretNumber) {
-                const diff = secretNumber - guess;
-                if (diff <= 50) hint = '🔥 ОЧЕНЬ БЛИЗКО! ➕'; color = '#ff4444';
-                else if (diff <= 200) hint = '➕ Больше!'; else hint = '📈 Намного больше!';
-            } else {
-                const diff = guess - secretNumber;
-                if (diff <= 50) hint = '🔥 ОЧЕНЬ БЛИЗКО! ➖'; color = '#ff4444';
-                else if (diff <= 200) hint = '➖ Меньше!'; else hint = '📉 Намного меньше!';
-            }
-            
+            const guess = parseInt(document.getElementById('guessInput').value);
+            attempts++;
             document.getElementById('attempts').textContent = attempts;
-            document.getElementById('score').textContent = Math.max(0, 10000 - attempts * 5);
-            document.getElementById('hint').innerHTML = `<span style="color:${color};">${hint}</span>`;
-            input.value = ''; input.focus();
+            
+            const score = Math.max(0, 10000 - attempts * 5);
+            document.getElementById('guessScore').textContent = score;
+
+            const diff = Math.abs(guess - secretNumber);
+            let feedback = '';
+
+            if (diff === 0) {
+                feedback = `🎉 УГАДАЛ! ${secretNumber} за ${attempts} ходов! 🔥`;
+                document.getElementById('guessFeedback').style.color = '#ffd700';
+            } else if (diff <= 50) {
+                feedback = '🔥 ОЧЕНЬ БЛИЗКО!';
+                document.getElementById('guessFeedback').style.color = '#ffaa00';
+            } else if (diff <= 200) {
+                feedback = guess < secretNumber ? '➕ Больше!' : '➖ Меньше!';
+                document.getElementById('guessFeedback').style.color = '#44ff44';
+            } else {
+                feedback = guess < secretNumber ? '📈 Намного больше!' : '📉 Намного меньше!';
+                document.getElementById('guessFeedback').style.color = '#8888ff';
+            }
+
+            document.getElementById('guessFeedback').textContent = feedback;
+            document.getElementById('guessInput').value = '';
+            document.getElementById('guessInput').focus();
         }
 
-        // 🔥 АВТОФИКСЫ
-        setInterval(initButtons, 500);
-        setInterval(checkUserStatus, 2000);
+        function newGame() {
+            secretNumber = Math.floor(Math.random() * 10000) + 1;
+            attempts = 0;
+            document.getElementById('attempts').textContent = 0;
+            document.getElementById('guessScore').textContent = 10000;
+            document.getElementById('guessFeedback').textContent = '';
+            document.getElementById('guessInput').focus();
+        }
 
-        // 🚀 ЗАПУСК
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🎮 ЗАПУСК ALEKSIN GAMES HUB');
-            setTimeout(checkUserStatus, 500);
-            setInterval(() => { if (isLoggedIn) { loadLeaderboard(); loadTournament(); } }, 30000);
+        function saveGuessScore() {
+            const score = parseInt(document.getElementById('guessScore').textContent) || 0;
+            fetch('/save_score', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include',
+                body: JSON.stringify({game: 'guess', score})
+            }).then(res => res.json()).then(data => {
+                if (data.success) {
+                    alert(`✅ ${score} очков в топ!`);
+                    loadGuessGame();
+                }
+            });
+        }
+
+        // Enter в поле ввода
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && currentGame === 'guess') checkGuess();
         });
     </script>
 </body>
