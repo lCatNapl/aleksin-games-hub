@@ -10,18 +10,27 @@
 
         body {
             font-family: 'Exo 2', sans-serif;
-            background: linear-gradient(-45deg, #0f0f23, #1a0033, #2d004f, #0f0f23);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            /* ✨ МЕГА НЕОНОВЫЙ ФОН */
+            background: linear-gradient(-45deg, #0f0f23, #1a0033, #2d004f, #0f0f23),
+                        radial-gradient(circle at 20% 80%, rgba(120,119,198,0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255,119,198,0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(120,219,255,0.3) 0%, transparent 50%);
+            background-size: 400% 400%, 200% 200%, 200% 200%, 200% 200%;
+            animation: megaNeonBg 20s ease infinite, neonPulse 4s ease-in-out infinite alternate;
             color: #fff;
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        @keyframes megaNeonBg {
+            0% { background-position: 0% 50%, 20% 80%, 80% 20%, 40% 40%; }
+            50% { background-position: 100% 50%, 80% 20%, 20% 80%, 60% 60%; }
+            100% { background-position: 0% 50%, 20% 80%, 80% 20%, 40% 40%; }
+        }
+
+        @keyframes neonPulse {
+            from { filter: hue-rotate(0deg) brightness(1); }
+            to { filter: hue-rotate(60deg) brightness(1.1); }
         }
 
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
@@ -161,7 +170,7 @@
         <div id="gamesSection">
             <div class="header">
                 <h1 class="title">ALEKSIN GAMES HUB 2026</h1>
-                <p class="subtitle">🐍 ЗМЕЙКА | 🎯 УГАДАЙКА | 🏆 ОТДЕЛЬНЫЕ ТОПЫ | ⚔️ ТУРНИРЫ</p>
+                <p class="subtitle">🐍 ЗМЕЙКА | 🎯 УГАДАЙКА | 🏆 ОТДЕЛЬНЫЕ ТОПЫ | ✨ МЕГА НЕОН</p>
             </div>
 
             <div class="games-grid">
@@ -170,8 +179,8 @@
                     <div class="game-icon" style="color: #00ff88;">🐍</div>
                     <div class="game-title">Змейка Pro 4.0</div>
                     <div class="features">
-                        <span class="feature">🌈 Красивый градиент</span>
-                        <span class="feature">🧱 Стены + сложности</span>
+                        <span class="feature">🌈 3D градиент + свечение</span>
+                        <span class="feature">🧱 Стены + 3 сложности</span>
                         <span class="feature">📱 Свайпы + WASD</span>
                     </div>
                     <select id="wallDifficulty">
@@ -211,14 +220,6 @@
                     <div class="lb-title">🎯 ТОП-10 УГАДАЙКА</div>
                     <ul class="lb-list" id="guessTop10"></ul>
                     <button class="btn btn-primary" onclick="updateGuessTop10()" style="width: 100%; margin-top: 15px;">🔄 ОБНОВИТЬ</button>
-                </div>
-                <div class="leaderboard-card">
-                    <div class="lb-title">⚔️ ТУРНИР ЗМЕЙКА</div>
-                    <ul class="lb-list" id="snakeTournament"></ul>
-                </div>
-                <div class="leaderboard-card">
-                    <div class="lb-title">⚔️ ТУРНИР УГАДАЙКА</div>
-                    <ul class="lb-list" id="guessTournament"></ul>
                 </div>
             </div>
         </div>
@@ -265,111 +266,103 @@
         let currentSecret = 0, minRange = 1, maxRange = 1000, guessAttempts = 0, guessDifficulty = 0;
         const GUESS_RANGES = [[1000, 1], [10000, 1], [100000, 1]];
 
-        // 🔐 АВТОРИЗАЦИЯ
-        window.onload = () => {
+        // ✅ ПРАВИЛЬНАЯ ИНИЦИАЛИЗАЦИЯ (DOMContentLoaded вместо window.onload)
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔥 ALEKSIN GAMES HUB 2026 ЗАГРУЖЕН!');
             checkAuth();
             updateAllTops();
-            // Автосохранение каждые 30 сек
             setInterval(autoSaveSnake, 30000);
+            
+            // Спящий режим
             document.addEventListener('visibilitychange', function() {
                 if (!document.hidden) updateAllTops();
             });
-        };
+        });
 
-        // ✅ ИСПРАВЛЕННАЯ АВТОРИЗАЦИЯ
-function checkAuth() {
-    userToken = localStorage.getItem('userToken');
-    currentUser = localStorage.getItem('userName');
-    
-    if (userToken && currentUser) {
-        // ✅ ПРЯМО сразу показываем контент
-        document.getElementById('authSection').style.display = 'none';
-        document.getElementById('gamesSection').style.display = 'block';
-        document.getElementById('userInfo').style.display = 'flex';
-        document.getElementById('currentUser').textContent = currentUser;
-        updateAllTops();
-        return true;
-    }
-    return false;
-}
+        // 🔐 ИСПРАВЛЕННАЯ АВТОРИЗАЦИЯ
+        function checkAuth() {
+            userToken = localStorage.getItem('userToken');
+            currentUser = localStorage.getItem('userName');
+            
+            if (userToken && currentUser) {
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('gamesSection').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('currentUser').textContent = currentUser;
+                updateAllTops();
+                return true;
+            }
+            return false;
+        }
 
-function login() {
-    const username = document.getElementById('usernameInput').value.trim();
-    const password = document.getElementById('passwordInput').value;
-    
-    if (!username || password.length < 4) {
-        showStatus('❌ Ник и пароль (минимум 4 символа) обязательны!', 'error');
-        return;
-    }
+        function login() {
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            
+            if (!username || password.length < 4) {
+                showStatus('❌ Ник и пароль (минимум 4 символа) обязательны!', 'error');
+                return;
+            }
 
-    const savedPassword = localStorage.getItem(`user_${username}_pass`);
-    if (savedPassword && savedPassword === btoa(password)) {
-        // ✅ СОХРАНЯЕМ и сразу переключаем
-        userToken = btoa(username + Date.now());
-        localStorage.setItem('userToken', userToken);
-        localStorage.setItem('userName', username);
-        currentUser = username;
-        
-        showStatus('✅ ВОШЁЛ УСПЕШНО! Добро пожаловать!', 'success');
-        
-        // ✅ ПРЯМО сразу показываем игры БЕЗ setTimeout
-        document.getElementById('authSection').style.display = 'none';
-        document.getElementById('gamesSection').style.display = 'block';
-        document.getElementById('userInfo').style.display = 'flex';
-        document.getElementById('currentUser').textContent = currentUser;
-        updateAllTops();
-        
-    } else {
-        showStatus('❌ Неверный логин или пароль!', 'error');
-        document.getElementById('usernameInput').value = '';
-        document.getElementById('passwordInput').value = '';
-    }
-}
+            const savedPassword = localStorage.getItem(`user_${username}_pass`);
+            if (savedPassword && savedPassword === btoa(password)) {
+                userToken = btoa(username + Date.now());
+                localStorage.setItem('userToken', userToken);
+                localStorage.setItem('userName', username);
+                currentUser = username;
+                
+                showStatus('✅ ВОШЁЛ УСПЕШНО! Добро пожаловать, легенда!', 'success');
+                
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('gamesSection').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('currentUser').textContent = currentUser;
+                updateAllTops();
+                
+            } else {
+                showStatus('❌ Неверный логин или пароль!', 'error');
+                document.getElementById('usernameInput').value = '';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
 
-function register() {
-    const username = document.getElementById('usernameInput').value.trim();
-    const password = document.getElementById('passwordInput').value;
-    
-    if (!username || password.length < 4) {
-        showStatus('❌ Ник и пароль (минимум 4 символа) обязательны!', 'error');
-        return;
-    }
+        function register() {
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            
+            if (!username || password.length < 4) {
+                showStatus('❌ Ник и пароль (минимум 4 символа) обязательны!', 'error');
+                return;
+            }
 
-    if (localStorage.getItem(`user_${username}_pass`)) {
-        showStatus('❌ Ник уже занят!', 'error');
-        return;
-    }
+            if (localStorage.getItem(`user_${username}_pass`)) {
+                showStatus('❌ Этот ник уже занят!', 'error');
+                return;
+            }
 
-    localStorage.setItem(`user_${username}_pass`, btoa(password));
-    showStatus('✅ Регистрация успешна! Теперь войди.', 'success');
-}
+            localStorage.setItem(`user_${username}_pass`, btoa(password));
+            showStatus('✅ Регистрация успешна! Теперь войди.', 'success');
+        }
 
-function logout() {
-    if (confirm('🚪 Выйти из аккаунта?')) {
-        localStorage.removeItem('userToken');
-        localStorage.removeItem('userName');
-        location.reload(); // ✅ Полный рефреш
-    }
-}
+        function logout() {
+            if (confirm('🚪 Выйти из аккаунта?')) {
+                localStorage.removeItem('userToken');
+                localStorage.removeItem('userName');
+                location.reload();
+            }
+        }
 
-function showStatus(message, type) {
-    const statusEl = document.getElementById('statusMessage');
-    statusEl.textContent = message;
-    statusEl.style.color = type === 'success' ? '#00ff88' : '#ff4757';
-    statusEl.style.fontSize = '1.2rem';
-    statusEl.style.fontWeight = 'bold';
-}
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.style.color = type === 'success' ? '#00ff88' : '#ff4757';
+            statusEl.style.fontSize = '1.2rem';
+            statusEl.style.fontWeight = 'bold';
+        }
 
-// ✅ ИЗМЕНИ window.onload
-window.onload = () => {
-    checkAuth();  // ✅ Проверяем сразу
-    updateAllTops();
-    setInterval(autoSaveSnake, 30000);
-};
-
-        // 🐍 ЗМЕЙКА НОВЫЙ ВИД
+        // 🐍 ЗМЕЙКА (КРАСИВЫЙ НОВЫЙ ВИД)
         function startSnakeGame() {
-            if (!currentUser) return alert('🔐 Войди!');
+            if (!currentUser) return alert('🔐 Войди для игры!');
             wallDifficulty = parseInt(document.getElementById('wallDifficulty').value);
             setupWalls();
             snakeScore = 0;
@@ -408,7 +401,7 @@ window.onload = () => {
 
             ctx.clearRect(0, 0, 400, 400);
             
-            // ✨ НОВЫЕ СТЕНЫ (квадраты с градиентом)
+            // Стены
             walls.forEach(wall => {
                 const grad = ctx.createLinearGradient(wall.x*10, wall.y*10, wall.x*10+10, wall.y*10+10);
                 grad.addColorStop(0, '#666'); grad.addColorStop(1, '#333');
@@ -418,7 +411,7 @@ window.onload = () => {
                 ctx.shadowBlur = 0;
             });
 
-            // ✨ ЕДА (пульсирующий круг)
+            // Пульсирующая еда
             const pulse = Math.sin(currentTime * 0.01) * 2 + 4;
             const foodGrad = ctx.createRadialGradient(food.x*10+5, food.y*10+5, 0, food.x*10+5, food.y*10+5, pulse);
             foodGrad.addColorStop(0, '#ff6b9d'); foodGrad.addColorStop(0.7, '#ff4757'); foodGrad.addColorStop(1, '#8b0000');
@@ -426,7 +419,7 @@ window.onload = () => {
             ctx.beginPath(); ctx.arc(food.x*10+5, food.y*10+5, pulse, 0, Math.PI*2); ctx.fill();
             ctx.shadowBlur = 0;
 
-            // Движение
+            // Движение змейки
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
             if (head.x < 1 || head.x > 39 || head.y < 1 || head.y > 39 || 
                 walls.some(w => w.x === head.x && w.y === head.y) ||
@@ -440,15 +433,14 @@ window.onload = () => {
                 snakeScore += 10;
                 document.getElementById('snakeScore').textContent = snakeScore;
                 spawnFood();
-                autoSaveSnake(); // Автосохранение при еде
+                autoSaveSnake();
             } else snake.pop();
 
-            // ✨ КРАСИВАЯ ЗМЕЙКА (3D эффект + градиент + свечение)
+            // Красивая змейка 3D
             for (let i = 0; i < snake.length; i++) {
                 const size = i === 0 ? 9 : 8;
                 const glow = i === 0 ? 25 : 15;
                 
-                // Основной градиент тела
                 const bodyGrad = ctx.createLinearGradient(
                     snake[i].x*10+1, snake[i].y*10+1, 
                     snake[i].x*10+1+size, snake[i].y*10+1+size
@@ -457,19 +449,16 @@ window.onload = () => {
                 bodyGrad.addColorStop(0.5, i === 0 ? '#00bfff' : '#1a0033');
                 bodyGrad.addColorStop(1, '#0a001a');
                 
-                // Тень для 3D
                 ctx.shadowColor = '#000'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
                 ctx.fillStyle = 'rgba(0,0,0,0.3)';
                 ctx.fillRect(snake[i].x*10+2, snake[i].y*10+3, size, size-2);
                 
-                // Основное тело
                 ctx.shadowColor = i === 0 ? '#00ff88' : '#00bfff';
                 ctx.shadowBlur = glow;
                 ctx.fillStyle = bodyGrad;
                 ctx.fillRect(snake[i].x*10+1, snake[i].y*10+1, size, size);
                 ctx.shadowBlur = 0;
                 
-                // Блик на голове
                 if (i === 0) {
                     ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 10;
                     ctx.fillStyle = 'rgba(255,255,255,0.6)';
@@ -480,22 +469,23 @@ window.onload = () => {
             requestAnimationFrame(gameLoop);
         }
 
-        function autoSaveSnake() {
-            if (snakeScore > (localStorage.getItem(`snake_best_${currentUser}`) || 0)) {
-                localStorage.setItem(`snake_best_${currentUser}`, snakeScore);
-            }
-        }
-
         function gameOver() {
             alert(`🐍 GAME OVER! ${snakeScore} очков`);
             closeSnakeGame();
         }
 
+        function autoSaveSnake() {
+            if (snakeScore > (parseInt(localStorage.getItem(`snake_best_${currentUser}`)) || 0)) {
+                localStorage.setItem(`snake_best_${currentUser}`, snakeScore);
+            }
+        }
+
         // 🎯 УГАДАЙКА 3 РЕЖИМА
         function startGuessGame() {
-            if (!currentUser) return alert('🔐 Войди!');
+            if (!currentUser) return alert('🔐 Войди для игры!');
             guessDifficulty = parseInt(document.getElementById('guessDifficulty').value);
-            [maxRange, minRange] = GUESS_RANGES[guessDifficulty];
+            maxRange = GUESS_RANGES[guessDifficulty][0];
+            minRange = GUESS_RANGES[guessDifficulty][1];
             currentSecret = Math.floor(Math.random() * maxRange) + minRange;
             guessAttempts = 0;
             document.getElementById('guessAttempts').textContent = '0';
@@ -518,8 +508,7 @@ window.onload = () => {
 
             if (guess === currentSecret) {
                 const score = Math.max(0, maxRange - (guessAttempts * 10));
-                document.getElementById('guessFeedback').innerHTML = 
-                    `🎉 УГАДАЛ ${currentSecret}! Очки: ${score}`;
+                document.getElementById('guessFeedback').innerHTML = `🎉 УГАДАЛ ${currentSecret}! Очки: ${score}`;
                 saveGuessScore(score);
             } else if (guess < currentSecret) {
                 minRange = guess + 1;
@@ -533,7 +522,7 @@ window.onload = () => {
             document.getElementById('guessInput').focus();
         }
 
-        // 🏆 ОТДЕЛЬНЫЕ ТОПЫ (1 запись на игрока)
+        // 🏆 ТОПЫ (1 запись на игрока)
         function updateAllTops() {
             updateSnakeTop10();
             updateGuessTop10();
@@ -543,7 +532,7 @@ window.onload = () => {
             const scores = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                if (key.startsWith('snake_best_')) {
+                if (key && key.startsWith('snake_best_')) {
                     const name = key.replace('snake_best_', '');
                     scores.push({name, score: parseInt(localStorage.getItem(key)) || 0});
                 }
@@ -583,7 +572,6 @@ window.onload = () => {
                 updateGuessTop10();
                 alert(`🎯 Рекорд: ${score}!`);
             }
-            // Продолжаем игру
         }
 
         // УПРАВЛЕНИЕ
@@ -602,7 +590,10 @@ window.onload = () => {
         });
 
         let touchStartX = 0, touchStartY = 0;
-        document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; });
+        document.addEventListener('touchstart', e => { 
+            touchStartX = e.touches[0].clientX; 
+            touchStartY = e.touches[0].clientY; 
+        });
         document.addEventListener('touchend', e => {
             if (!gameCanvas) return;
             const diffX = touchStartX - e.changedTouches[0].clientX;
@@ -615,12 +606,18 @@ window.onload = () => {
         });
 
         function changeDirection(newDx, newDy) {
-            if (newDx * dx + newDy * dy === 0) { dx = newDx; dy = newDy; }
+            if (newDx * dx + newDy * dy === 0) { 
+                dx = newDx; 
+                dy = newDy; 
+            }
         }
 
-        function closeSnakeGame() { document.getElementById('snakeScreen').style.display = 'none'; }
-        function newGuessGame() { startGuessGame(); }
+        function closeSnakeGame() { 
+            document.getElementById('snakeScreen').style.display = 'none'; 
+        }
+        function newGuessGame() { 
+            startGuessGame(); 
+        }
     </script>
 </body>
 </html>
-
