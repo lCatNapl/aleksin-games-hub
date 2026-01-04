@@ -21,10 +21,7 @@ def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS users 
-                 (username TEXT PRIMARY KEY, password TEXT, total_score INTEGER DEFAULT 0)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS scores 
-                 (username TEXT, game TEXT, score INTEGER, date TIMESTAMP,
-                  FOREIGN KEY(username) REFERENCES users(username))''')
+                 (username TEXT PRIMARY KEY, password TEXT, highscore INTEGER DEFAULT 0, total_games INTEGER DEFAULT 0)''')
     conn.commit()
     conn.close()
 
@@ -35,17 +32,11 @@ def hash_password(password):
 def index():
     return render_template('index.html')
 
-@app.route('/status')
-def status():
-    if 'username' in session:
-        return jsonify({'logged_in': True, 'username': session['username']})
-    return jsonify({'logged_in': False})
-
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
-    username = data.get('username')
-    password = hash_password(data.get('password'))
+    username = data['username'].strip()
+    password = hash_password(data['password'])
     
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -54,62 +45,60 @@ def login():
     conn.close()
     
     if user:
-        session['username'] = username
-        return jsonify({'success': True})
+        session['user_id'] = username
+        return jsonify({'success': True, 'username': username})
     return jsonify({'success': False, 'error': 'Неверный логин/пароль'})
 
 @app.route('/register', methods=['POST'])
 def register():
     data = request.json
-    username = data.get('username')
-    password = hash_password(data.get('password'))
+    username = data['username'].strip()
+    password = hash_password(data['password'])
     
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     try:
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        c.execute("INSERT INTO users (username, password, highscore) VALUES (?, ?, 0)", (username, password))
         conn.commit()
-        session['username'] = username
+        session['user_id'] = username
         conn.close()
-        return jsonify({'success': True})
+        return jsonify({'success': True, 'username': username})
     except sqlite3.IntegrityError:
         conn.close()
         return jsonify({'success': False, 'error': 'Пользователь уже существует'})
 
-@app.route('/logout', methods=['POST'])
-def logout():
-    session.pop('username', None)
-    return jsonify({'success': True})
+@app.route('/status')
+def status():
+    if session.get('user_id'):
+        return jsonify({'logged_in': True, 'username': session['user_id']})
+    return jsonify({'logged_in': False})
 
-@app.route('/save', methods=['POST'])
-def save():
-    if 'username' not in session:
+@app.route('/save_score', methods=['POST'])
+def save_score():
+    if not session.get('user_id'):
         return jsonify({'success': False})
     
     data = request.json
-    username = session['username']
-    game = data['game']
+    username = session['user_id']
     score = data['score']
     
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("INSERT INTO scores (username, game, score, date) VALUES (?, ?, ?, ?)",
-              (username, game, score, datetime.now()))
-    c.execute("UPDATE users SET total_score = total_score + ? WHERE username = ?",
-              (score, username))
+    c.execute("UPDATE users SET highscore = MAX(highscore, ?), total_games = total_games + 1 WHERE username = ?", (score, username))
     conn.commit()
     conn.close()
     
+    save_tournament_score(username, score)
     return jsonify({'success': True})
 
-@app.route('/top/<game>')
-def top(game):
+@app.route('/leaderboard')
+def leaderboard():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT username, MAX(score) as score FROM scores WHERE game=? GROUP BY username ORDER BY score DESC LIMIT 10", (game,))
-    results = [{'username': row[0], 'score': row[1]} for row in c.fetchall()]
+    c.execute("SELECT username, highscore FROM users ORDER BY highscore DESC LIMIT 10")
+    leaders = [{'username': row[0], 'score': row[1]} for row in c.fetchall()]
     conn.close()
-    return jsonify(results)
+    return jsonify(leaders)
 
 @app.route('/tournament')
 def tournament():
@@ -122,6 +111,18 @@ def tournament():
     if data.get('active'):
         return jsonify(data)
     return jsonify({'active': False})
+
+def save_tournament_score(username, score):
+    try:
+        with open(TOURNAMENT_FILE, 'r+') as f:
+            data = json.load(f)
+            if not data.get('scores'):
+                data['scores'] = {}
+            data['scores'][username] = data['scores'].get(username, 0) + score
+            f.seek(0)
+            json.dump(data, f)
+    except:
+        pass
 
 init_db()
 
