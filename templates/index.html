@@ -30,15 +30,19 @@
             border-radius: 20px; padding: 25px; text-align: center;
             cursor: pointer; transition: all 0.3s; border: 2px solid #333;
         }
-        .game-card:hover { border-color: #44ff44; transform: translateY(-5px); box-shadow: 0 15px 30px rgba(68,255,68,0.3); }
+        .game-card:hover { 
+            border-color: #44ff44; transform: translateY(-5px); 
+            box-shadow: 0 15px 30px rgba(68,255,68,0.3); 
+        }
         .game-icon { font-size: 4em; margin-bottom: 15px; }
         .leaderboard {
             background: rgba(0,0,0,0.7); border-radius: 15px; padding: 20px;
             max-height: 300px; overflow-y: auto;
         }
         .leader-item {
-            display: flex; justify-content: space-between; padding: 10px; margin: 5px 0;
-            background: rgba(68,255,68,0.1); border-radius: 10px; font-size: 16px !important;
+            display: flex; justify-content: space-between; padding: 10px; 
+            margin: 5px 0; background: rgba(68,255,68,0.1); 
+            border-radius: 10px; font-size: 16px !important;
         }
         .modal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0;
@@ -53,12 +57,22 @@
         .modal-buttons {
             display: flex; gap: 10px; justify-content: center; margin-top: 20px;
         }
-        .modal-btn { padding: 15px 30px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; flex: 1; }
+        .modal-btn { 
+            padding: 15px 30px; border: none; border-radius: 10px; 
+            cursor: pointer; font-size: 16px; flex: 1; font-weight: bold;
+        }
         .btn-primary { background: #44ff44; color: black; }
         .btn-secondary { background: #666; color: white; }
         #game-container { min-height: 500px; }
-        canvas { border: 3px solid #44ff44; border-radius: 15px; background: #000; display: block; margin: 20px auto; }
-        input { padding: 15px; font-size: 18px; border-radius: 10px; border: 2px solid #444; background: #2a2a2a; color: white; width: 250px; }
+        canvas { 
+            border: 3px solid #44ff44; border-radius: 15px; 
+            background: #000; display: block; margin: 20px auto; 
+        }
+        input { 
+            padding: 15px; font-size: 18px; border-radius: 10px; 
+            border: 2px solid #444; background: #2a2a2a; color: white; 
+            width: 100%; margin: 10px 0; box-sizing: border-box;
+        }
         #warning-text {
             background: #ffaa00; color: black; padding: 15px; border-radius: 10px;
             margin: 15px 0; display: none; font-weight: bold; text-align: center;
@@ -102,6 +116,7 @@
         </div>
     </div>
 
+    <!-- 🔥 МОДАЛКА С 5x КНОПКАМИ -->
     <div id="auth-modal" class="modal">
         <div class="modal-content">
             <span onclick="closeAuth()" style="float:right;cursor:pointer;font-size:24px;">×</span>
@@ -110,12 +125,211 @@
             <input type="text" id="username" placeholder="Логин" maxlength="20">
             <input type="password" id="password" placeholder="Пароль">
             <div class="modal-buttons">
-                <button class="modal-btn btn-primary" id="submit-btn" onclick="authUser();return false;">Войти</button>
+                <!-- 🔥 5x НЕУНИЧТОЖИМАЯ КНОПКА -->
+                <button class="modal-btn btn-primary" 
+                        id="submit-btn" 
+                        onclick="authUser();return false;"
+                        onmousedown="authUser();return false;"
+                        onpointerdown="authUser();return false;"
+                        ontouchstart="authUser();return false;"
+                        ondblclick="authUser();return false;">
+                    Войти
+                </button>
                 <button class="modal-btn btn-secondary" onclick="closeAuth();return false;">Отмена</button>
             </div>
         </div>
     </div>
 
-    <script src="/static/script.js"></script>
+    <script>
+        // 🔥 ВСТРАИВАЕМЫЙ JS (НЕ НУЖЕН /static/script.js)
+        let currentGame = ''; 
+        let isLoggedIn = false; 
+        let gameData = {score: 0, highscore: 0};
+        let gameInterval = null; 
+        let snake = {x:10,y:10,dx:0,dy:0,cells:[],maxCells:4};
+        let food = {x:15,y:15}; 
+        let secretNumber = 0; 
+        let attempts = 0;
+
+        async function checkUserStatus() {
+            try {
+                const res = await fetch('/status', {credentials: 'include'});
+                const data = await res.json();
+                if (data.logged_in) {
+                    document.getElementById('status').textContent = `👋 ${data.username}`;
+                    document.getElementById('logout').style.display = 'inline-block';
+                    isLoggedIn = true;
+                }
+            } catch (e) {}
+        }
+
+        async function authUser() {
+            console.log('🔥 КНОПКА ЖИВА! 5x защита сработала!');
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('warning-text');
+            
+            if (!username || !password) {
+                errorDiv.textContent = '⚠️ Заполни все поля!';
+                errorDiv.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const endpoint = document.getElementById('modal-title').textContent === 'Вход' ? 'login' : 'register';
+                const res = await fetch('/' + endpoint, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    checkUserStatus();
+                    closeAuth();
+                    loadLeaderboard();
+                    console.log('✅ ВОШЁЛ:', data.username);
+                } else {
+                    errorDiv.textContent = data.error || 'Ошибка!';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (e) {
+                console.error('Auth error:', e);
+                errorDiv.textContent = 'Ошибка сети!';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function showAuth(mode) {
+            document.getElementById('auth-modal').style.display = 'flex';
+            document.getElementById('modal-title').textContent = mode === 'login' ? 'Вход' : 'Регистрация';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('warning-text').style.display = 'none';
+            console.log('🔧 showAuth:', mode);
+        }
+
+        function closeAuth() {
+            document.getElementById('auth-modal').style.display = 'none';
+        }
+
+        function logout() {
+            fetch('/logout', {credentials: 'include'}).catch(() => {});
+            location.reload();
+        }
+
+        // 🎯 УГАДАЙКА 1-10000
+        function loadGuessGame() {
+            currentGame = 'guess';
+            secretNumber = Math.floor(Math.random() * 10000) + 1;
+            attempts = 0;
+            
+            document.getElementById('game-container').innerHTML = `
+                <h1 style="text-align:center;margin:20px 0">🎯 Угадай число (1-10000)</h1>
+                <div id="game-info" style="text-align:center;font-size:20px;margin:20px 0">
+                    <span style="color:#44ff44">Ходов: <span id="attempts">0</span></span> 
+                    <span style="color:#ffaa00">Очки: <span id="score">10000</span></span>
+                </div>
+                <div style="text-align:center">
+                    <input type="number" id="guessInput" min="1" max="10000" placeholder="1-10000" 
+                           style="padding:15px;font-size:18px;width:280px;border-radius:10px;border:2px solid #444;margin:10px;display:block;margin:10px auto">
+                    <br>
+                    <button id="submitGuess" style="padding:15px 40px;font-size:18px;border-radius:10px;background:#44ff44;color:black;cursor:pointer;font-weight:bold">
+                        Проверить
+                    </button>
+                </div>
+                <div id="hint" style="font-size:28px;margin:30px 0;color:#ffaa00;text-align:center;font-weight:bold;min-height:40px"></div>
+            `;
+            
+            document.getElementById('submitGuess').onclick = checkGuess;
+            document.getElementById('guessInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') checkGuess();
+            });
+            document.getElementById('guessInput').focus();
+        }
+
+        function checkGuess() {
+            const input = document.getElementById('guessInput');
+            const guess = parseInt(input.value);
+            attempts++;
+            
+            if (isNaN(guess) || guess < 1 || guess > 10000) {
+                document.getElementById('hint').innerHTML = '❌ Введи число от 1 до 10000!';
+                input.value = ''; input.focus(); return;
+            }
+            
+            let hint = '';
+            if (guess === secretNumber) {
+                const score = Math.max(0, 10000 - attempts * 5);
+                gameData.score = score;
+                saveScore();
+                hint = `✅ <span style="color:#44ff44;font-size:32px">УГДАЛ за ${attempts} ходов!</span><br>Очки: ${score}`;
+                setTimeout(() => loadGamesMenu(), 3000);
+            } else if (guess < secretNumber) {
+                const diff = secretNumber - guess;
+                if (diff <= 50) hint = '🔥 Очень близко! Больше! 🔥';
+                else if (diff <= 200) hint = '➕ Больше!';
+                else hint = '📈 Значительно больше!';
+            } else {
+                const diff = guess - secretNumber;
+                if (diff <= 50) hint = '🔥 Очень близко! Меньше! 🔥';
+                else if (diff <= 200) hint = '➖ Меньше!';
+                else hint = '📉 Значительно меньше!';
+            }
+            
+            document.getElementById('attempts').textContent = attempts;
+            document.getElementById('score').textContent = Math.max(0, 10000 - attempts * 5);
+            document.getElementById('hint').innerHTML = hint;
+            input.value = ''; input.focus();
+        }
+
+        function saveScore() {
+            if (!isLoggedIn || gameData.score === 0) return;
+            fetch('/save_score', {
+                method: 'POST', credentials: 'include',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({score: gameData.score})
+            }).catch(e => console.error('Save error:', e));
+        }
+
+        async function loadLeaderboard() {
+            try {
+                const res = await fetch('/leaderboard');
+                const leaders = await res.json();
+                document.getElementById('leaderboard-list').innerHTML = 
+                    leaders.map((player, i) => `<div class="leader-item">${i+1}. ${player.username} - ${player.score}</div>`).join('');
+            } catch (e) {}
+        }
+
+        function loadGamesMenu() {
+            document.getElementById('gamesMenu').style.display = 'grid';
+            document.getElementById('game-container').innerHTML = '';
+        }
+
+        function loadSnakeGame() {
+            alert('🐍 Змейка скоро! Играй в угадайку 1-10000! 🎯');
+        }
+
+        // 🔥 НЕУНИЧТОЖИМЫЙ ФИКС КНОПОК — 5x защита
+        setInterval(() => {
+            const btn = document.getElementById('submit-btn');
+            if (btn && !btn.dataset.fixed) {
+                btn.dataset.fixed = 'true';
+                btn.onclick = () => { authUser(); return false; };
+                btn.onmousedown = () => { authUser(); return false; };
+                btn.ontouchstart = () => { authUser(); return false; };
+                btn.onpointerdown = () => { authUser(); return false; };
+                console.log('🔥 КНОПКА НЕУНИЧТОЖИМА! 5x защита');
+            }
+        }, 500);
+
+        // СТАРТ
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUserStatus();
+            loadLeaderboard();
+            setInterval(loadLeaderboard, 30000);
+        });
+    </script>
 </body>
 </html>
