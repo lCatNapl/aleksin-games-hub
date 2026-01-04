@@ -5,8 +5,7 @@ let gameInterval = null;
 let snake = {x:10,y:10,dx:0,dy:0,cells:[],maxCells:4};
 let food = {x:15,y:15}; 
 let secretNumber = 0; 
-let attempts = 0; 
-let maxAttempts = 20;
+let attempts = 0;
 
 async function checkUserStatus() {
     try {
@@ -14,153 +13,85 @@ async function checkUserStatus() {
         const data = await res.json();
         if (data.logged_in) {
             document.getElementById('status').textContent = `👋 ${data.username}`;
-            document.getElementById('auth-buttons').style.display = 'none';
-            document.getElementById('games-grid').style.display = 'grid';
-            document.getElementById('logout-btn').style.display = 'block';
-            document.getElementById('leaderboard-container').style.display = 'block';
-            isLoggedIn = true; 
-            loadLeaderboard();
-        } else {
-            document.getElementById('status').textContent = '👋 Гость';
-            document.getElementById('auth-buttons').style.display = 'flex';
-            document.getElementById('games-grid').style.display = 'none';
-            document.getElementById('logout-btn').style.display = 'none';
-            document.getElementById('leaderboard-container').style.display = 'none';
+            document.getElementById('logout').style.display = 'inline-block';
+            isLoggedIn = true;
         }
-    } catch (e) { 
-        console.error('Status check failed:', e); 
-    }
+    } catch (e) {}
 }
 
 async function authUser() {
-    console.log('🚀 authUser() вызвана!');
+    console.log('🔥 КНОПКА ЖИВА!');
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
-    const errorDiv = document.getElementById('error'); 
-    errorDiv.textContent = '';
+    const errorDiv = document.getElementById('warning-text');
     
-    if (!username || !password) { 
-        errorDiv.textContent = 'Заполни все поля'; 
-        console.log('❌ Поля пустые');
-        return; 
+    if (!username || !password) {
+        errorDiv.textContent = '⚠️ Заполни все поля!';
+        errorDiv.style.display = 'block';
+        return;
     }
     
-    console.log(`🔐 Отправка ${username} на /login`);
     try {
-        const mode = document.getElementById('submit-btn').dataset.mode || 'login';
-        const endpoint = mode === 'register' ? '/register' : '/login';
-        
-        const res = await fetch(endpoint, {
-            method: 'POST', credentials: 'include',
+        const res = await fetch('/' + document.getElementById('modal-title').textContent.toLowerCase(), {
+            method: 'POST',
+            credentials: 'include',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({username, password})
         });
         const data = await res.json();
-        console.log('📡 Ответ сервера:', data);
         
-        if (data.success) { 
-            closeAuth(); 
-            checkUserStatus(); 
-            console.log('✅ АВТОРИЗАЦИЯ УСПЕШНА!');
+        if (data.success) {
+            checkUserStatus();
+            closeAuth();
+            loadLeaderboard();
         } else {
-            errorDiv.textContent = data.error || 'Ошибка авторизации';
-            console.log('❌ Ошибка:', data.error);
+            errorDiv.textContent = data.error || 'Ошибка!';
+            errorDiv.style.display = 'block';
         }
-    } catch (e) { 
-        errorDiv.textContent = 'Ошибка сети';
-        console.error('Auth failed:', e);
+    } catch (e) {
+        console.error('Auth error:', e);
     }
 }
 
 function showAuth(mode) {
     document.getElementById('auth-modal').style.display = 'flex';
-    document.getElementById('modal-title').textContent = mode === 'register' ? '📝 Регистрация' : '🔑 Вход';
-    document.getElementById('submit-btn').textContent = mode === 'register' ? 'Зарегистрироваться' : 'Войти';
-    document.getElementById('submit-btn').dataset.mode = mode;
-    document.getElementById('warning-text').style.display = mode === 'register' ? 'block' : 'none';
-    document.getElementById('username').value = ''; 
+    document.getElementById('modal-title').textContent = mode === 'login' ? 'Вход' : 'Регистрация';
+    document.getElementById('username').value = '';
     document.getElementById('password').value = '';
-    document.getElementById('error').textContent = ''; 
-    document.getElementById('username').focus();
+    document.getElementById('warning-text').style.display = 'none';
+    console.log('🔧 showAuth вызвана:', mode);
 }
 
-function closeAuth() { 
-    document.getElementById('auth-modal').style.display = 'none'; 
+function closeAuth() {
+    document.getElementById('auth-modal').style.display = 'none';
 }
 
-async function logout() {
-    try { 
-        await fetch('/logout', {credentials: 'include', method: 'POST'}); 
-    } catch (e) {} 
+function logout() {
+    sessionStorage.clear();
     location.reload();
 }
 
-async function loadLeaderboard() {
-    try {
-        const [snakeRes, guessRes] = await Promise.all([
-            fetch('/top/snake', {credentials: 'include'}),
-            fetch('/top/guess', {credentials: 'include'})
-        ]);
-        const snakeData = await snakeRes.json();
-        const guessData = await guessRes.json();
-        
-        document.getElementById('snake-leaderboard').innerHTML = `
-            <h4>🐍 Змейка</h4>
-            ${snakeData.length ? snakeData.map((p, i) => `<div class="leader-item"><span>#${i+1} ${p.username}</span><span>${p.score}</span></div>`).join('') : '<div style="color:#666;text-align:center">Пока пусто</div>'}
-        `;
-        document.getElementById('guess-leaderboard').innerHTML = `
-            <h4>🎯 Угадайка</h4>
-            ${guessData.length ? guessData.map((p, i) => `<div class="leader-item"><span>#${i+1} ${p.username}</span><span>${p.score}</span></div>`).join('') : '<div style="color:#666;text-align:center">Пока пусто</div>'}
-        `;
-    } catch (e) {
-        console.error('Leaderboard failed:', e);
-        document.getElementById('snake-leaderboard').innerHTML = '<div style="color:#ff4444">Ошибка загрузки</div>';
-        document.getElementById('guess-leaderboard').innerHTML = '<div style="color:#ff4444">Ошибка загрузки</div>';
-    }
-}
-
-function backToMenu() {
-    if (gameInterval) { 
-        clearInterval(gameInterval); 
-        gameInterval = null; 
-    }
-    location.reload();
-}
-
-// 🐍 ЗМЕЙКА С ФИКСОМ СВАЙПОВ
+// 🐍 ЗМЕЙКА (полная)
 function loadSnakeGame() {
     currentGame = 'snake';
-    document.querySelector('.container').innerHTML = `
-        <h1>🐍 Змейка</h1>
-        <div id="game-info">Счёт: <span id="score">0</span> | Рекорд: <span id="highscore">0</span></div>
-        <canvas id="gameCanvas" width="400" height="400" style="border:2px solid #44ff44;border-radius:10px;background:#111;touch-action:none;display:block;margin:20px auto;"></canvas>
-        <div style="text-align:center;margin:20px">
-            <p>📱 Свайпы | 💻 Стрелки</p>
-            <button class="auth-btn" onclick="backToMenu()" style="width:200px">🏠 В меню</button>
+    document.getElementById('game-container').innerHTML = `
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div style="text-align:center;font-size:20px">
+            <div>Счёт: <span id="snakeScore">0</span> | Рекорд: <span id="snakeHighscore">0</span></div>
+            <div>Свайпай 📱 или WASD/Стрелки</div>
         </div>
     `;
     
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    snake = {x:10,y:10,dx:0,dy:0,cells:[],maxCells:4};
-    food = {x:Math.floor(Math.random()*38)+1,y:Math.floor(Math.random()*38)+1};
-    gameData.score = 0; 
-    gameData.highscore = 0;
-
-    canvas.addEventListener('click', restartSnake);
     
-    document.addEventListener('keydown', (e) => {
-        if (currentGame !== 'snake') return;
-        if (e.key === 'ArrowLeft' && snake.dx === 0) { snake.dx = -1; snake.dy = 0; }
-        if (e.key === 'ArrowUp' && snake.dy === 0) { snake.dx = 0; snake.dy = -1; }
-        if (e.key === 'ArrowRight' && snake.dx === 0) { snake.dx = 1; snake.dy = 0; }
-        if (e.key === 'ArrowDown' && snake.dy === 0) { snake.dx = 0; snake.dy = 1; }
-    });
-
+    canvas.focus();
+    
+    // СВАЙПЫ БЕЗ ПРОКРУТКИ
     let touchStartX = 0, touchStartY = 0;
     canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault(); 
-        touchStartX = e.touches[0].clientX; 
+        e.preventDefault();
+        touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
     }, { passive: false });
     
@@ -171,251 +102,209 @@ function loadSnakeGame() {
         const diffX = touchStartX - touchEndX;
         const diffY = touchStartY - touchEndY;
         
-        if (Math.abs(diffX) > 30 || Math.abs(diffY) > 30) {
-            if (Math.abs(diffX) > Math.abs(diffY)) {
-                if (diffX > 0 && snake.dx === 0) { snake.dx = -1; snake.dy = 0; }
-                else if (diffX < 0 && snake.dx === 0) { snake.dx = 1; snake.dy = 0; }
-            } else {
-                if (diffY > 0 && snake.dy === 0) { snake.dx = 0; snake.dy = -1; }
-                else if (diffY < 0 && snake.dy === 0) { snake.dx = 0; snake.dy = 1; }
-            }
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+            if (diffX > 0 && snake.dx !== 1) { snake.dx = -1; snake.dy = 0; }
+            else if (diffX < 0 && snake.dx !== -1) { snake.dx = 1; snake.dy = 0; }
+        } else {
+            if (diffY > 0 && snake.dy !== 1) { snake.dx = 0; snake.dy = -1; }
+            else if (diffY < 0 && snake.dy !== -1) { snake.dx = 0; snake.dy = 1; }
         }
     }, { passive: false });
-
+    
+    document.addEventListener('keydown', (e) => {
+        if (currentGame !== 'snake') return;
+        switch(e.key) {
+            case 'ArrowLeft': if (snake.dx !== 1) { snake.dx = -1; snake.dy = 0; } break;
+            case 'ArrowUp': if (snake.dy !== 1) { snake.dx = 0; snake.dy = -1; } break;
+            case 'ArrowRight': if (snake.dx !== -1) { snake.dx = 1; snake.dy = 0; } break;
+            case 'ArrowDown': if (snake.dy !== -1) { snake.dx = 0; snake.dy = 1; } break;
+            case 'a': case 'A': if (snake.dx !== 1) { snake.dx = -1; snake.dy = 0; } break;
+            case 'w': case 'W': if (snake.dy !== 1) { snake.dx = 0; snake.dy = -1; } break;
+            case 'd': case 'D': if (snake.dx !== -1) { snake.dx = 1; snake.dy = 0; } break;
+            case 's': case 'S': if (snake.dy !== -1) { snake.dx = 0; snake.dy = 1; } break;
+        }
+    });
+    
     function updateSnake() {
-        snake.x += snake.dx; 
+        snake.x += snake.dx;
         snake.y += snake.dy;
-        if (snake.x < 0 || snake.x >= 40 || snake.y < 0 || snake.y >= 40) gameOver();
-        for (let cell of snake.cells) { 
-            if (snake.x === cell.x && snake.y === cell.y) gameOver(); 
-        }
-        snake.cells.unshift({x: snake.x, y: snake.y});
-        if (snake.x === food.x && snake.y === food.y) {
-            gameData.score++; 
-            document.getElementById('score').textContent = gameData.score;
-            food = {x:Math.floor(Math.random()*38)+1,y:Math.floor(Math.random()*38)+1};
-        } else { 
-            snake.cells.pop(); 
-        }
-        if (snake.cells.length > snake.maxCells) snake.maxCells++;
         
-        ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 400, 400);
-        ctx.fillStyle = '#ff4444'; ctx.fillRect(food.x*10, food.y*10, 10, 10);
-        ctx.fillStyle = '#44ff44'; 
-        for (let cell of snake.cells) ctx.fillRect(cell.x*10, cell.y*10, 10, 10);
-        ctx.fillStyle = '#00ff88'; 
-        ctx.fillRect(snake.x*10, snake.y*10, 10, 10);
-    }
-
-    function gameOver() {
-        clearInterval(gameInterval);
-        if (isLoggedIn) saveScore('snake');
-        if (gameData.score > gameData.highscore) {
-            gameData.highscore = gameData.score;
-            document.getElementById('highscore').textContent = gameData.highscore;
+        if (snake.x < 0) snake.x = canvas.width / 10 - 1;
+        if (snake.y < 0) snake.y = canvas.height / 10 - 1;
+        if (snake.x >= canvas.width / 10) snake.x = 0;
+        if (snake.y >= canvas.height / 10) snake.y = 0;
+        
+        snake.cells.unshift({x: snake.x, y: snake.y});
+        if (snake.cells.length > snake.maxCells) snake.cells.pop();
+        
+        if (snake.x === food.x && snake.y === food.y) {
+            snake.maxCells++;
+            food.x = Math.floor(Math.random() * 39) + 1;
+            food.y = Math.floor(Math.random() * 39) + 1;
         }
-        ctx.fillStyle = 'rgba(255,0,0,0.7)'; ctx.fillRect(0, 0, 400, 400);
-        ctx.fillStyle = 'white'; ctx.font = '30px Arial'; ctx.textAlign = 'center';
-        ctx.fillText('GAME OVER', 200, 190); 
+        
+        for (let cell of snake.cells.slice(1)) {
+            if (snake.x === cell.x && snake.y === cell.y) {
+                gameOver();
+                return;
+            }
+        }
+        
+        ctx.fillStyle = '#111';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.fillStyle = 'lime';
+        snake.cells.forEach((cell, index) => {
+            ctx.fillRect(cell.x * 10, cell.y * 10, 10-index*0.2, 10-index*0.2);
+        });
+        
+        ctx.fillStyle = 'red';
+        ctx.fillRect(food.x * 10, food.y * 10, 10, 10);
+        
+        document.getElementById('snakeScore').textContent = snake.cells.length - 4;
+        gameData.score = snake.cells.length - 4;
+    }
+    
+    function gameOver() {
+        if (gameInterval) clearInterval(gameInterval);
+        ctx.fillStyle = 'rgba(255,0,0,0.7)';
+        ctx.fillRect(0, 0, 400, 400);
+        ctx.fillStyle = 'white';
+        ctx.font = '30px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('GAME OVER', 200, 190);
         ctx.fillText(`Счёт: ${gameData.score}`, 200, 230);
         ctx.fillText('Кликни для рестарта', 200, 270);
+        saveScore();
     }
-
-    function restartSnake() {
-        if (gameInterval) clearInterval(gameInterval);
+    
+    canvas.onclick = () => {
         snake = {x:10,y:10,dx:0,dy:0,cells:[],maxCells:4};
-                food = {x:Math.floor(Math.random()*38)+1,y:Math.floor(Math.random()*38)+1};
+        food = {x:Math.floor(Math.random()*38)+1,y:Math.floor(Math.random()*38)+1};
         gameData.score = 0;
         gameInterval = setInterval(updateSnake, 200);
-    }
-
+    };
+    
     gameInterval = setInterval(updateSnake, 200);
 }
 
-// 🎯 УГАДАЙКА 1-1000
+// 🎯 УГАДАЙКА 1-10000 БЕЗЛИМИТ (НОВАЯ)
 function loadGuessGame() {
     currentGame = 'guess';
-    secretNumber = Math.floor(Math.random() * 1000) + 1;
+    secretNumber = Math.floor(Math.random() * 10000) + 1; // 1-10000
     attempts = 0;
     
-    document.querySelector('.container').innerHTML = `
-        <h1>🎯 Угадай число (1-1000)</h1>
-        <div id="game-info">
+    document.getElementById('game-container').innerHTML = `
+        <h1 style="text-align:center;margin:20px 0">🎯 Угадай число (1-10000)</h1>
+        <div id="game-info" style="text-align:center;font-size:20px;margin:20px 0">
             <span style="color:#44ff44">Ходов: <span id="attempts">0</span></span> 
-            <span style="color:#ffaa00">Рекорд: <span id="highscore">0</span></span>
+            <span style="color:#ffaa00">Очки: <span id="score">10000</span></span>
         </div>
-        <div style="text-align:center;margin:20px 0">
-            <input type="number" id="guessInput" min="1" max="1000" placeholder="1-1000" 
-                   style="padding:15px;font-size:18px;width:200px;border-radius:10px;border:2px solid #444">
-            <br><br>
-            <canvas id="guessCanvas" width="400" height="50" 
-                    style="border:2px solid #44ff44;border-radius:10px;cursor:pointer;margin:20px 0;background:#222"></canvas>
-            <div id="hint" style="text-align:center;color:#ffaa00;font-size:18px;margin:10px;font-weight:bold"></div>
+        <div style="text-align:center">
+            <input type="number" id="guessInput" min="1" max="10000" placeholder="1-10000" 
+                   style="padding:15px;font-size:18px;width:280px;border-radius:10px;border:2px solid #444;margin:10px;display:block;margin:10px auto">
+            <br>
+            <button id="submitGuess" style="padding:15px 40px;font-size:18px;border-radius:10px;background:#44ff44;color:black;cursor:pointer;font-weight:bold">
+                Проверить
+            </button>
         </div>
-        <button class="auth-btn" onclick="backToMenu()" style="width:200px">🏠 В меню</button>
+        <div id="hint" style="font-size:28px;margin:30px 0;color:#ffaa00;text-align:center;font-weight:bold;min-height:40px"></div>
     `;
     
-    gameData.highscore = 0;
-    updateGuessCanvas();
-    
+    document.getElementById('submitGuess').onclick = checkGuess;
     document.getElementById('guessInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') checkGuess();
     });
-    
-    document.getElementById('guessCanvas').addEventListener('click', checkGuess);
+    document.getElementById('guessInput').focus();
 }
 
-function updateGuessCanvas() {
-    const canvas = document.getElementById('guessCanvas');
-    const ctx = canvas.getContext('2d');
-    const progress = Math.min(attempts / maxAttempts, 1);
+function checkGuess() {
+    const input = document.getElementById('guessInput');
+    const guess = parseInt(input.value);
+    attempts++;
     
-    ctx.fillStyle = '#222'; ctx.fillRect(0, 0, 400, 50);
-    ctx.fillStyle = '#44ff44'; ctx.fillRect(0, 0, 400 * (1-progress), 50);
-    ctx.fillStyle = '#ff4444'; ctx.fillRect(400 * (1-progress), 0, 400 * progress, 50);
-    ctx.fillStyle = 'white'; ctx.font = '20px Arial'; ctx.textAlign = 'center';
-    ctx.fillText(`Ход ${attempts}/${maxAttempts}`, 200, 30);
-}
-
-async function checkGuess() {
-    if (attempts >= maxAttempts) {
-        document.getElementById('hint').innerHTML = '<span style="color:#ff4444">⏰ Время вышло!</span>';
-        if (isLoggedIn) saveScore('guess');
+    if (isNaN(guess) || guess < 1 || guess > 10000) {
+        document.getElementById('hint').innerHTML = '❌ Введи число от 1 до 10000!';
+        input.value = '';
+        input.focus();
         return;
     }
     
-    const guess = parseInt(document.getElementById('guessInput').value);
-    attempts++;
-    document.getElementById('attempts').textContent = attempts;
-    document.getElementById('guessInput').value = '';
-    updateGuessCanvas();
-    
     let hint = '';
     if (guess === secretNumber) {
-        const score = Math.max(0, 1000 - attempts * 30);
-        hint = `<span style="color:#44ff44">🎉 УГАДАЛ за ${attempts} ходов! ${score} очков</span>`;
-        if (isLoggedIn) saveScore('guess');
-    } else if (attempts >= maxAttempts) {
-        hint = `<span style="color:#ff4444">⏰ Не угадано: ${secretNumber}</span>`;
-        if (isLoggedIn) saveScore('guess');
+        const score = Math.max(0, 10000 - attempts * 5);
+        hint = `✅ <span style="color:#44ff44;font-size:32px">УГДАЛ за ${attempts} ходов!</span><br>Очки: ${score}`;
+        gameData.score = score;
+        saveScore();
+        document.getElementById('hint').innerHTML = hint;
+        setTimeout(() => {
+            document.getElementById('game-container').innerHTML = `
+                <h2 style="text-align:center;color:#44ff44">🎉 ПОЗДРАВЛЯЕМ! 🎉</h2>
+                <p style="text-align:center;font-size:24px">Угадал за <strong>${attempts}</strong> ходов!</p>
+                <p style="text-align:center;font-size:20px">Очки: <strong>${score}</strong></p>
+                <div style="text-align:center;margin:30px">
+                    <button onclick="loadGamesMenu()" style="padding:15px 30px;font-size:18px;background:#44ff44;color:black;border:none;border-radius:10px;cursor:pointer">
+                        🎮 В главное меню
+                    </button>
+                </div>
+            `;
+        }, 3000);
     } else if (guess < secretNumber) {
         const diff = secretNumber - guess;
-        hint = diff <= 10 ? '🔥 Больше! (очень близко)' : '📈 Больше!';
+        if (diff <= 50) hint = '🔥 Очень близко! Больше! 🔥';
+        else if (diff <= 200) hint = '➕ Больше!';
+        else hint = '📈 Значительно больше!';
     } else {
         const diff = guess - secretNumber;
-        hint = diff <= 10 ? '🔥 Меньше! (очень близко)' : '📉 Меньше!';
+        if (diff <= 50) hint = '🔥 Очень близко! Меньше! 🔥';
+        else if (diff <= 200) hint = '➖ Меньше!';
+        else hint = '📉 Значительно меньше!';
     }
-    document.getElementById('hint').innerHTML = hint;
-}
-
-async function saveScore(gameType) {
-    if (!isLoggedIn) return;
     
-    const score = gameType === 'snake' ? gameData.score : Math.max(0, 1000 - attempts * 30);
-    console.log(`💾 Сохранение ${gameType}: ${score}`);
+    document.getElementById('attempts').textContent = attempts;
+    document.getElementById('score').textContent = Math.max(0, 10000 - attempts * 5);
+    document.getElementById('hint').textContent = hint;
+    input.value = '';
+    input.focus();
+}
+
+function saveScore() {
+    if (!isLoggedIn || gameData.score === 0) return;
     
-    try {
-        const res = await fetch('/save', {
-            method: 'POST', credentials: 'include',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({game: gameType, score})
-        });
-        const data = await res.json();
-        console.log('✅', gameType, 'сохранено:', data);
-        
-        if (data.highscore_updated) {
-            gameData.highscore = data.highscore;
-            document.getElementById('highscore')?.textContent = gameData.highscore;
-        }
-        loadLeaderboard();
-        loadTournament();
-    } catch (e) { 
-        console.error('Save failed:', e); 
-    }
+    fetch('/save_score', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({score: gameData.score})
+    }).catch(e => console.error('Save error:', e));
 }
 
-async function loadTournament() {
+async function loadLeaderboard() {
     try {
-        const res = await fetch('/tournament', {credentials: 'include'});
-        const data = await res.json();
-        
-        if (data.active && !document.getElementById('tournament-container')) {
-            document.body.insertAdjacentHTML('beforeend', `
-                <div id="tournament-container" style="position:fixed;top:10px;right:10px;background:#1a1a1a;padding:15px;border-radius:15px;border:2px solid #ffaa00;max-width:300px;z-index:1000">
-                    <div id="tournament-title" style="font-size:20px;color:#ffaa00;margin-bottom:10px"></div>
-                    <div id="tournament-leaderboard" style="max-height:150px;overflow-y:auto;font-size:14px"></div>
-                    <div style="color:#666;font-size:12px;margin-top:10px">🥇1-е: +1000 | 🥈2-е: +500 | 🥉3-е: +250</div>
-                </div>
-            `);
-        }
-        
-        if (data.active) {
-            const timeLeft = Math.max(0, data.ends_at - Date.now());
-            const hours = Math.floor(timeLeft / 3600000);
-            const minutes = Math.floor((timeLeft % 3600000) / 60000);
-            
-            document.getElementById('tournament-title').textContent = `🏆 Турнир (${hours}ч ${minutes}м)`;
-            document.getElementById('tournament-leaderboard').innerHTML = 
-                data.leaderboard.slice(0, 3).map((p, i) => 
-                    `<div class="leader-item"><span>#${i+1} ${p.username}</span><span>${p.score}</span></div>`
-                ).join('') + 
-                (data.my_position ? `<div style="color:#44ff44">👤 Ты: #${data.my_position} ${data.my_score}</div>` : '');
-        }
-    } catch (e) { 
-        console.error('Tournament load failed:', e); 
-    }
+        const res = await fetch('/leaderboard');
+        const leaders = await res.json();
+        const list = document.getElementById('leaderboard-list');
+        list.innerHTML = leaders.map((player, i) => 
+            `<div class="leader-item">${i+1}. ${player.username} - ${player.score}</div>`
+        ).join('');
+    } catch (e) {}
 }
 
-// 🚨 ЭКСТРЕННЫЙ ТРОЙНОЙ ФИКС КНОПОК ДЛЯ RENDER
-document.addEventListener('click', function(e) {
-    if (e.target.id === 'submit-btn' || e.target.classList.contains('btn-primary')) {
-        e.preventDefault(); e.stopPropagation();
-        console.log('🚨 КНОПКА НАЙДЕНА ПО CLICK!');
-        authUser();
-    }
-});
+function loadGamesMenu() {
+    document.getElementById('gamesMenu').style.display = 'grid';
+    document.getElementById('game-container').innerHTML = '';
+}
 
-document.addEventListener('pointerdown', function(e) {
-    if (e.target.id === 'submit-btn') {
-        e.preventDefault(); e.stopPropagation();
-        console.log('🚨 КНОПКА НАЙДЕНА ПО POINTERDOWN!');
-        authUser();
-    }
-});
-
-// ГАРАНТИЯ - каждые 2 сек проверяем привязку
-setInterval(() => {
-    const btn = document.getElementById('submit-btn');
-    if (btn && !btn.onclick) {
-        btn.onclick = () => { authUser(); return false; };
-        console.log('🔧 КНОПКА ПЕРЕПРИВЯЗАНА!');
-    }
-}, 2000);
-
-// ✅ ПОЛНАЯ ИНИЦИАЛИЗАЦИЯ
+// ТРОЙНОЙ ФИКС КНОПОК
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🎮 Aleksin Games Hub полностью загружен!');
-    
-    // CSS ФИКС ТОПА
-    const style = document.createElement('style');
-    style.textContent = `
-        .leader-item { 
-            display: flex !important; justify-content: space-between !important; 
-            padding: 15px !important; margin: 10px 0 !important; 
-            background: #2a2a2a !important; border-radius: 10px !important;
-            font-size: 16px !important; min-height: 20px !important; 
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // ФИКС КНОПОК
     const submitBtn = document.getElementById('submit-btn');
     if (submitBtn) {
         submitBtn.onclick = () => { authUser(); return false; };
+        submitBtn.onmousedown = () => { authUser(); return false; };
         console.log('🔧 Кнопка авторизации привязана при загрузке!');
     }
     
     checkUserStatus();
-    setInterval(loadTournament, 30000);
-    loadTournament();
+    loadLeaderboard();
+    setInterval(loadLeaderboard, 30000);
 });
