@@ -110,7 +110,6 @@ def tournament():
         with open(TOURNAMENT_FILE, 'r') as f:
             data = json.load(f)
     except:
-        # ✅ НОВЫЙ ТУРНИР 24ч
         data = {
             'active': True,
             'start_time': datetime.now().isoformat(),
@@ -119,7 +118,6 @@ def tournament():
         }
         with open(TOURNAMENT_FILE, 'w') as f:
             json.dump(data, f)
-    
     return jsonify(data)
 
 init_db()
