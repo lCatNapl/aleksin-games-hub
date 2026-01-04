@@ -191,7 +191,6 @@
             const nowMSK = getNextMidnightMSK() - (24 * 60 * 60 * 1000); // Сегодня 00:00 МСК
             
             if (nowMSK > lastReset) {
-                // ✅ НОВЫЙ ТУРНИР - сбрасываем только лидерборд турнира
                 const tournamentScores = JSON.parse(localStorage.getItem('tournamentScores') || '{}');
                 Object.keys(tournamentScores).forEach(user => {
                     if (!tournamentScores[user].locked) delete tournamentScores[user];
@@ -317,13 +316,11 @@
             document.getElementById('snakeScore').textContent = score;
 
             // 🧹 Очищаем старые обработчики
-            canvas.onkeydown = null;
-            window.onkeydown = null;
+            const keyHandler = (e) => keys[e.key] = true;
+            const keyUpHandler = (e) => keys[e.key] = false;
             
             // Клавиатура
             const keys = {};
-            const keyHandler = (e) => keys[e.key] = true;
-            const keyUpHandler = (e) => keys[e.key] = false;
             window.addEventListener('keydown', keyHandler);
             window.addEventListener('keyup', keyUpHandler);
             
@@ -361,7 +358,7 @@
                     document.getElementById('snakeScore').textContent = `💀 ${Math.floor(score)}`;
                     clearInterval(gameInterval);
                     window.removeEventListener('keydown', keyHandler);
-                    window.removeEventListener('keyup', keyUpHandler);
+                                        window.removeEventListener('keyup', keyUpHandler);
                     return;
                 }
                 
@@ -508,7 +505,16 @@
             document.getElementById('timerLive').textContent = 
                 `⚔️ До конца: ${hours}ч ${minutes}м`;
             
+            // ✅ ПРОВЕРКА ИГРОКОВ - реальное кол-во
             const tournamentScores = JSON.parse(localStorage.getItem('tournamentScores') || '{}');
+            const activePlayers = Object.keys(tournamentScores).filter(user => 
+                !tournamentScores[user].locked && tournamentScores[user].total > 0
+            ).length;
+            
+            document.getElementById('statusLive').innerHTML = 
+                activePlayers === 0 ? '👥 Игроков пока нет...' : 
+                `👥 ${activePlayers} активных игроков`;
+            
             const tournamentList = Object.entries(tournamentScores)
                 .filter(([_, data]) => !data.locked)
                 .map(([user, data]) => ({
@@ -522,7 +528,7 @@
             listEl.innerHTML = tournamentList.map((item, i) => {
                 const medals = ['🥇', '🥈', '🥉', '⚜️', '⚜️'];
                 return `<li>${medals[i] || i+1} ${item.user}: ${item.total}💎`;
-            }).join('') || '<li>👥 Игроков пока нет...</li>';
+            }).join('') || '<li>⏳ Ждём первых героев...</li>';
         }
 
         // Инициализация
