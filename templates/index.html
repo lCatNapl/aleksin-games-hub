@@ -230,12 +230,12 @@
 
         <div id="gamesSection" style="display: none;">
             <div class="games-grid">
-                <!-- 🔥 ЗМЕЙКА PRO 2.0 -->
+                <!-- 🔥 ЗМЕЙКА PRO 3.0 -->
                 <div class="glass-card game-card" id="snakeCard">
                     <div class="game-icon" style="color: #00ff88;">🐍</div>
-                    <div class="game-title">Змейка Pro 2.0</div>
+                    <div class="game-title">Змейка Pro 3.0</div>
                     <div class="features">
-                        <span class="feature">🧱 Стены + 3 уровня</span>
+                        <span class="feature">🧱 Стены + 3 скорости</span>
                         <span class="feature">🌈 Градиент змейка</span>
                         <span class="feature">⚡ Телепорт еда</span>
                         <span class="feature">📱 Свайпы</span>
@@ -244,12 +244,12 @@
                         <select id="wallDifficulty" style="padding: 12px 20px; border-radius: 25px; 
                                 border: 2px solid #00ff88; background: rgba(0,255,136,0.1); 
                                 color: white; font-size: 1em; width: 100%;">
-                            <option value="0">😌 Легко (без стен)</option>
-                            <option value="1">🧱 Средне (стены по краям)</option>
-                            <option value="2">💀 Хардкор (4 стены)</option>
+                            <option value="0">😌 Легко (150ms)</option>
+                            <option value="1">🧱 Средне (120ms)</option>
+                            <option value="2">💀 Хардкор (90ms)</option>
                         </select>
                     </div>
-                    <button class="btn btn-game" onclick="startSnakeGame()">🚀 ИГРАТЬ PRO 2.0</button>
+                    <button class="btn btn-game" onclick="startSnakeGame()">🚀 ИГРАТЬ PRO 3.0</button>
                 </div>
 
                 <!-- 🎯 УГАДАЙ ЧИСЛО -->
@@ -261,7 +261,7 @@
                         <span class="feature">📊 Точный диапазон</span>
                         <span class="feature">⚔️ Турнир х1.5 очков</span>
                     </div>
-                    <button class="btn btn-game" onclick="startGuessGame()">🎯 ИГРАТЬ</button>
+                    <button class="btn btn-game" onclick="startGuessGame()">🎯 ИГРАЙ</button>
                 </div>
 
                 <!-- ⚔️ ТУРНИР ТОП-100 -->
@@ -293,10 +293,8 @@
         </div>
     </div>
 
-    <canvas id="gameCanvas" style="display: none;"></canvas>
-    <div id="gameControls" class="game-controls" style="display: none;"></div>
-
     <script>
+        // 🔥 ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
         let currentGameSecret = 0;
         let gameCanvas = null;
         let tournamentActive = true;
@@ -307,6 +305,14 @@
         let wallDifficulty = 0;
         let walls = [];
         let gameLoopId = null;
+        let lastSnakeUpdate = 0;
+        
+        // ✅ КОНТРОЛЬ СКОРОСТИ ЗМЕЙКИ
+        const SNAKE_SPEED = {
+            0: 150,  // 😌 Легко - медленная
+            1: 120,  // 🧱 Средне  
+            2: 90    // 💀 Хардкор - быстрая
+        };
 
         window.onload = () => checkAuth();
 
@@ -346,7 +352,7 @@
             location.reload();
         }
 
-        // 🔥 ЗМЕЙКА PRO 2.0 - ИСПРАВЛЕНО
+        // 🔥 ЗМЕЙКА PRO 3.0 - ПРАВИЛЬНАЯ СКОРОСТЬ
         function startSnakeGame() {
             const token = localStorage.getItem('userToken');
             if (!token) { 
@@ -361,37 +367,33 @@
             document.getElementById('snakeCard').innerHTML = `
                 <canvas id="gameCanvas" width="400" height="400"></canvas>
                 <div class="score-display">Очки: <span id="snakeScore">0</span> | 
-                    <span style="color: #ffd700;">←→↑↓ или СВАЙПЫ</span></div>
+                    СКОРОСТЬ: ${['😌 МЕДЛ', '🧱 НОРМА', '💀 БЫСТРО'][wallDifficulty]} 
+                    <span style="color: #ffd700;">←→↑↓ СВАЙПЫ</span></div>
                 <div>Сложность: ${['😌 Легко', '🧱 Средне', '💀 Хардкор'][wallDifficulty]}</div>
                 <button class="btn" onclick="closeGame()" style="background: #ff4757;">❌ Выйти</button>
             `;
             
             gameCanvas = document.getElementById('gameCanvas');
-            const ctx = gameCanvas.getContext('2d');
             
-            // ✅ НАЧАЛЬНОЕ ДВИЖЕНИЕ ПРАВУЮ
+            // ✅ СТАРТОВЫЕ НАСТРОЙКИ
             snake = [{x: 10, y: 10}];
-            dx = 1; dy = 0;  // ЗМЕЙКА ИДЁТ ПРАВА
+            dx = 1; dy = 0;  // ПРАВУЮ
             score = 0;
+            lastSnakeUpdate = 0;  // СБРОС ТАЙМЕРА
             spawnFood();
             
-            // Инструкция
-            setTimeout(() => alert('🐍 ЗМЕЙКА ИДЁТ ПРАВА!\n←→↑↓ или СВАЙПЫ для управления!'), 100);
+            alert('🐍 ЗМЕЙКА ИДЁТ ПРАВА!\n←→↑↓ или СВАЙПЫ для управления!');
             
             gameLoopId = requestAnimationFrame(gameLoop);
         }
 
         function setupWalls() {
             walls = [];
-            const gridSize = 20;
-            
             if (wallDifficulty === 1) {
-                // 🧱 Стены по краям
                 for (let i = 0; i < 20; i++) {
                     walls.push({x: 0, y: i}, {x: 19, y: i});
                 }
             } else if (wallDifficulty === 2) {
-                // 💀 4 внутренние стены
                 for (let i = 2; i < 18; i++) {
                     walls.push({x: 2, y: i}, {x: 17, y: i});
                     walls.push({x: i, y: 2}, {x: i, y: 17});
@@ -407,38 +409,43 @@
             if (checkWallCollision(food.x, food.y)) spawnFood();
         }
 
-        function gameLoop() {
+        // ✅ ИСПРАВЛЁННЫЙ gameLoop С КОНТРОЛЕМ СКОРОСТИ
+        function gameLoop(currentTime) {
             const ctx = gameCanvas.getContext('2d');
             ctx.clearRect(0, 0, 400, 400);
             
-            // Движение
-            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            // 🔥 КОНТРОЛЬ СКОРОСТИ ПО ВРЕМЕНИ
+            const timeDelta = currentTime - lastSnakeUpdate;
+            const speedDelay = SNAKE_SPEED[wallDifficulty];
             
-            // Столкновения
-            if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || 
-                checkWallCollision(head.x, head.y) ||
-                snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-                gameOver();
-                return;
+            if (timeDelta > speedDelay) {
+                const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+                
+                if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || 
+                    checkWallCollision(head.x, head.y) ||
+                    snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                    gameOver();
+                    return;
+                }
+                
+                snake.unshift(head);
+                
+                if (head.x === food.x && head.y === food.y) {
+                    score += wallDifficulty ? 200 : 100;
+                    document.getElementById('snakeScore').textContent = score;
+                    spawnFood();
+                } else {
+                    snake.pop();
+                }
+                
+                lastSnakeUpdate = currentTime;
             }
             
-            snake.unshift(head);
-            
-            // Еда
-            if (head.x === food.x && head.y === food.y) {
-                score += wallDifficulty ? 200 : 100;
-                document.getElementById('snakeScore').textContent = score;
-                spawnFood();
-            } else {
-                snake.pop();
-            }
-            
-            // Отрисовка
+            // ПЛАВНАЯ ОТРИСОВКА
             drawWalls(ctx);
             drawSnake(ctx);
             drawFood(ctx);
             
-            // Рекорд
             localStorage.setItem('highScore', Math.max(
                 parseInt(localStorage.getItem('highScore') || '0'), score
             ));
@@ -502,7 +509,7 @@
             closeGame();
         }
 
-        // 🎯 УГАДАЙКА - ИСПРАВЛЕНО
+        // 🎯 УГАДАЙКА
         function startGuessGame() {
             const token = localStorage.getItem('userToken');
             if (!token) { showLogin(); return; }
@@ -552,7 +559,6 @@
                 return;
             }
             
-            // Точный диапазон
             let feedback = '';
             let minRange = 1, maxRange = 10000;
             
@@ -572,29 +578,23 @@
             document.getElementById('guessInput').focus();
         }
 
-        // Турнир
+        // Турнир + лидерборды
         function joinTournament() {
             const token = localStorage.getItem('userToken');
-            if (!token) { 
-                alert('🔐 Войдите для турнира!'); 
-                showLogin(); 
-                return; 
-            }
+            if (!token) { alert('🔐 Войдите для турнира!'); showLogin(); return; }
             tournamentActive = true;
-            alert(`⚔️ ${localStorage.getItem('userName')} вступил в турнир 24ч!\n\n🎮 Играй в Змейку/Угадай → набирай очки → побеждай в Алексина! 🏆`);
+            alert(`⚔️ ${localStorage.getItem('userName')} вступил в турнир 24ч!\n🎮 Играй → набирай очки → побеждай! 🏆`);
             loadTournamentTop100();
         }
 
         function updateTournament() {
             const now = Date.now();
             let endTime = parseInt(localStorage.getItem('tournamentEnd'));
-            
             if (!endTime || now > endTime) {
                 endTime = now + 24 * 60 * 60 * 1000;
                 localStorage.setItem('tournamentEnd', endTime);
                 tournamentActive = true;
             }
-            
             if (now > endTime) {
                 document.getElementById('tournamentStatus').innerHTML = '🏆 ТУРНИР ОКОНЧЕН! Новый через 5 сек...';
                 setTimeout(updateTournament, 5000);
@@ -608,42 +608,28 @@
             const scores = JSON.parse(localStorage.getItem('tournamentScores') || '[]');
             const list = document.getElementById('tournamentTop100');
             list.innerHTML = '';
-            
             scores.slice(0, 100).forEach((player, index) => {
                 const li = document.createElement('li');
                 li.className = index < 5 ? `top-${index + 1}` : '';
-                
-                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : 
-                             index < 5 ? '🎁' : '';
-                li.innerHTML = `
-                    ${index + 1}. ${medal} <strong>${player.name}</strong> 
-                    <span style="float: right; color: #ffd700;">${player.score.toLocaleString()}🔥</span>
-                `;
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index < 5 ? '🎁' : '';
+                li.innerHTML = `${index + 1}. ${medal} <strong>${player.name}</strong> <span style="float: right; color: #ffd700;">${player.score.toLocaleString()}🔥</span>`;
                 list.appendChild(li);
             });
-            
-            if (scores.length === 0) {
-                list.innerHTML = '<li>⚔️ ПЕРВЫЙ БУДЕТ ЛЕГЕНДОЙ! Играй в турнире! 🔥</li>';
-            }
+            if (scores.length === 0) list.innerHTML = '<li>⚔️ ПЕРВЫЙ БУДЕТ ЛЕГЕНДОЙ! Играй в турнире! 🔥</li>';
         }
 
         function loadRealLeaderboard() {
             const scores = JSON.parse(localStorage.getItem('leaderboard') || '[]');
             const list = document.getElementById('topPlayersList');
-            
             if (scores.length === 0) {
                 list.innerHTML = '<li>👑 БУДЬ ПЕРВЫМ! Играй → Рекорды → ТОП! 🔥</li>';
                 return;
             }
-            
             list.innerHTML = '';
             scores.slice(0, 10).forEach((player, index) => {
                 const li = document.createElement('li');
                 li.style = `border-left: 5px solid ${index === 0 ? '#ffd700' : '#00ff88'}`;
-                li.innerHTML = `
-                    ${index + 1}🔥 <strong>${player.name}</strong> 
-                    <span style="float: right; color: #ffd700;">${player.score.toLocaleString()}</span>
-                `;
+                li.innerHTML = `${index + 1}🔥 <strong>${player.name}</strong> <span style="float: right; color: #ffd700;">${player.score.toLocaleString()}</span>`;
                 list.appendChild(li);
             });
         }
@@ -687,9 +673,9 @@
             if (gameLoopId) cancelAnimationFrame(gameLoopId);
             document.getElementById('snakeCard').innerHTML = `
                 <div class="game-icon" style="color: #00ff88;">🐍</div>
-                <div class="game-title">Змейка Pro 2.0</div>
+                <div class="game-title">Змейка Pro 3.0</div>
                 <div class="features">
-                    <span class="feature">🧱 Стены + 3 уровня</span>
+                    <span class="feature">🧱 Стены + 3 скорости</span>
                     <span class="feature">🌈 Градиент змейка</span>
                     <span class="feature">⚡ Телепорт еда</span>
                     <span class="feature">📱 Свайпы</span>
@@ -698,12 +684,12 @@
                     <select id="wallDifficulty" style="padding: 12px 20px; border-radius: 25px; 
                             border: 2px solid #00ff88; background: rgba(0,255,136,0.1); 
                             color: white; font-size: 1em; width: 100%;">
-                        <option value="0">😌 Легко (без стен)</option>
-                        <option value="1">🧱 Средне (стены по краям)</option>
-                        <option value="2">💀 Хардкор (4 стены)</option>
+                        <option value="0">😌 Легко (150ms)</option>
+                        <option value="1">🧱 Средне (120ms)</option>
+                        <option value="2">💀 Хардкор (90ms)</option>
                     </select>
                 </div>
-                <button class="btn btn-game" onclick="startSnakeGame()">🚀 ИГРАТЬ PRO 2.0</button>
+                <button class="btn btn-game" onclick="startSnakeGame()">🚀 ИГРАТЬ PRO 3.0</button>
             `;
             document.getElementById('guessCard').innerHTML = `
                 <div class="game-icon" style="color: #ff6b9d;">🎯</div>
@@ -730,7 +716,6 @@
             }
         });
 
-        // Мобильные свайпы
         let touchStartX = 0, touchStartY = 0;
         document.addEventListener('touchstart', (e) => {
             touchStartX = e.touches[0].clientX;
