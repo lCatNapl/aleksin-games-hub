@@ -208,8 +208,7 @@
                 </div>
 
                 <div class="game-card" id="guessCard">
-                    <div class="game-title">🎯 УГАДАЙ ЧИСЛО</div>
-                    <canvas id="guessCanvas" style="display: none;"></canvas>
+                    <div class="game-title">🎯 УГАДАЙ ЧИСЛО (1-1000)</div>
                     <div style="text-align: center;">
                         <input id="guessInput" placeholder="🔍 Твоё число..." maxlength="6">
                         <br><button onclick="checkGuess()">🔍 ПРОВЕРИТЬ</button>
@@ -238,6 +237,16 @@
         let snakeGame = null;
         let guessNumber = null;
         let guessAttempts = 0;
+        
+        // ✅ ПОСТОЯННЫЙ ТАЙМЕР ТУРНИРА
+        let tournamentStart = parseInt(localStorage.getItem('tournamentStart') || Date.now());
+
+        // ✅ СУПЕРНАДЁЖНОЕ СОХРАНЕНИЕ
+        function saveData(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+            // Дублируем в sessionStorage для надёжности
+            sessionStorage.setItem(key, JSON.stringify(data));
+        }
 
         // ✅ РАБОЧИЕ ФУНКЦИИ АВТОРИЗАЦИИ
         function login() {
@@ -256,7 +265,6 @@
                 return;
             }
 
-            // ТЕСТОВЫЕ АККАУНТЫ
             const testAccounts = {
                 'АлексинЛегенда': '12345',
                 'GamingPro2026': 'aleksin1',
@@ -264,9 +272,10 @@
             };
 
             if (testAccounts[username] && testAccounts[username] === password) {
-                // ✅ УСПЕШНЫЙ ВХОД
                 localStorage.setItem('userToken', 'valid');
                 localStorage.setItem('userName', username);
+                sessionStorage.setItem('userToken', 'valid');
+                sessionStorage.setItem('userName', username);
                 currentUser = username;
                 
                 document.getElementById('authSection').style.display = 'none';
@@ -275,7 +284,10 @@
                 document.getElementById('currentUser').textContent = username;
                 
                 alert('✅ ' + username + ' — ЛЕГЕНДА АЛЕКСИНА!');
-                updateAllTops();
+                setTimeout(() => {
+                    updateAllTops();
+                    console.log('💾 АВТОСОХРАНЕНИЕ АКТИВНО');
+                }, 500);
                 return;
             }
             
@@ -292,25 +304,29 @@
             }
             
             localStorage.setItem(`pass_${username}`, btoa(password));
+            sessionStorage.setItem(`pass_${username}`, btoa(password));
             alert('✅ Зарегистрирован! Теперь войди.');
         }
 
         function checkAuth() {
-            const userToken = localStorage.getItem('userToken');
-            currentUser = localStorage.getItem('userName');
+            const userToken = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
+            currentUser = localStorage.getItem('userName') || sessionStorage.getItem('userName');
             
             if (userToken === 'valid' && currentUser) {
                 document.getElementById('authSection').style.display = 'none';
                 document.getElementById('gamesSection').style.display = 'block';
                 document.getElementById('userInfo').style.display = 'flex';
                 document.getElementById('currentUser').textContent = currentUser;
-                updateAllTops();
+                setTimeout(updateAllTops, 500);
+                console.log('✅ ВОССТАНОВЛЕНО ПОСЛЕ СНА:', currentUser);
             }
         }
 
         function logout() {
             localStorage.removeItem('userToken');
             localStorage.removeItem('userName');
+            sessionStorage.removeItem('userToken');
+            sessionStorage.removeItem('userName');
             currentUser = null;
             document.getElementById('authSection').style.display = 'block';
             document.getElementById('gamesSection').style.display = 'none';
@@ -334,7 +350,6 @@
                 ctx.fillStyle = 'rgba(0,0,0,0.1)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // Змейка градиент
                 snake.forEach((part, i) => {
                     const gradient = ctx.createLinearGradient(part.x*grid, part.y*grid, (part.x+1)*grid, (part.y+1)*grid);
                     gradient.addColorStop(0, `hsl(${120 + i*5}, 70%, ${50 + i*5}%)`);
@@ -343,7 +358,6 @@
                     ctx.fillRect(part.x*grid, part.y*grid, grid-2, grid-2);
                 });
 
-                // Еда
                 ctx.shadowColor = '#ff0000';
                 ctx.shadowBlur = 20;
                 ctx.fillStyle = '#ff4444';
@@ -420,13 +434,13 @@
             document.getElementById('guessInput').value = '';
         }
 
-        // 💾 СОХРАНЕНИЕ
+        // 💾 СОХРАНЕНИЕ РЕКОРДОВ
         function saveScore(game, score) {
             const scores = JSON.parse(localStorage.getItem('scores') || '{}');
             if (!scores[currentUser]) scores[currentUser] = {};
             if (!scores[currentUser][game] || score > scores[currentUser][game]) {
                 scores[currentUser][game] = score;
-                localStorage.setItem('scores', JSON.stringify(scores));
+                saveData('scores', scores);
                 updateAllTops();
             }
         }
@@ -454,6 +468,18 @@
         }
 
         function updateTournament() {
+            const now = Date.now();
+            const elapsed = Math.floor((now - tournamentStart) / (1000 * 60 * 60));
+            const remaining = 24 - (elapsed % 24);
+            
+            if (elapsed >= 24) {
+                tournamentStart = now;
+                localStorage.setItem('tournamentStart', tournamentStart);
+            }
+            
+            document.getElementById('tournamentInfo').innerHTML = 
+                `⚔️ ${remaining}ч осталось | Топ-5: Steam 1000₽/500₽/250₽`;
+            
             const scores = JSON.parse(localStorage.getItem('scores') || '{}');
             const tournamentScores = [];
             
@@ -467,9 +493,6 @@
             document.getElementById('tournamentList').innerHTML = tournamentScores.map((item, i) => 
                 `<li>${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1}. ${item.user}: ${item.score}💎</li>`
             ).join('');
-            
-            document.getElementById('tournamentInfo').innerHTML = 
-                `🔥 АКТИВЕН! ${Math.floor(Math.random()*23+1)}ч осталось | Топ-5: Steam 1000₽/500₽/250₽`;
         }
 
         // Enter для угадывания
@@ -479,7 +502,23 @@
             }
         });
 
-        // Автообновление топов
+        // ✅ АВТОСОХРАНЕНИЕ КАЖДЫЕ 10 СЕК
+        setInterval(() => {
+            if (currentUser) {
+                const scores = JSON.parse(localStorage.getItem('scores') || '{}');
+                saveData('scores', scores);
+            }
+        }, 10000);
+
+        // ✅ ВОССТАНОВЛЕНИЕ ПОСЛЕ СНА
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && currentUser) {
+                setTimeout(updateAllTops, 1000);
+                console.log('💾 ВОССТАНОВЛЕНО после спящего режима!');
+            }
+        });
+
+        // ✅ АВТООБНОВЛЕНИЕ ТОПОВ
         setInterval(updateAllTops, 30000);
     </script>
 </body>
