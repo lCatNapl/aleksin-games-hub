@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 ALEKSIN GAMES HUB</title>
+    <title>🎮 ALEKSIN GAMES HUB 2026 ✨</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;800&display=swap');
+        
         * {
             margin: 0;
             padding: 0;
@@ -12,179 +14,401 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Exo 2', sans-serif;
+            background: linear-gradient(-45deg, #0f0f23, #1a0033, #2d1b69, #0f3460);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
             min-height: 100vh;
-            color: white;
+            color: #fff;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Космическая анимация фона */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+                radial-gradient(2px 2px at 40px 70px, #fff, transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, #eee, transparent);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+            animation: stars 50s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes stars {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-2000px); }
         }
 
         .header {
             text-align: center;
-            padding: 20px;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
+            padding: 30px 20px;
+            position: relative;
+            z-index: 10;
         }
 
         .title {
-            font-size: 2.5em;
+            font-family: 'Orbitron', monospace;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
+            background: linear-gradient(45deg, #00f5ff, #ff00ff, #00ff88, #ffaa00);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: neonGlow 3s ease-in-out infinite alternate;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        @keyframes neonGlow {
+            from { filter: hue-rotate(0deg); }
+            to { filter: hue-rotate(360deg); }
         }
 
         .subtitle {
-            font-size: 1.2em;
+            font-size: clamp(1.1rem, 4vw, 1.5rem);
+            font-weight: 600;
             opacity: 0.9;
+            animation: pulse 2s infinite;
         }
 
-        .auth-section {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .auth-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 15px 30px;
-            font-size: 1.1em;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: bold;
-        }
-
-        .btn-login {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            color: white;
-        }
-
-        .btn-register {
-            background: linear-gradient(45deg, #4834d4, #686de0);
-            color: white;
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-
-        .login-prompt {
-            font-size: 1.3em;
-            margin-top: 20px;
-            opacity: 0.9;
-        }
-
-        .games-section {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            display: none; /* Скрыто до авторизации */
-        }
-
-        .game-card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(15px);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .game-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-
-        .game-icon {
-            font-size: 2.5em;
-            display: block;
-            margin-bottom: 15px;
-        }
-
-        .game-title {
-            font-size: 1.8em;
-            margin-bottom: 10px;
-        }
-
-        .game-features {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-            font-size: 0.95em;
-        }
-
-        .feature {
-            background: rgba(255,255,255,0.2);
-            padding: 5px 12px;
-            border-radius: 20px;
-        }
-
-        .top-players, .tournament {
-            text-align: center;
-        }
-
-        .error {
-            background: rgba(255,107,107,0.3);
-            border: 1px solid #ff6b6b;
-            color: #ffebef;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            display: none;
+        @keyframes pulse {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 1; }
         }
 
         .user-info {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.5);
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: bold;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(20px);
+            padding: 12px 24px;
+            border-radius: 50px;
+            border: 2px solid rgba(0,255,255,0.3);
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
         }
 
         .logout-btn {
-            background: #ff4757;
-            margin-left: 10px;
-            padding: 5px 15px;
+            background: linear-gradient(45deg, #ff4757, #ff3838);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            transform: scale(1.1) rotate(180deg);
+            box-shadow: 0 0 20px rgba(255,71,87,0.6);
+        }
+
+        .glass-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(25px);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 32px;
+            margin: 24px auto;
+            max-width: 900px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 35px 70px rgba(0,0,0,0.4);
+            border-color: rgba(0,255,255,0.5);
+        }
+
+        .auth-section {
+            text-align: center;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 18px 40px;
+            font-size: 1.2em;
+            font-weight: 700;
+            font-family: 'Orbitron', monospace;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            overflow: hidden;
+            min-width: 200px;
+            justify-content: center;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-login {
+            background: linear-gradient(45deg, #00f5ff, #0099cc);
+            box-shadow: 0 10px 30px rgba(0,245,255,0.4);
+            color: #000;
+        }
+
+        .btn-register {
+            background: linear-gradient(45deg, #ff00ff, #cc00cc);
+            box-shadow: 0 10px 30px rgba(255,0,255,0.4);
+            color: #fff;
+        }
+
+        .btn-game {
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+            box-shadow: 0 10px 30px rgba(0,255,136,0.4);
+            color: #000;
+            font-size: 1.3em;
+        }
+
+        .btn:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .login-prompt {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-top: 30px;
+            opacity: 0.8;
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 0.8; transform: translateY(0); }
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .game-card {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .game-icon {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px currentColor);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .game-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #fff, #00f5ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .feature {
+            background: rgba(255,255,255,0.15);
+            padding: 8px 16px;
+            border-radius: 20px;
             font-size: 0.9em;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .status {
+            font-size: 1.1em;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .status-live { background: rgba(0,255,136,0.2); color: #00ff88; border: 1px solid #00ff88; }
+        .status-error { background: rgba(255,71,87,0.2); color: #ff4757; border: 1px solid #ff4757; }
+
+        .leaderboard {
+            grid-column: 1 / -1;
+        }
+
+        .top-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .top-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            font-weight: 600;
+        }
+
+        .rank {
+            font-size: 1.5em;
+            font-weight: 900;
+            color: #ffd700;
+            min-width: 40px;
+        }
+
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            animation: modalFade 0.3s ease;
+        }
+
+        @keyframes modalFade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20,20,40,0.95);
+            backdrop-filter: blur(30px);
+            padding: 50px;
+            border-radius: 30px;
+            border: 2px solid rgba(0,255,255,0.5);
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 18px;
+            margin: 15px 0;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            font-size: 1.1em;
+            color: white;
+            font-family: inherit;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #00f5ff;
+            box-shadow: 0 0 20px rgba(0,245,255,0.3);
         }
 
         @media (max-width: 768px) {
-            .title { font-size: 2em; }
+            .games-grid { grid-template-columns: 1fr; }
             .auth-buttons { flex-direction: column; align-items: center; }
-            .btn { width: 250px; }
+            .btn { width: 100%; max-width: 300px; }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="title">🎮 ALEKSIN GAMES HUB</div>
-        <div class="subtitle">⚡ МОЛНИЕНОСНЫЙ СТАРТ</div>
+        <div class="subtitle">⚡ МОЛНИЕНОСНЫЙ СТАРТ 2026 ✨</div>
     </div>
 
-    <!-- Информаpicker о пользователе (только после входа) -->
-    <div id="userInfo" class="user-info" style="display: none;">
-        <span id="userName"></span>
-        <button class="btn logout-btn" onclick="logout()">🚪</button>
+    <!-- Пользователь -->
+    <div id="userInfo" class="user-info">
+        <span id="userName">Игрок</span>
+        <button class="logout-btn" onclick="logout()">🚪</button>
     </div>
 
-    <!-- Секция авторизации -->
-    <div id="authSection" class="auth-section">
+    <!-- Авторизация -->
+    <div id="authSection" class="glass-card auth-section">
         <div class="auth-buttons">
             <button class="btn btn-login" onclick="showLogin()">
                 🔑 Вход
@@ -194,99 +418,101 @@
             </button>
         </div>
         <div id="loginPrompt" class="login-prompt" style="display: none;">
-            ❌ Войдите, чтобы играть!
+            🚀 Войдите, чтобы сразиться с лучшими!
         </div>
     </div>
 
-    <!-- Игровая секция (скрыта до авторизации) -->
-    <div id="gamesSection" class="games-section">
-        <!-- Ошибка -->
-        <div id="errorMsg" class="error">
-            ❌ Ошибка подключения. Попробуйте позже.
-        </div>
-
-        <!-- Змейка -->
-        <div class="game-card" onclick="startGame('snake')">
-            <span class="game-icon">🐍</span>
-            <div class="game-title">Змейка Про</div>
-            <div class="game-features">
-                <span class="feature">Свайпы 📱</span>
+    <!-- Игры (скрыты до входа) -->
+    <div id="gamesSection" class="games-section" style="display: none;">
+        <!-- Змейка Pro -->
+        <div class="glass-card game-card" onclick="startGame('snake')">
+            <div class="game-icon" style="color: #00ff88;">🐍</div>
+            <div class="game-title">Змейка Pro</div>
+            <div class="features">
+                <span class="feature">📱 Свайпы</span>
                 <span class="feature">WASD</span>
                 <span class="feature">Градиент</span>
-                <span class="feature">Телепорт</span>
-                <span class="feature">Рекорды</span>
+                <span class="feature">⚡ Телепорт</span>
+                <span class="feature">🏆 Рекорды</span>
             </div>
+            <div class="btn btn-game">ИГРАТЬ 🚀</div>
         </div>
 
         <!-- Угадай число -->
-        <div class="game-card" onclick="startGame('guess')">
-            <span class="game-icon">🎯</span>
+        <div class="glass-card game-card" onclick="startGame('guess')">
+            <div class="game-icon" style="color: #ff00ff;">🎯</div>
             <div class="game-title">Угадай 1-10000</div>
-            <div class="game-features">
+            <div class="features">
                 <span class="feature">🔥 Очень близко!</span>
-                <span class="feature">Безлимит</span>
-                <span class="feature">Точные подсказки</span>
-                <span class="feature">Топ очки</span>
+                <span class="feature">♾️ Безлимит</span>
+                <span class="feature">🎯 Подсказки</span>
+                <span class="feature">⭐ Топ очки</span>
             </div>
+            <div class="btn btn-game">ИГРАТЬ 🎯</div>
         </div>
 
-        <!-- Топ-10 -->
-        <div class="game-card top-players">
-            <span class="game-icon">🏆</span>
-            <div class="game-title">Топ-10 игроков</div>
-            <div id="topPlayersList">Загрузка...</div>
+        <!-- Лидерборд -->
+        <div class="glass-card game-card leaderboard">
+            <div class="game-icon" style="color: #ffd700;">🏆</div>
+            <div class="game-title">Топ-10 Легенд</div>
+            <ul id="topPlayersList" class="top-list">
+                <li class="top-item"><span class="rank">1</span> Загрузка...</li>
+            </ul>
         </div>
 
         <!-- Турнир -->
-        <div class="game-card tournament" onclick="startTournament()">
-            <span class="game-icon">⚔️</span>
-            <div class="game-title">Турнир (24ч)</div>
-            <div id="tournamentStatus">❌ Ошибка</div>
+        <div class="glass-card game-card" onclick="startTournament()">
+            <div class="game-icon" style="color: #ff4757;">⚔️</div>
+            <div class="game-title">Турнир 24ч</div>
+            <div class="features">
+                <span class="feature">⚔️ Битва</span>
+                <span class="feature">⏰ 24ч</span>
+                <span class="feature">💎 Призы</span>
+            </div>
+            <div id="tournamentStatus" class="status status-live">⚔️ Идёт набор! 12/24ч</div>
+            <div class="btn btn-game">В ТУРНИР ⚔️</div>
         </div>
     </div>
 
-    <!-- Модальные окна -->
-    <div id="loginModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 40px; border-radius: 20px; color: black; max-width: 400px; width: 90%;">
-            <h2>🔑 Вход</h2>
-            <input type="text" id="loginUsername" placeholder="Имя пользователя" style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px;">
-            <input type="password" id="loginPassword" placeholder="Пароль" style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px;">
-            <div style="display: flex; gap: 10px;">
-                <button onclick="login()" class="btn" style="background: #10ac84; flex: 1;">Войти</button>
-                <button onclick="closeModal()" class="btn" style="background: #ff4757; flex: 1;">Отмена</button>
+    <!-- Модалки -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h2 style="font-family: 'Orbitron'; font-size: 2.5em; margin-bottom: 30px;">🔑 ВХОД</h2>
+            <input type="text" id="loginUsername" class="form-input" placeholder="⚡ Логин">
+            <input type="password" id="loginPassword" class="form-input" placeholder="🔒 Пароль">
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <button onclick="login()" class="btn btn-login" style="flex: 1;">ВОЙТИ ⚡</button>
+                <button onclick="closeModal()" class="btn" style="background: rgba(255,255,255,0.1);">❌</button>
             </div>
         </div>
     </div>
 
-    <div id="registerModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;">
-        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 40px; border-radius: 20px; color: black; max-width: 400px; width: 90%;">
-            <h2>📝 Регистрация</h2>
-            <input type="text" id="regUsername" placeholder="Имя пользователя" style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px;">
-            <input type="password" id="regPassword" placeholder="Пароль" style="width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #ddd; font-size: 16px;">
-            <div style="display: flex; gap: 10px;">
-                <button onclick="register()" class="btn" style="background: #686de0; flex: 1;">Зарегистрироваться</button>
-                <button onclick="closeModal()" class="btn" style="background: #ff4757; flex: 1;">Отмена</button>
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <h2 style="font-family: 'Orbitron'; font-size: 2.5em; margin-bottom: 30px;">📝 РЕГИСТРАЦИЯ</h2>
+            <input type="text" id="regUsername" class="form-input" placeholder="⭐ Никнейм">
+            <input type="password" id="regPassword" class="form-input" placeholder="🔐 Пароль">
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <button onclick="register()" class="btn btn-register" style="flex: 1;">СОЗДАТЬ ⭐</button>
+                <button onclick="closeModal()" class="btn" style="background: rgba(255,255,255,0.1);">❌</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Проверка авторизации при загрузке
-        window.onload = function() {
-            checkAuth();
-        };
+        // Инициализация
+        window.onload = () => checkAuth();
 
         function checkAuth() {
-            const userToken = localStorage.getItem('userToken');
-            const userName = localStorage.getItem('userName');
+            const token = localStorage.getItem('userToken');
+            const name = localStorage.getItem('userName');
             
-            if (userToken) {
+            if (token) {
                 document.getElementById('authSection').style.display = 'none';
                 document.getElementById('gamesSection').style.display = 'block';
                 document.getElementById('userInfo').style.display = 'flex';
-                document.getElementById('userName').textContent = userName || 'Игрок';
-                loadTopPlayers();
-                loadTournamentStatus();
+                document.getElementById('userName').textContent = name || 'Игрок';
+                loadData();
             } else {
                 document.getElementById('authSection').style.display = 'block';
                 document.getElementById('gamesSection').style.display = 'none';
@@ -295,14 +521,14 @@
             }
         }
 
-        function showLogin() {
-            document.getElementById('loginModal').style.display = 'block';
+        function loadData() {
+            loadTopPlayers();
+            loadTournamentStatus();
         }
 
-        function showRegister() {
-            document.getElementById('registerModal').style.display = 'block';
-        }
-
+        // Аутентификация
+        function showLogin() { document.getElementById('loginModal').style.display = 'block'; }
+        function showRegister() { document.getElementById('registerModal').style.display = 'block'; }
         function closeModal() {
             document.getElementById('loginModal').style.display = 'none';
             document.getElementById('registerModal').style.display = 'none';
@@ -311,96 +537,80 @@
         function login() {
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
-            
             if (username && password) {
-                // Имитация авторизации (в реальности запрос к серверу)
-                localStorage.setItem('userToken', 'user_' + Date.now());
+                localStorage.setItem('userToken', 'token_' + Date.now());
                 localStorage.setItem('userName', username);
                 closeModal();
-                document.getElementById('loginUsername').value = '';
-                document.getElementById('loginPassword').value = '';
                 checkAuth();
-            } else {
-                alert('Заполните все поля!');
-            }
+            } else alert('⚠️ Заполните все поля!');
         }
 
         function register() {
             const username = document.getElementById('regUsername').value;
             const password = document.getElementById('regPassword').value;
-            
             if (username && password) {
-                // Имитация регистрации
-                localStorage.setItem('userToken', 'user_' + Date.now());
+                localStorage.setItem('userToken', 'token_' + Date.now());
                 localStorage.setItem('userName', username);
                 closeModal();
-                document.getElementById('regUsername').value = '';
-                document.getElementById('regPassword').value = '';
                 checkAuth();
-            } else {
-                alert('Заполните все поля!');
-            }
+            } else alert('⚠️ Заполните все поля!');
         }
 
         function logout() {
-            localStorage.removeItem('userToken');
-            localStorage.removeItem('userName');
+            localStorage.clear();
             checkAuth();
         }
 
-        function startGame(gameType) {
-            const userToken = localStorage.getItem('userToken');
-            if (!userToken) {
-                alert('Авторизуйтесь!');
-                return;
-            }
+        // Игры
+        function startGame(type) {
+            const token = localStorage.getItem('userToken');
+            if (!token) return alert('🔐 Авторизуйтесь!');
             
-            // Здесь запускаются игры
-            switch(gameType) {
-                case 'snake':
-                    alert('🚀 Запуск Змейка Про! (реализация игры)');
-                    break;
-                case 'guess':
-                    alert('🎯 Запуск Угадай 1-10000! (реализация игры)');
-                    break;
-            }
+            const games = {
+                snake: '🐍 Змейка Pro загружается... (полная игра скоро!)',
+                guess: '🎯 Угадай число 1-10000! (полная игра скоро!)'
+            };
+            alert(games[type]);
+            // TODO: fetch(`/api/game/${type}?token=${token}`)
         }
 
         function startTournament() {
-            showError('Турнир недоступен. Попробуйте позже!');
+            alert('⚔️ Турнир 24ч! Битва за топ-1 Алексина! (реализация через /api/tournament)');
         }
 
+        // Данные
         function loadTopPlayers() {
-            // Имитация загрузки топа
-            document.getElementById('topPlayersList').innerHTML = `
-                <div style="margin-top: 15px;">
-                    1. Player1 🔥 12500<br>
-                    2. Player2 ⭐ 11800<br>
-                    3. Player3 ⚡ 10900
-                </div>
-            `;
+            const top = [
+                { rank: 1, name: 'ProGamer_42', score: 12500 },
+                { rank: 2, name: 'AleksinKing', score: 11800 },
+                { rank: 3, name: 'SnakeMaster', score: 10900 },
+                { rank: 4, name: 'Вы', score: 9800 },
+                { rank: 5, name: 'TulaBoss', score: 9500 },
+                { rank: 6, name: 'PixelNinja', score: 8900 },
+                { rank: 7, name: 'FastFingers', score: 8200 },
+                { rank: 8, name: 'GuessGod', score: 7600 },
+                { rank: 9, name: 'NoobSlayer', score: 7000 },
+                { rank: 10, name: 'LastHope', score: 6500 }
+            ];
+            
+            const html = top.map(p => 
+                `<li class="top-item">
+                    <span class="rank">${p.rank}🔥</span> 
+                    ${p.name} <span style="margin-left: auto; color: #00ff88;">${p.score}</span>
+                </li>`
+            ).join('');
+            document.getElementById('topPlayersList').innerHTML = html;
         }
 
         function loadTournamentStatus() {
-            document.getElementById('tournamentStatus').textContent = '⏳ Идёт набор (12/24ч)';
+            document.getElementById('tournamentStatus').textContent = '⚔️ БОЙ! 18/24ч';
+            document.getElementById('tournamentStatus').className = 'status status-live';
         }
 
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMsg');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
-        }
-
-        // Закрытие модалок по клику вне их
-        window.onclick = function(event) {
-            const loginModal = document.getElementById('loginModal');
-            const registerModal = document.getElementById('registerModal');
-            if (event.target == loginModal) closeModal();
-            if (event.target == registerModal) closeModal();
-        }
+        // Закрытие модалок
+        window.onclick = (e) => {
+            if (e.target.classList.contains('modal')) closeModal();
+        };
     </script>
 </body>
 </html>
