@@ -110,7 +110,7 @@
 
         <div id="gamesSection">
             <div class="game-grid">
-                <!-- 🐍 ЗМЕЙКА ULTRA с ЯБЛОКАМИ -->
+                <!-- 🐍 ЗМЕЙКА ULTRA -->
                 <div class="game-card" id="snakeCard">
                     <div class="game-title">🐍 ЗМЕЙКА ULTRA ⚡🍎</div>
                     <div style="text-align: center; margin-bottom: 15px;">
@@ -126,7 +126,7 @@
                     </div>
                 </div>
 
-                <!-- 🎯 УГАДАЙКА НЕОГРАНИЧЕННЫЕ ПОПЫТКИ -->
+                <!-- 🎯 УГАДАЙКА -->
                 <div class="game-card" id="guessCard">
                     <div class="game-title">🎯 УГАДАЙКА PRO 🎲</div>
                     <div style="text-align: center; margin-bottom: 15px;">
@@ -166,12 +166,39 @@
         let currentUser = null;
         let guessNumber = null; let guessAttempts = 0; let lastGuessedNumber = 0;
         let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
-        let tournamentStart = parseInt(localStorage.getItem('tournamentStart') || Date.now());
         let snakeDifficulty = 1; let guessDifficulty = 1;
+        let gameInterval = null;
 
         function saveData(key, data) {
             localStorage.setItem(key, JSON.stringify(data));
             sessionStorage.setItem(key, JSON.stringify(data));
+        }
+
+        // 🕐 ТУРНИРНАЯ ЛОГИКА 00:00 МСК
+        function getNextMidnightMSK() {
+            const now = new Date();
+            const mskOffset = 3 * 60; // МСК +3 UTC
+            const utcNow = now.getTime() + (now.getTimezoneOffset() * 60 * 1000);
+            const mskNow = new Date(utcNow + (mskOffset * 60 * 1000));
+            
+            const nextMidnight = new Date(mskNow);
+            nextMidnight.setHours(24, 0, 0, 0); // Завтра 00:00 МСК
+            return nextMidnight.getTime();
+        }
+
+        function checkTournamentReset() {
+            const lastReset = parseInt(localStorage.getItem('tournamentLastReset') || 0);
+            const nowMSK = getNextMidnightMSK() - (24 * 60 * 60 * 1000); // Сегодня 00:00 МСК
+            
+            if (nowMSK > lastReset) {
+                // ✅ НОВЫЙ ТУРНИР - сбрасываем только лидерборд турнира
+                const tournamentScores = JSON.parse(localStorage.getItem('tournamentScores') || '{}');
+                Object.keys(tournamentScores).forEach(user => {
+                    if (!tournamentScores[user].locked) delete tournamentScores[user];
+                });
+                saveData('tournamentScores', tournamentScores);
+                localStorage.setItem('tournamentLastReset', nowMSK.toString());
+            }
         }
 
         // 🔐 АВТОРИЗАЦИЯ
@@ -181,8 +208,11 @@
             const statusEl = document.getElementById('authStatus');
             
             if (!username || password.length < 4) {
-                statusEl.innerHTML = '❌ Ник и пароль (4+ символа)'; statusEl.style.background = 'rgba(255,0,0,0.3)'; statusEl.style.borderLeftColor = '#ff4444';
-                setTimeout(() => { statusEl.innerHTML = ''; statusEl.style.background = ''; }, 2000); return;
+                statusEl.innerHTML = '❌ Ник и пароль (4+ символа)'; 
+                statusEl.style.background = 'rgba(255,0,0,0.3)'; 
+                statusEl.style.borderLeftColor = '#ff4444';
+                setTimeout(() => { statusEl.innerHTML = ''; statusEl.style.background = ''; }, 2000); 
+                return;
             }
 
             const testAccounts = { 'АлексинЛегенда': '12345', 'GamingPro2026': 'aleksin1', 'test': '1234' };
@@ -191,16 +221,22 @@
             if (savedPassword && savedPassword === password) {
                 localStorage.setItem('userToken', 'valid'); localStorage.setItem('userName', username);
                 sessionStorage.setItem('userToken', 'valid'); sessionStorage.setItem('userName', username);
-                currentUser = username; document.getElementById('authSection').style.display = 'none';
-                document.getElementById('gamesSection').style.display = 'block'; document.getElementById('userInfo').style.display = 'flex';
-                document.getElementById('currentUser').textContent = username; updateAllTops(); return;
+                currentUser = username; 
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('gamesSection').style.display = 'block'; 
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('currentUser').textContent = username; 
+                updateAllTops(); 
+                return;
             }
             
-            statusEl.innerHTML = '❌ Неверный логин/пароль'; statusEl.style.background = 'rgba(255,0,0,0.3)'; statusEl.style.borderLeftColor = '#ff4444';
+            statusEl.innerHTML = '❌ Неверный логин/пароль'; 
+            statusEl.style.background = 'rgba(255,0,0,0.3)'; 
+            statusEl.style.borderLeftColor = '#ff4444';
             setTimeout(() => { statusEl.innerHTML = ''; statusEl.style.background = ''; }, 2000);
         }
 
-                function register() {
+        function register() {
             const username = document.getElementById('usernameInput').value.trim();
             const password = document.getElementById('passwordInput').value;
             const statusEl = document.getElementById('authStatus');
@@ -233,6 +269,7 @@
             currentUser = null;
             localStorage.removeItem('userToken'); localStorage.removeItem('userName');
             sessionStorage.removeItem('userToken'); sessionStorage.removeItem('userName');
+            if (gameInterval) clearInterval(gameInterval);
             document.getElementById('authSection').style.display = 'block';
             document.getElementById('gamesSection').style.display = 'none';
             document.getElementById('userInfo').style.display = 'none';
@@ -251,9 +288,10 @@
                 document.getElementById('currentUser').textContent = userName;
                 updateAllTops();
             }
+            checkTournamentReset();
         }
 
-        // 🐍 ЗМЕЙКА ULTRA
+        // 🐍 ЗМЕЙКА ИСПРАВЛЕННАЯ
         function setSnakeDifficulty(level) {
             snakeDifficulty = level;
             const btns = document.querySelectorAll('#snakeCard .difficulty-btn');
@@ -263,73 +301,109 @@
         }
 
         function startSnake() {
+            if (gameInterval) clearInterval(gameInterval);
+            
             const canvas = document.getElementById('snakeCanvas');
             const ctx = canvas.getContext('2d');
             canvas.width = 300; canvas.height = 250;
             
-            const grid = 15; let snake = [{x: 10, y: 10}]; let dx = 0, dy = 0;
+            const grid = 15;
+            let snake = [{x: 10, y: 10}];
+            let dx = 0, dy = 0;
             let food = {x: Math.floor(Math.random()*20), y: Math.floor(Math.random()*17)};
-            let score = 0; let gameSpeed = snakeDifficulty === 1 ? 200 : snakeDifficulty === 2 ? 150 : 100;
+            let score = 0;
+            let gameSpeed = snakeDifficulty === 1 ? 200 : snakeDifficulty === 2 ? 150 : 100;
             
             document.getElementById('snakeScore').textContent = score;
+
+            // 🧹 Очищаем старые обработчики
+            canvas.onkeydown = null;
+            window.onkeydown = null;
             
-            // Управление
-            const keys = {}; window.addEventListener('keydown', e => keys[e.key] = true);
-            window.addEventListener('keyup', e => keys[e.key] = false);
+            // Клавиатура
+            const keys = {};
+            const keyHandler = (e) => keys[e.key] = true;
+            const keyUpHandler = (e) => keys[e.key] = false;
+            window.addEventListener('keydown', keyHandler);
+            window.addEventListener('keyup', keyUpHandler);
             
             // Touch свайпы
             let touchStartX = 0, touchStartY = 0;
-            canvas.addEventListener('touchstart', e => {
-                e.preventDefault(); touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
             }, {passive: false});
-            canvas.addEventListener('touchend', e => {
+            
+            canvas.addEventListener('touchend', (e) => {
                 e.preventDefault();
                 const touchEndX = e.changedTouches[0].clientX;
                 const touchEndY = e.changedTouches[0].clientY;
-                const diffX = touchStartX - touchEndX; const diffY = touchStartY - touchEndY;
-                if (Math.abs(diffX) > Math.abs(diffY)) {
+                const diffX = touchStartX - touchEndX;
+                const diffY = touchStartY - touchEndY;
+                
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
                     if (diffX > 0 && dx !== 1) { dx = -1; dy = 0; } // Left
                     else if (diffX < 0 && dx !== -1) { dx = 1; dy = 0; } // Right
-                } else {
+                } else if (Math.abs(diffY) > 30) {
                     if (diffY > 0 && dy !== 1) { dy = -1; dx = 0; } // Up
                     else if (diffY < 0 && dy !== -1) { dy = 1; dx = 0; } // Down
                 }
             }, {passive: false});
 
             function update() {
-                // Движение
                 const head = {x: snake[0].x + dx, y: snake[0].y + dy};
                 
-                // Стены
+                // Столкновения
                 if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 17 || 
-                    snake.some(part => part.x === head.x && part.y === head.y)) {
-                    saveScore('snake', score); clearInterval(gameInterval); return;
+                    snake.some((part, i) => i > 0 && part.x === head.x && part.y === head.y)) {
+                    saveScore('snake', Math.floor(score));
+                    document.getElementById('snakeScore').textContent = `💀 ${Math.floor(score)}`;
+                    clearInterval(gameInterval);
+                    window.removeEventListener('keydown', keyHandler);
+                    window.removeEventListener('keyup', keyUpHandler);
+                    return;
                 }
                 
                 snake.unshift(head);
                 
                 // Еда
                 if (head.x === food.x && head.y === food.y) {
-                    score += snakeDifficulty * 10; document.getElementById('snakeScore').textContent = score;
+                    score += snakeDifficulty * 10;
+                    document.getElementById('snakeScore').textContent = Math.floor(score);
                     food = {x: Math.floor(Math.random()*20), y: Math.floor(Math.random()*17)};
-                } else snake.pop();
+                } else {
+                    snake.pop();
+                }
                 
                 // Отрисовка
-                ctx.fillStyle = 'rgba(0,0,0,0.9)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'rgba(3,5,10,0.95)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Змейка градиент
                 snake.forEach((part, i) => {
-                    ctx.fillStyle = i === 0 ? `hsl(${score*2}, 100%, 50%)` : `hsl(${score}, 70%, 40%)`;
+                    const gradient = ctx.createLinearGradient(part.x*grid, part.y*grid, (part.x+1)*grid, (part.y+1)*grid);
+                    gradient.addColorStop(0, i === 0 ? '#00ff88' : '#00aa55');
+                    gradient.addColorStop(1, i === 0 ? '#44ffaa' : '#008844');
+                    ctx.fillStyle = gradient;
                     ctx.fillRect(part.x*grid, part.y*grid, grid-1, grid-1);
                 });
-                ctx.fillStyle = '#ff4444'; ctx.fillRect(food.x*grid, food.y*grid, grid-1, grid-1);
                 
-                // Управление клавишами
+                // Еда
+                ctx.fillStyle = '#ff4444';
+                ctx.shadowColor = '#ff0000';
+                ctx.shadowBlur = 10;
+                ctx.fillRect(food.x*grid+2, food.y*grid+2, grid-5, grid-5);
+                ctx.shadowBlur = 0;
+                
+                // Управление
                 if (keys['ArrowUp'] && dy !== 1) { dy = -1; dx = 0; }
                 if (keys['ArrowDown'] && dy !== -1) { dy = 1; dx = 0; }
                 if (keys['ArrowLeft'] && dx !== 1) { dx = -1; dy = 0; }
                 if (keys['ArrowRight'] && dx !== -1) { dx = 1; dy = 0; }
             }
             
-            const gameInterval = setInterval(update, gameSpeed);
+            gameInterval = setInterval(update, gameSpeed);
         }
 
         // 🎯 УГАДАЙКА
@@ -339,7 +413,11 @@
             btns.forEach((b, i) => b.classList.toggle('active', i+1 === level));
             const ranges = ['1-1000', '1-10000', '1-100000'];
             document.getElementById('guessRange').textContent = `Диапазон: ${ranges[level-1]}`;
-            if (guessNumber) checkGuess(); // Перезапуск
+            if (guessNumber) {
+                guessNumber = null; guessAttempts = 0;
+                document.getElementById('guessFeedback').innerHTML = '🎯 Новая игра!';
+                document.getElementById('guessAttempts').textContent = '0 попыток';
+            }
         }
 
         function checkGuess() {
@@ -360,10 +438,12 @@
             
             const feedbackEl = document.getElementById('guessFeedback');
             if (guess === guessNumber) {
-                const score = Math.max(1000, 100000 / guessAttempts * guessDifficulty);
-                feedbackEl.innerHTML = `✅ Угадал ${guessNumber}! ${score.toFixed(0)}💎`;
-                feedbackEl.style.color = '#00ff00'; saveScore('guess', score);
-                guessNumber = null; guessAttempts = 0; document.getElementById('guessInput').value = '';
+                const score = Math.floor(Math.max(1000, 100000 / guessAttempts * guessDifficulty));
+                feedbackEl.innerHTML = `✅ Угадал ${guessNumber}! ${score}💎`;
+                feedbackEl.style.color = '#00ff00'; 
+                saveScore('guess', score);
+                guessNumber = null; guessAttempts = 0; 
+                document.getElementById('guessInput').value = '';
             } else if (guess < guessNumber) {
                 feedbackEl.innerHTML = `📈 Больше чем <strong>${guess}</strong>!`;
                 feedbackEl.style.color = '#ffaa00';
@@ -376,20 +456,30 @@
             document.getElementById('guessInput').focus();
         }
 
-        // 💾 СОХРАНЕНИЕ РЕКОРДОВ
+        // 💾 СОХРАНЕНИЕ - Бриллианты НАКОПИТЕЛЬНЫЕ
         function saveScore(game, score) {
             if (!currentUser) return;
+            
+            // Обычные рекорды (максимум)
             const scores = JSON.parse(localStorage.getItem('userScores') || '{}');
-            if (!scores[currentUser]) scores[currentUser] = {};
-            if (!scores[currentUser][game] || score > scores[currentUser][game]) {
-                scores[currentUser][game] = score;
-                saveData('userScores', scores);
+            if (!scores[currentUser]) scores[currentUser] = {snake: 0, guess: 0};
+            if (score > scores[currentUser][game]) {
+                scores[currentUser][game] = Math.floor(score);
             }
+            saveData('userScores', scores);
+            
+            // Турнирные бриллианты (накопительные)
+            const tournamentScores = JSON.parse(localStorage.getItem('tournamentScores') || '{}');
+            if (!tournamentScores[currentUser]) tournamentScores[currentUser] = {total: 0, locked: false};
+            tournamentScores[currentUser].total += Math.floor(score);
+            saveData('tournamentScores', tournamentScores);
         }
 
-        // 🏆 ТОПЫ И ТУРНИР
+        // 🏆 ТОПЫ
         function updateAllTops() {
-            updateLeaderboard(); updateTournament();
+            checkTournamentReset();
+            updateLeaderboard(); 
+            updateTournament();
         }
 
         function updateLeaderboard() {
@@ -397,7 +487,7 @@
             const topList = Object.entries(scores)
                 .map(([user, games]) => ({
                     user,
-                    total: (games.snake || 0) + (games.guess || 0)
+                    total: Math.floor((games.snake || 0) + (games.guess || 0))
                 }))
                 .sort((a, b) => b.total - a.total)
                 .slice(0, 10);
@@ -405,59 +495,59 @@
             const listEl = document.getElementById('topList');
             listEl.innerHTML = topList.map((item, i) => 
                 `<li>${i+1}. <strong>${item.user}</strong> ${item.total}💎`
-            ).join('');
+            ).join('') || '<li>👥 Рекордов пока нет...</li>';
         }
 
         function updateTournament() {
+            const nextMidnight = getNextMidnightMSK();
             const now = Date.now();
-            const elapsed = Math.floor((now - tournamentStart) / (1000 * 60 * 60));
-            if (elapsed >= 24) {
-                tournamentStart = now; saveData('tournamentStart', tournamentStart);
-            }
-            
-            const remaining = 24 - elapsed;
-            const hours = Math.floor(remaining);
-            const minutes = Math.floor((remaining * 60) % 60);
+            const remainingMs = nextMidnight - now;
+            const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+            const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
             
             document.getElementById('timerLive').textContent = 
-                `⚔️ Осталось: ${hours}ч ${minutes}м`;
+                `⚔️ До конца: ${hours}ч ${minutes}м`;
             
-            const scores = JSON.parse(localStorage.getItem('userScores') || '{}');
-            const tournamentList = Object.entries(scores)
-                .map(([user, games]) => ({
+            const tournamentScores = JSON.parse(localStorage.getItem('tournamentScores') || '{}');
+            const tournamentList = Object.entries(tournamentScores)
+                .filter(([_, data]) => !data.locked)
+                .map(([user, data]) => ({
                     user,
-                    total: (games.snake || 0) + (games.guess || 0)
+                    total: Math.floor(data.total)
                 }))
                 .sort((a, b) => b.total - a.total)
                 .slice(0, 5);
             
             const listEl = document.getElementById('tournamentList');
             listEl.innerHTML = tournamentList.map((item, i) => {
-                const medals = ['🥇', '🥈', '🥉', '', ''];
+                const medals = ['🥇', '🥈', '🥉', '⚜️', '⚜️'];
                 return `<li>${medals[i] || i+1} ${item.user}: ${item.total}💎`;
             }).join('') || '<li>👥 Игроков пока нет...</li>';
         }
 
-        // Enter для угадалки
+        // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('guessInput').addEventListener('keypress', e => {
                 if (e.key === 'Enter') checkGuess();
             });
             
-            // Живое обновление
-            setInterval(updateAllTops, 3000);
+            setInterval(updateAllTops, 5000); // Каждые 5 сек
             updateAllTops();
-            setSnakeDifficulty(1); setGuessDifficulty(1);
+            setSnakeDifficulty(1); 
+            setGuessDifficulty(1);
         });
 
-        // Автосохранение каждые 10 сек
+        // Автосохранение
         setInterval(() => {
             if (currentUser) {
                 const scores = JSON.parse(localStorage.getItem('userScores') || '{}');
-                if (scores[currentUser]) saveData('userScores', scores);
+                const tournamentScores = JSON.parse(localStorage.getItem('tournamentScores') || '{}');
+                if (scores[currentUser] || tournamentScores[currentUser]) {
+                    saveData('userScores', scores);
+                    saveData('tournamentScores', tournamentScores);
+                }
             }
             saveData('registeredUsers', registeredUsers);
-            saveData('tournamentStart', tournamentStart);
         }, 10000);
     </script>
 </body>
