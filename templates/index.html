@@ -72,6 +72,7 @@
             color: #fff;
             font-size: 16px;
             backdrop-filter: blur(10px);
+            transition: all 0.3s;
         }
 
         input::placeholder { color: #aaa; }
@@ -171,6 +172,16 @@
             margin-bottom: 30px;
             border: 2px solid #00ff00;
         }
+
+        .status-message {
+            font-family: 'Orbitron', monospace;
+            font-size: 1rem;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(0,255,0,0.2);
+            border-left: 4px solid #00ff00;
+        }
     </style>
 </head>
 <body onload="checkAuth()">
@@ -180,6 +191,7 @@
         <!-- ✅ АВТОРИЗАЦИЯ -->
         <div id="authSection">
             <h2>🔐 ВХОД В ЛЕГЕНДУ АЛЕКСИНА</h2>
+            <div id="authStatus" style="min-height: 20px; margin: 10px 0;"></div>
             <input id="usernameInput" placeholder="👑 Твой ник..." maxlength="20">
             <input id="passwordInput" type="password" placeholder="🔑 Пароль (минимум 4 символа)" maxlength="20">
             <button onclick="login()">🚀 ВОЙТИ</button>
@@ -212,7 +224,7 @@
                     <div style="text-align: center;">
                         <input id="guessInput" placeholder="🔍 Твоё число..." maxlength="6">
                         <br><button onclick="checkGuess()">🔍 ПРОВЕРИТЬ</button>
-                        <div id="guessFeedback">-</div>
+                        <div id="guessFeedback" style="font-family: Orbitron; font-size: 1.1rem; margin: 10px 0;">🎯 Загадать число?</div>
                         <div id="guessAttempts" style="font-family: Orbitron; font-size: 1.2rem; margin-top: 10px;">0 попыток</div>
                     </div>
                 </div>
@@ -226,7 +238,10 @@
 
             <div id="tournament">
                 <h3 style="text-align: center; margin-bottom: 20px;">⚔️ ТУРНИР 24ч 🏆</h3>
-                <div id="tournamentInfo" style="text-align: center;"></div>
+                <div id="tournamentInfo" style="text-align: center; font-size: 1.2rem;">
+                    <div id="timerLive">⚔️ Загрузка турнира...</div>
+                    <div id="statusLive">⏳ Проверка игроков...</div>
+                </div>
                 <ul id="tournamentList" class="top-list"></ul>
             </div>
         </div>
@@ -234,40 +249,37 @@
 
     <script>
         let currentUser = null;
-        let snakeGame = null;
         let guessNumber = null;
         let guessAttempts = 0;
         
-        // ✅ БАЗА ПОЛЬЗОВАТЕЛЕЙ (СОХРАНЯЕТСЯ НАВСЕГДА)
+        // ✅ БАЗА ПОЛЬЗОВАТЕЛЕЙ
         let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
-        
-        // ✅ ПОСТОЯННЫЙ ТАЙМЕР ТУРНИРА
         let tournamentStart = parseInt(localStorage.getItem('tournamentStart') || Date.now());
 
-        // ✅ СУПЕРНАДЁЖНОЕ СОХРАНЕНИЕ
         function saveData(key, data) {
             localStorage.setItem(key, JSON.stringify(data));
             sessionStorage.setItem(key, JSON.stringify(data));
         }
 
-        // ✅ РАБОЧИЕ ФУНКЦИИ АВТОРИЗАЦИИ (РЕГИСТРАЦИЯ + ТЕСТОВЫЕ)
+        // ✅ АВТОРИЗАЦИЯ БЕЗ УВЕДОМЛЕНИЙ
         function login() {
-            console.log('🔐 КНОПКА ВЫЗВАНА!');
             const username = document.getElementById('usernameInput').value.trim();
             const password = document.getElementById('passwordInput').value;
+            const statusEl = document.getElementById('authStatus');
             
-            console.log('Ник:', username, 'Пароль:', password.length, 'символов');
-            
-            if (!username) {
-                alert('❌ Введи НИК!');
-                return;
-            }
-            if (password.length < 4) {
-                alert('❌ Пароль короче 4 символов!');
+            // Ошибка ввода
+            if (!username || password.length < 4) {
+                statusEl.innerHTML = '❌ Введи ник и пароль (4+ символа)';
+                statusEl.style.background = 'rgba(255,0,0,0.3)';
+                statusEl.style.borderLeftColor = '#ff4444';
+                document.getElementById('usernameInput').style.border = '2px solid #ff4444';
+                setTimeout(() => {
+                    statusEl.innerHTML = '';
+                    document.getElementById('usernameInput').style.border = '';
+                }, 2000);
                 return;
             }
 
-            // ✅ ПРОВЕРЯЕМ ТЕСТОВЫЕ + ЗАРЕГАННЫХ ПОЛЬЗОВАТЕЛЕЙ
             const testAccounts = {
                 'АлексинЛегенда': '12345',
                 'GamingPro2026': 'aleksin1',
@@ -287,45 +299,64 @@
                 document.getElementById('gamesSection').style.display = 'block';
                 document.getElementById('userInfo').style.display = 'flex';
                 document.getElementById('currentUser').textContent = username;
-                
-                alert('✅ ' + username + ' — ЛЕГЕНДА АЛЕКСИНА!');
-                setTimeout(() => {
-                    updateAllTops();
-                    console.log('💾 АВТОСОХРАНЕНИЕ АКТИВНО');
-                }, 500);
+                statusEl.innerHTML = `✅ ${username} вошёл!`;
+                statusEl.style.background = 'rgba(0,255,0,0.3)';
+                statusEl.style.borderLeftColor = '#00ff00';
+                updateAllTops();
                 return;
             }
             
-            alert('❌ Неверный логин/пароль!');
+            // Неверный пароль
+            statusEl.innerHTML = '❌ Неверный логин/пароль';
+            statusEl.style.background = 'rgba(255,0,0,0.3)';
+            statusEl.style.borderLeftColor = '#ff4444';
+            document.getElementById('passwordInput').style.border = '2px solid #ff4444';
+            setTimeout(() => {
+                statusEl.innerHTML = '';
+                document.getElementById('passwordInput').style.border = '';
+            }, 2000);
         }
 
         function register() {
             const username = document.getElementById('usernameInput').value.trim();
             const password = document.getElementById('passwordInput').value;
+            const statusEl = document.getElementById('authStatus');
             
             if (!username || password.length < 4) {
-                alert('❌ Ник и пароль (4+ символа)!');
+                statusEl.innerHTML = '❌ Ник и пароль (4+ символа)';
+                statusEl.style.background = 'rgba(255,0,0,0.3)';
+                statusEl.style.borderLeftColor = '#ff4444';
+                setTimeout(() => statusEl.innerHTML = '', 2000);
                 return;
             }
             
-            // ✅ ПРОВЕРЯЕМ, НЕ СУЩЕСТВУЕТ ЛИ УЖЕ
             if (registeredUsers[username]) {
-                alert('✅ ' + username + ' уже зарегистрирован! Нажми ВОЙТИ.');
+                statusEl.innerHTML = `✅ ${username} уже есть! Нажми ВОЙТИ`;
+                statusEl.style.background = 'rgba(0,255,255,0.3)';
+                statusEl.style.borderLeftColor = '#00ffff';
+                document.getElementById('usernameInput').style.background = '#44ff44';
+                setTimeout(() => {
+                    statusEl.innerHTML = '';
+                    document.getElementById('usernameInput').style.background = 'rgba(255,255,255,0.1)';
+                }, 2000);
                 return;
             }
             
-            // ✅ НОВЫЙ ПОЛЬЗОВАТЕЛЬ!
             registeredUsers[username] = password;
             saveData('registeredUsers', registeredUsers);
-            
-            alert('✅ ' + username + ' ЗАРЕГИСТРИРОВАН! Теперь нажми ВОЙТИ!');
+            statusEl.innerHTML = `✅ ${username} зарегистрирован! Нажми ВОЙТИ`;
+            statusEl.style.background = 'rgba(0,255,0,0.3)';
+            statusEl.style.borderLeftColor = '#00ff00';
+            document.getElementById('usernameInput').style.background = '#44ff44';
+            setTimeout(() => {
+                statusEl.innerHTML = '';
+                document.getElementById('usernameInput').style.background = 'rgba(255,255,255,0.1)';
+            }, 2000);
         }
 
         function checkAuth() {
             const userToken = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
             currentUser = localStorage.getItem('userName') || sessionStorage.getItem('userName');
-            
-            // ✅ ОБНОВЛЯЕМ БАЗУ ПОЛЬЗОВАТЕЛЕЙ ПРИ ЗАГРУЗКЕ
             registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
             
             if (userToken === 'valid' && currentUser) {
@@ -333,8 +364,7 @@
                 document.getElementById('gamesSection').style.display = 'block';
                 document.getElementById('userInfo').style.display = 'flex';
                 document.getElementById('currentUser').textContent = currentUser;
-                setTimeout(updateAllTops, 500);
-                console.log('✅ ВОССТАНОВЛЕНО ПОСЛЕ СНА:', currentUser);
+                updateAllTops();
             }
         }
 
@@ -349,7 +379,7 @@
             document.getElementById('userInfo').style.display = 'none';
         }
 
-        // 🐍 ЗМЕЙКА
+        // 🐍 ЗМЕЙКА БЕЗ ALERT
         function startSnake() {
             const canvas = document.getElementById('snakeCanvas');
             const ctx = canvas.getContext('2d');
@@ -389,7 +419,8 @@
 
                 if (head.x < 0 || head.x >= canvas.width/grid || head.y < 0 || head.y >= canvas.height/grid || 
                     snake.some(part => part.x === head.x && part.y === head.y)) {
-                    alert(`💀 Game Over! ${currentUser}: ${score}`);
+                    document.getElementById('snakeScore').innerHTML = 
+                        `💀 ${score} очков! <button onclick="startSnake()" style="padding:5px 15px;font-size:0.9rem;">🔄 Новая игра</button>`;
                     saveScore('snake', score);
                     return;
                 }
@@ -420,11 +451,11 @@
             update();
         }
 
-        // 🎯 УГАДАЙКА
+        // 🎯 УГАДАЙКА БЕЗ ALERT
         function startGuessGame() {
             guessNumber = Math.floor(Math.random() * 1000) + 1;
             guessAttempts = 0;
-            document.getElementById('guessFeedback').textContent = '🎯 Загадал число 1-1000';
+            document.getElementById('guessFeedback').innerHTML = '🎯 Новое число 1-1000 загадано!';
             document.getElementById('guessInput').value = '';
             document.getElementById('guessAttempts').textContent = '0 попыток';
         }
@@ -437,20 +468,19 @@
             
             if (guess === guessNumber) {
                 const score = Math.max(1000 - guessAttempts * 10, 1);
-                document.getElementById('guessFeedback').innerHTML = `✅ УГАДАЛ! (${score} очков)`;
+                document.getElementById('guessFeedback').innerHTML = 
+                    `✅ Угадал за ${guessAttempts} попыток! ${score} очков <button onclick="startGuessGame()" style="padding:5px 15px;font-size:0.9rem;margin-left:10px;">🔄 Новое число</button>`;
                 saveScore('guess', score);
-                setTimeout(startGuessGame, 2000);
             } else if (guess < guessNumber) {
-                document.getElementById('guessFeedback').textContent = `📈 Больше ${guess}!`;
+                document.getElementById('guessFeedback').textContent = `📈 Больше чем ${guess}!`;
             } else {
-                document.getElementById('guessFeedback').textContent = `📉 Меньше ${guess}!`;
+                document.getElementById('guessFeedback').textContent = `📉 Меньше чем ${guess}!`;
             }
             
             document.getElementById('guessAttempts').textContent = `${guessAttempts} попыток`;
             document.getElementById('guessInput').value = '';
         }
 
-        // 💾 СОХРАНЕНИЕ РЕКОРДОВ
         function saveScore(game, score) {
             const scores = JSON.parse(localStorage.getItem('scores') || '{}');
             if (!scores[currentUser]) scores[currentUser] = {};
@@ -464,6 +494,7 @@
         function updateAllTops() {
             updateTopList();
             updateTournament();
+            liveUpdate();
         }
 
         function updateTopList() {
@@ -477,25 +508,12 @@
             
             allScores.sort((a, b) => b.score - a.score).slice(0, 10);
             
-            const list = document.getElementById('topList');
-            list.innerHTML = allScores.map((item, i) => 
+            document.getElementById('topList').innerHTML = allScores.map((item, i) => 
                 `<li>${i+1}. ${item.user} ${item.game} <strong>${item.score}</strong></li>`
-            ).join('');
+            ).join('') || '<li>Пока нет рекордов...</li>';
         }
 
         function updateTournament() {
-            const now = Date.now();
-            const elapsed = Math.floor((now - tournamentStart) / (1000 * 60 * 60));
-            const remaining = 24 - (elapsed % 24);
-            
-            if (elapsed >= 24) {
-                tournamentStart = now;
-                localStorage.setItem('tournamentStart', tournamentStart);
-            }
-            
-            document.getElementById('tournamentInfo').innerHTML = 
-                `⚔️ ${remaining}ч осталось | Топ-5: Steam 1000₽/500₽/250₽`;
-            
             const scores = JSON.parse(localStorage.getItem('scores') || '{}');
             const tournamentScores = [];
             
@@ -508,17 +526,41 @@
             
             document.getElementById('tournamentList').innerHTML = tournamentScores.map((item, i) => 
                 `<li>${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1}. ${item.user}: ${item.score}💎</li>`
-            ).join('');
+            ).join('') || '<li>Ждём первых игроков...</li>';
         }
 
-        // Enter для угадывания
+        function liveUpdate() {
+            const now = Date.now();
+            const elapsed = Math.floor((now - tournamentStart) / (1000 * 60 * 60));
+            const remaining = 24 - (elapsed % 24);
+            const minutes = Math.floor(((24 - (elapsed % 24)) * 60) % 60);
+            
+            if (elapsed >= 24) {
+                tournamentStart = now;
+                localStorage.setItem('tournamentStart', tournamentStart);
+            }
+            
+            document.getElementById('timerLive').innerHTML = `⚔️ ${remaining}ч ${minutes}м осталось`;
+            
+            const scores = JSON.parse(localStorage.getItem('scores') || '{}');
+            const activeCount = Object.keys(scores).length;
+            document.getElementById('statusLive').innerHTML = `👥 ${activeCount} игроков | Топ-5: Steam 1000₽/500₽`;
+            
+            if (currentUser) {
+                const userScores = scores[currentUser] || {};
+                const total = (userScores.snake || 0) + (userScores.guess || 0);
+                document.getElementById('currentUser').innerHTML = `${currentUser} (${total}💎)`;
+            }
+        }
+
+        // Управление Enter
         document.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && document.getElementById('guessInput') === document.activeElement) {
                 checkGuess();
             }
         });
 
-        // ✅ АВТОСОХРАНЕНИЕ КАЖДЫЕ 10 СЕК
+        // Автосохранение
         setInterval(() => {
             if (currentUser) {
                 const scores = JSON.parse(localStorage.getItem('scores') || '{}');
@@ -527,16 +569,16 @@
             }
         }, 10000);
 
-        // ✅ ВОССТАНОВЛЕНИЕ ПОСЛЕ СНА
+        // Восстановление после сна
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && currentUser) {
                 setTimeout(updateAllTops, 1000);
-                console.log('💾 ВОССТАНОВЛЕНО после спящего режима!');
             }
         });
 
-        // ✅ АВТООБНОВЛЕНИЕ ТОПОВ
-        setInterval(updateAllTops, 30000);
+        // Живое обновление + автотопы
+        setInterval(updateAllTops, 3000);
+        liveUpdate();
     </script>
 </body>
 </html>
