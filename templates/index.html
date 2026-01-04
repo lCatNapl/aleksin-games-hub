@@ -12,10 +12,7 @@
             color: white; min-height: 100vh; overflow-x: hidden;
         }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .header {
-            text-align: center; margin-bottom: 30px;
-            font-size: 2.5em; text-shadow: 0 0 20px #44ff44;
-        }
+        .header { text-align: center; margin-bottom: 30px; font-size: 2.5em; text-shadow: 0 0 20px #44ff44; }
         .status-bar {
             display: flex; justify-content: space-between; align-items: center;
             background: rgba(0,0,0,0.5); padding: 15px; border-radius: 15px;
@@ -35,11 +32,11 @@
             box-shadow: 0 15px 30px rgba(68,255,68,0.3); 
         }
         .game-icon { font-size: 4em; margin-bottom: 15px; }
-        .leaderboard {
+        .leaderboard, .tournament {
             background: rgba(0,0,0,0.7); border-radius: 15px; padding: 20px;
-            max-height: 300px; overflow-y: auto;
+            margin: 20px 0; max-height: 300px; overflow-y: auto;
         }
-        .leader-item {
+        .leader-item, .tournament-item {
             display: flex; justify-content: space-between; padding: 10px; 
             margin: 5px 0; background: rgba(68,255,68,0.1); 
             border-radius: 10px; font-size: 16px !important;
@@ -51,36 +48,17 @@
         .modal-content {
             background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
             margin: 10% auto; padding: 30px; border-radius: 20px;
-            width: 90%; max-width: 450px; position: relative;
-            box-shadow: 0 10px 30px rgba(0,255,0,0.5);
+            width: 90%; max-width: 450px; box-shadow: 0 10px 30px rgba(0,255,0,0.5);
         }
-        .modal-buttons {
-            display: flex; gap: 10px; justify-content: center; margin-top: 20px;
-        }
-        .modal-btn { 
-            padding: 15px 30px; border: none; border-radius: 10px; 
-            cursor: pointer; font-size: 16px; flex: 1; font-weight: bold;
-        }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .modal-btn { padding: 15px 30px; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; flex: 1; font-weight: bold; }
         .btn-primary { background: #44ff44; color: black; }
-        .btn-secondary { background: #666; color: white; }
+        .btn-secondary, #logout { background: #666; color: white; }
         #game-container { min-height: 500px; }
-        canvas { 
-            border: 3px solid #44ff44; border-radius: 15px; 
-            background: #000; display: block; margin: 20px auto; 
-        }
-        input { 
-            padding: 15px; font-size: 18px; border-radius: 10px; 
-            border: 2px solid #444; background: #2a2a2a; color: white; 
-            width: 100%; margin: 10px 0; box-sizing: border-box;
-        }
-        #warning-text {
-            background: #ffaa00; color: black; padding: 15px; border-radius: 10px;
-            margin: 15px 0; display: none; font-weight: bold; text-align: center;
-        }
-        @media (max-width: 768px) {
-            .games-grid { grid-template-columns: 1fr; }
-            .header { font-size: 2em; }
-        }
+        canvas { border: 3px solid #44ff44; border-radius: 15px; background: #000; display: block; margin: 20px auto; }
+        input { padding: 15px; font-size: 18px; border-radius: 10px; border: 2px solid #444; background: #2a2a2a; color: white; width: 100%; margin: 10px 0; box-sizing: border-box; }
+        #warning-text { background: #ffaa00; color: black; padding: 15px; border-radius: 10px; margin: 15px 0; display: none; font-weight: bold; text-align: center; }
+        @media (max-width: 768px) { .games-grid { grid-template-columns: 1fr; } .header { font-size: 2em; } }
     </style>
 </head>
 <body>
@@ -99,12 +77,12 @@
             <div class="game-card" onclick="loadSnakeGame()">
                 <div class="game-icon">🐍</div>
                 <h2>Змейка</h2>
-                <p>Классика с свайпами 📱</p>
+                <p>Свайпы 📱 + WASD</p>
             </div>
             <div class="game-card" onclick="loadGuessGame()">
                 <div class="game-icon">🎯</div>
                 <h2>Угадай число</h2>
-                <p>1-10000 • Безлимит ходов</p>
+                <p>1-10000 • Безлимит</p>
             </div>
         </div>
         
@@ -114,9 +92,13 @@
             <h3>🏆 Топ-10</h3>
             <div id="leaderboard-list">Загрузка...</div>
         </div>
+        
+        <div class="tournament">
+            <h3>⚔️ Турнир (24ч)</h3>
+            <div id="tournament-info">Загрузка...</div>
+        </div>
     </div>
 
-    <!-- 🔥 МОДАЛКА С 5x КНОПКАМИ -->
     <div id="auth-modal" class="modal">
         <div class="modal-content">
             <span onclick="closeAuth()" style="float:right;cursor:pointer;font-size:24px;">×</span>
@@ -125,14 +107,9 @@
             <input type="text" id="username" placeholder="Логин" maxlength="20">
             <input type="password" id="password" placeholder="Пароль">
             <div class="modal-buttons">
-                <!-- 🔥 5x НЕУНИЧТОЖИМАЯ КНОПКА -->
-                <button class="modal-btn btn-primary" 
-                        id="submit-btn" 
-                        onclick="authUser();return false;"
-                        onmousedown="authUser();return false;"
-                        onpointerdown="authUser();return false;"
-                        ontouchstart="authUser();return false;"
-                        ondblclick="authUser();return false;">
+                <button class="modal-btn btn-primary" id="submit-btn" 
+                        onclick="authUser();return false;" onmousedown="authUser();return false;"
+                        onpointerdown="authUser();return false;" ontouchstart="authUser();return false;">
                     Войти
                 </button>
                 <button class="modal-btn btn-secondary" onclick="closeAuth();return false;">Отмена</button>
@@ -141,15 +118,9 @@
     </div>
 
     <script>
-        // 🔥 ВСТРАИВАЕМЫЙ JS (НЕ НУЖЕН /static/script.js)
-        let currentGame = ''; 
-        let isLoggedIn = false; 
-        let gameData = {score: 0, highscore: 0};
-        let gameInterval = null; 
-        let snake = {x:10,y:10,dx:0,dy:0,cells:[],maxCells:4};
-        let food = {x:15,y:15}; 
-        let secretNumber = 0; 
-        let attempts = 0;
+        let currentGame = ''; let isLoggedIn = false; let gameData = {score: 0};
+        let gameInterval = null; let snake = {x:10,y:10,dx:0,dy:0,cells:[],maxCells:4};
+        let food = {x:15,y:15}; let secretNumber = 0; let attempts = 0;
 
         async function checkUserStatus() {
             try {
@@ -164,124 +135,76 @@
         }
 
         async function authUser() {
-            console.log('🔥 КНОПКА ЖИВА! 5x защита сработала!');
+            console.log('🔥 КНОПКА ЖИВА!');
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             const errorDiv = document.getElementById('warning-text');
             
             if (!username || !password) {
-                errorDiv.textContent = '⚠️ Заполни все поля!';
-                errorDiv.style.display = 'block';
-                return;
+                errorDiv.textContent = '⚠️ Заполни все поля!'; errorDiv.style.display = 'block'; return;
             }
             
             try {
                 const endpoint = document.getElementById('modal-title').textContent === 'Вход' ? 'login' : 'register';
                 const res = await fetch('/' + endpoint, {
-                    method: 'POST',
-                    credentials: 'include',
+                    method: 'POST', credentials: 'include',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({username, password})
                 });
                 const data = await res.json();
                 
                 if (data.success) {
-                    checkUserStatus();
-                    closeAuth();
-                    loadLeaderboard();
+                    checkUserStatus(); closeAuth(); loadLeaderboard(); loadTournament();
                     console.log('✅ ВОШЁЛ:', data.username);
                 } else {
-                    errorDiv.textContent = data.error || 'Ошибка!';
-                    errorDiv.style.display = 'block';
+                    errorDiv.textContent = data.error || 'Ошибка!'; errorDiv.style.display = 'block';
                 }
             } catch (e) {
-                console.error('Auth error:', e);
-                errorDiv.textContent = 'Ошибка сети!';
-                errorDiv.style.display = 'block';
+                console.error('Auth error:', e); errorDiv.textContent = 'Ошибка сети!'; errorDiv.style.display = 'block';
             }
+        }
+
+        async function logout() {
+            await fetch('/logout', {method: 'POST', credentials: 'include'});
+            document.getElementById('status').textContent = '👋 Гость';
+            document.getElementById('logout').style.display = 'none';
+            isLoggedIn = false;
+            loadLeaderboard();
         }
 
         function showAuth(mode) {
             document.getElementById('auth-modal').style.display = 'flex';
             document.getElementById('modal-title').textContent = mode === 'login' ? 'Вход' : 'Регистрация';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
+            document.getElementById('username').value = ''; document.getElementById('password').value = '';
             document.getElementById('warning-text').style.display = 'none';
-            console.log('🔧 showAuth:', mode);
         }
 
-        function closeAuth() {
-            document.getElementById('auth-modal').style.display = 'none';
+        function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
+
+        async function loadLeaderboard() {
+            try {
+                const res = await fetch('/leaderboard');
+                const leaders = await res.json();
+                document.getElementById('leaderboard-list').innerHTML = 
+                    leaders.length ? leaders.map((p,i) => `<div class="leader-item">${i+1}. ${p.username} - ${p.score}</div>`).join('') : 'Пусто...';
+            } catch (e) { document.getElementById('leaderboard-list').innerHTML = 'Ошибка загрузки'; }
         }
 
-        function logout() {
-            fetch('/logout', {credentials: 'include'}).catch(() => {});
-            location.reload();
-        }
-
-        // 🎯 УГАДАЙКА 1-10000
-        function loadGuessGame() {
-            currentGame = 'guess';
-            secretNumber = Math.floor(Math.random() * 10000) + 1;
-            attempts = 0;
-            
-            document.getElementById('game-container').innerHTML = `
-                <h1 style="text-align:center;margin:20px 0">🎯 Угадай число (1-10000)</h1>
-                <div id="game-info" style="text-align:center;font-size:20px;margin:20px 0">
-                    <span style="color:#44ff44">Ходов: <span id="attempts">0</span></span> 
-                    <span style="color:#ffaa00">Очки: <span id="score">10000</span></span>
-                </div>
-                <div style="text-align:center">
-                    <input type="number" id="guessInput" min="1" max="10000" placeholder="1-10000" 
-                           style="padding:15px;font-size:18px;width:280px;border-radius:10px;border:2px solid #444;margin:10px;display:block;margin:10px auto">
-                    <br>
-                    <button id="submitGuess" style="padding:15px 40px;font-size:18px;border-radius:10px;background:#44ff44;color:black;cursor:pointer;font-weight:bold">
-                        Проверить
-                    </button>
-                </div>
-                <div id="hint" style="font-size:28px;margin:30px 0;color:#ffaa00;text-align:center;font-weight:bold;min-height:40px"></div>
-            `;
-            
-            document.getElementById('submitGuess').onclick = checkGuess;
-            document.getElementById('guessInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') checkGuess();
-            });
-            document.getElementById('guessInput').focus();
-        }
-
-        function checkGuess() {
-            const input = document.getElementById('guessInput');
-            const guess = parseInt(input.value);
-            attempts++;
-            
-            if (isNaN(guess) || guess < 1 || guess > 10000) {
-                document.getElementById('hint').innerHTML = '❌ Введи число от 1 до 10000!';
-                input.value = ''; input.focus(); return;
-            }
-            
-            let hint = '';
-            if (guess === secretNumber) {
-                const score = Math.max(0, 10000 - attempts * 5);
-                gameData.score = score;
-                saveScore();
-                hint = `✅ <span style="color:#44ff44;font-size:32px">УГДАЛ за ${attempts} ходов!</span><br>Очки: ${score}`;
-                setTimeout(() => loadGamesMenu(), 3000);
-            } else if (guess < secretNumber) {
-                const diff = secretNumber - guess;
-                if (diff <= 50) hint = '🔥 Очень близко! Больше! 🔥';
-                else if (diff <= 200) hint = '➕ Больше!';
-                else hint = '📈 Значительно больше!';
-            } else {
-                const diff = guess - secretNumber;
-                if (diff <= 50) hint = '🔥 Очень близко! Меньше! 🔥';
-                else if (diff <= 200) hint = '➖ Меньше!';
-                else hint = '📉 Значительно меньше!';
-            }
-            
-            document.getElementById('attempts').textContent = attempts;
-            document.getElementById('score').textContent = Math.max(0, 10000 - attempts * 5);
-            document.getElementById('hint').innerHTML = hint;
-            input.value = ''; input.focus();
+        async function loadTournament() {
+            try {
+                const res = await fetch('/tournament');
+                const data = await res.json();
+                const info = document.getElementById('tournament-info');
+                if (data.active) {
+                    const timeLeft = new Date(data.end_time) - Date.now();
+                    const hours = Math.floor(timeLeft / 3600000);
+                    const minutes = Math.floor((timeLeft % 3600000) / 60000);
+                    info.innerHTML = `⏰ Осталось: ${hours}ч ${minutes}м<br>` + 
+                        Object.entries(data.scores).slice(0,5).map(([u,s],i) => `<div class="tournament-item">${i+1}. ${u}: ${s}</div>`).join('');
+                } else {
+                    info.innerHTML = 'Турнир не активен';
+                }
+            } catch (e) { document.getElementById('tournament-info').innerHTML = 'Ошибка'; }
         }
 
         function saveScore() {
@@ -290,45 +213,139 @@
                 method: 'POST', credentials: 'include',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({score: gameData.score})
-            }).catch(e => console.error('Save error:', e));
+            }).then(() => { loadLeaderboard(); loadTournament(); });
         }
 
-        async function loadLeaderboard() {
-            try {
-                const res = await fetch('/leaderboard');
-                const leaders = await res.json();
-                document.getElementById('leaderboard-list').innerHTML = 
-                    leaders.map((player, i) => `<div class="leader-item">${i+1}. ${player.username} - ${player.score}</div>`).join('');
-            } catch (e) {}
-        }
-
-        function loadGamesMenu() {
-            document.getElementById('gamesMenu').style.display = 'grid';
-            document.getElementById('game-container').innerHTML = '';
-        }
-
+        // 🐍 ЗМЕЙКА ПОЛНАЯ
         function loadSnakeGame() {
-            alert('🐍 Змейка скоро! Играй в угадайку 1-10000! 🎯');
+            currentGame = 'snake';
+            document.getElementById('game-container').innerHTML = `
+                <canvas id="gameCanvas" width="400" height="400"></canvas>
+                <div style="text-align:center;font-size:20px">
+                    <div>Счёт: <span id="snakeScore">0</span> | Рекорд: <span id="snakeHighscore">0</span></div>
+                    <div>Свайпай 📱 или WASD/Стрелки</div>
+                </div>
+            `;
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            let touchStartX = 0, touchStartY = 0;
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault(); touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+            }, { passive: false });
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault(); const dx = touchStartX - e.changedTouches[0].clientX;
+                const dy = touchStartY - e.changedTouches[0].clientY;
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    if (dx > 0 && snake.dx !== 1) { snake.dx = -1; snake.dy = 0; }
+                    else if (dx < 0 && snake.dx !== -1) { snake.dx = 1; snake.dy = 0; }
+                } else {
+                    if (dy > 0 && snake.dy !== 1) { snake.dx = 0; snake.dy = -1; }
+                    else if (dy < 0 && snake.dy !== -1) { snake.dx = 0; snake.dy = 1; }
+                }
+            }, { passive: false });
+
+            document.addEventListener('keydown', (e) => {
+                if (currentGame !== 'snake') return;
+                if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') if (snake.dx !== 1) { snake.dx = -1; snake.dy = 0; }
+                if (e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') if (snake.dy !== 1) { snake.dx = 0; snake.dy = -1; }
+                if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') if (snake.dx !== -1) { snake.dx = 1; snake.dy = 0; }
+                if (e.key === 'ArrowDown' || e.key.toLowerCase() === 's') if (snake.dy !== -1) { snake.dx = 0; snake.dy = 1; }
+            });
+
+            function updateSnake() {
+                snake.x += snake.dx; snake.y += snake.dy;
+                if (snake.x < 0) snake.x = 39; if (snake.y < 0) snake.y = 39;
+                if (snake.x >= 40) snake.x = 0; if (snake.y >= 40) snake.y = 0;
+                
+                snake.cells.unshift({x: snake.x, y: snake.y});
+                if (snake.cells.length > snake.maxCells) snake.cells.pop();
+                
+                if (snake.x === food.x && snake.y === food.y) {
+                    snake.maxCells++; food.x = Math.floor(Math.random() * 39); food.y = Math.floor(Math.random() * 39);
+                }
+                
+                for (let cell of snake.cells.slice(1)) {
+                    if (snake.x === cell.x && snake.y === cell.y) { gameOver(); return; }
+                }
+                
+                ctx.fillStyle = '#111'; ctx.fillRect(0, 0, 400, 400);
+                ctx.fillStyle = 'lime'; snake.cells.forEach((cell,i) => {
+                    ctx.fillRect(cell.x*10, cell.y*10, 10-i*0.2, 10-i*0.2);
+                });
+                ctx.fillStyle = 'red'; ctx.fillRect(food.x*10, food.y*10, 10, 10);
+                document.getElementById('snakeScore').textContent = snake.cells.length - 4;
+                gameData.score = snake.cells.length - 4;
+            }
+            
+            function gameOver() {
+                if (gameInterval) clearInterval(gameInterval);
+                ctx.fillStyle = 'rgba(255,0,0,0.7)'; ctx.fillRect(0, 0, 400, 400);
+                ctx.fillStyle = 'white'; ctx.font = '30px Arial'; ctx.textAlign = 'center';
+                ctx.fillText('GAME OVER', 200, 190); ctx.fillText(`Счёт: ${gameData.score}`, 200, 230);
+                ctx.fillText('Кликни для рестарта', 200, 270); saveScore();
+            }
+            
+            canvas.onclick = () => {
+                snake = {x:10,y:10,dx:0,dy:0,cells:[],maxCells:4};
+                food = {x:Math.floor(Math.random()*39),y:Math.floor(Math.random()*39)};
+                gameData.score = 0; gameInterval = setInterval(updateSnake, 150);
+            };
+            gameInterval = setInterval(updateSnake, 150);
         }
 
-        // 🔥 НЕУНИЧТОЖИМЫЙ ФИКС КНОПОК — 5x защита
+        // 🎯 УГАДАЙКА 1-10000
+        function loadGuessGame() {
+            currentGame = 'guess'; secretNumber = Math.floor(Math.random() * 10000) + 1; attempts = 0;
+            document.getElementById('game-container').innerHTML = `
+                <h1 style="text-align:center;margin:20px 0">🎯 Угадай число (1-10000)</h1>
+                <div id="game-info" style="text-align:center;font-size:20px;margin:20px 0">
+                    <span style="color:#44ff44">Ходов: <span id="attempts">0</span></span> 
+                    <span style="color:#ffaa00">Очки: <span id="score">10000</span></span>
+                </div>
+                <div style="text-align:center">
+                    <input type="number" id="guessInput" min="1" max="10000" placeholder="1-10000" style="padding:15px;font-size:18px;width:280px;border-radius:10px;border:2px solid #444;margin:10px auto;display:block">
+                    <button id="submitGuess" style="padding:15px 40px;font-size:18px;border-radius:10px;background:#44ff44;color:black;cursor:pointer;font-weight:bold">Проверить</button>
+                </div>
+                <div id="hint" style="font-size:28px;margin:30px 0;color:#ffaa00;text-align:center;font-weight:bold;min-height:40px"></div>
+            `;
+            document.getElementById('submitGuess').onclick = checkGuess;
+            document.getElementById('guessInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkGuess(); });
+            document.getElementById('guessInput').focus();
+        }
+
+        function checkGuess() {
+            const input = document.getElementById('guessInput'); const guess = parseInt(input.value); attempts++;
+            if (isNaN(guess) || guess < 1 || guess > 10000) {
+                document.getElementById('hint').innerHTML = '❌ Введи число от 1 до 10000!'; input.value = ''; input.focus(); return;
+            }
+            let hint = '';
+            if (guess === secretNumber) {
+                const score = Math.max(0, 10000 - attempts * 5); gameData.score = score; saveScore();
+                hint = `✅ <span style="color:#44ff44;font-size:32px">УГДАЛ за ${attempts} ходов!</span><br>Очки: ${score}`;
+            } else if (guess < secretNumber) {
+                const diff = secretNumber - guess; hint = diff <= 50 ? '🔥 Очень близко! Больше! 🔥' : diff <= 200 ? '➕ Больше!' : '📈 Значительно больше!';
+            } else {
+                const diff = guess - secretNumber; hint = diff <= 50 ? '🔥 Очень близко! Меньше! 🔥' : diff <= 200 ? '➖ Меньше!' : '📉 Значительно меньше!';
+            }
+            document.getElementById('attempts').textContent = attempts;
+            document.getElementById('score').textContent = Math.max(0, 10000 - attempts * 5);
+            document.getElementById('hint').innerHTML = hint; input.value = ''; input.focus();
+        }
+
+        // 🔥 5x ФИКС КНОПОК
         setInterval(() => {
             const btn = document.getElementById('submit-btn');
             if (btn && !btn.dataset.fixed) {
-                btn.dataset.fixed = 'true';
-                btn.onclick = () => { authUser(); return false; };
-                btn.onmousedown = () => { authUser(); return false; };
-                btn.ontouchstart = () => { authUser(); return false; };
-                btn.onpointerdown = () => { authUser(); return false; };
-                console.log('🔥 КНОПКА НЕУНИЧТОЖИМА! 5x защита');
+                btn.dataset.fixed = 'true'; btn.onclick = () => { authUser(); return false; };
+                console.log('🔥 КНОПКА НЕУНИЧТОЖИМА!');
             }
         }, 500);
 
         // СТАРТ
         document.addEventListener('DOMContentLoaded', () => {
-            checkUserStatus();
-            loadLeaderboard();
-            setInterval(loadLeaderboard, 30000);
+            checkUserStatus(); loadLeaderboard(); loadTournament();
+            setInterval(() => { loadLeaderboard(); loadTournament(); }, 30000);
         });
     </script>
 </body>
