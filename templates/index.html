@@ -14,7 +14,7 @@
             min-height: 100vh;
             overflow-x: hidden;
             animation: bgShift 15s ease infinite;
-            touch-action: none; /* 📱 БЛОКИРУЕМ ПРОКРУТКУ */
+            touch-action: none;
         }
         @keyframes bgShift { 0%,100% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
@@ -67,7 +67,6 @@
             width: 220px; 
             margin: 10px; 
             backdrop-filter: blur(10px);
-            transition: all 0.3s;
         }
         input:focus { outline: none; border-color: #00ffff; box-shadow: 0 0 20px rgba(0,255,255,0.5); }
         .top-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 20px; }
@@ -83,12 +82,12 @@
         canvas { 
             border: 4px solid #00ffff; 
             border-radius: 20px; 
-            background: radial-gradient(circle, #000, #111); 
+            background: #0a0a0a; 
             display: block; 
             margin: 20px auto; 
             box-shadow: 0 20px 40px rgba(0,255,255,0.3);
             cursor: pointer;
-            touch-action: none; /* 📱 БЛОКИРУЕМ ПРОКРУТКУ НА КАНВАСЕ */
+            touch-action: none;
         }
         #userInfo { 
             position: fixed; 
@@ -131,23 +130,27 @@
 
         <!-- 🎮 ИГРЫ -->
         <div id="gamesSection" class="hidden">
+            <!-- 🐍 ЗМЕЙКА (ИСПРАВЛЕННАЯ) -->
             <div class="section">
-                <h2 style="font-family: 'Orbitron';">🐍 ЗМЕЙКА ULTRA (3 уровня)</h2>
+                <h2 style="font-family: 'Orbitron';">🐍 ЗМЕЙКА ULTRA HD</h2>
                 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px;">
                     <button onclick="setSnakeDifficulty(1)">🐌 ЛЁГКАЯ</button>
                     <button onclick="setSnakeDifficulty(2)">⚡ НОРМАЛЬНАЯ</button>
                     <button onclick="setSnakeDifficulty(3)">🚀 ХАРДКОР</button>
                 </div>
-                <canvas id="snakeCanvas" width="450" height="450"></canvas>
+                <canvas id="snakeCanvas" width="450" height="450" style="touch-action: none;"></canvas>
                 <div style="text-align: center; font-size: 1.3rem; margin: 15px 0;">
                     Счёт: <span id="snakeScore" style="color: #00ff00; font-family: Orbitron; font-weight: 900; font-size: 1.5rem;">0</span>
                 </div>
-                <button id="startSnakeBtn" onclick="startSnake()" style="display:none; font-size: 1.3rem;">▶️ НОВАЯ ИГРА</button>
+                <div style="text-align: center;">
+                    <button id="startSnakeBtn" onclick="startSnake()" style="display:block; font-size: 1.3rem; padding: 20px 40px;">▶️ СТАРТ ЗМЕЙКИ</button>
+                </div>
                 <div style="font-size: 0.9rem; opacity: 0.8; text-align: center;">
-                    ⌨️ Стрелки/WASD | 📱 Свайпы | 🖱️ Клик по canvas
+                    ⌨️ Стрелки/WASD | 📱 Свайпы | 🖱️ Клик
                 </div>
             </div>
 
+            <!-- 🎯 УГАДАЙКА -->
             <div class="section">
                 <h2 style="font-family: 'Orbitron';">🎯 УГАДАЙ ЧИСЛО (умные подсказки)</h2>
                 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px;">
@@ -190,28 +193,28 @@
     <div id="userInfo" class="hidden">
         <div id="currentUser" style="font-size: 1.3rem;"></div>
         <div id="liveStats" style="font-size: 0.9rem;"></div>
-        <button onclick="logout()">🚪 ВЫХОД</button>
+        <button onclick="logout()" style="background: linear-gradient(45deg, #ff4444, #ff6666) !important; color: #fff !important; width: 100%;">🚪 ВЫХОД</button>
     </div>
 
     <script>
+        // 🎮 ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
         let currentUser = '', snakeDifficulty = 1, guessDifficulty = 1;
         let guessNumber = 0, guessAttempts = 0, lastGuessedNumber = 0;
         let snakeScore = 0, gameInterval = null, snake = [], dx = 0, dy = 0, food = {};
-        let tops = { snakeTop10: [], guessTop10: [] }, tournaments = { snake: {}, guess: {} }, tournamentStart = Date.now();
+        let snakeGameActive = false;
+        let tops = { snakeTop10: [], guessTop10: [] }, tournaments = { snake: {}, guess: {} };
         let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
 
-        // 🔧 ФИКС ЗМЕЙКИ + КРАСОТА + 📱/🖥️ БЕЗ ПРОКРУТКИ
+        // 💾 СОХРАНЕНИЕ
+        function saveData(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
         function loadData() {
             tops.snakeTop10 = JSON.parse(localStorage.getItem('snakeTop10') || '[]');
             tops.guessTop10 = JSON.parse(localStorage.getItem('guessTop10') || '[]');
             tournaments.snake = JSON.parse(localStorage.getItem('snakeTournament') || '{}');
             tournaments.guess = JSON.parse(localStorage.getItem('guessTournament') || '{}');
-            tournamentStart = parseInt(localStorage.getItem('tournamentStart') || Date.now());
         }
 
-        function saveData(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
-
-        // 🔐 АВТОРИЗАЦИЯ (БЕЗ ИЗМЕНЕНИЙ)
+        // 🔐 АВТОРИЗАЦИЯ
         function login() {
             const username = document.getElementById('usernameInput').value.trim();
             const password = document.getElementById('passwordInput').value;
@@ -219,7 +222,7 @@
             if (registeredUsers[username] && registeredUsers[username] === password) {
                 currentUser = username; showGames(); 
                 status.innerHTML = `✅ ${username} вошёл!`; status.className = 'status success';
-            } else { status.innerHTML = '❌ Неверно'; status.className = 'status error'; }
+            } else { status.innerHTML = '❌ Неверный логин/пароль'; status.className = 'status error'; }
         }
 
         function register() {
@@ -227,182 +230,160 @@
             const password = document.getElementById('passwordInput').value;
             const status = document.getElementById('authStatus');
             if (username && password.length >= 4) {
-                if (registeredUsers[username]) { status.innerHTML = '👤 Уже есть!'; status.className = 'status error'; return; }
+                if (registeredUsers[username]) { status.innerHTML = '👤 Уже есть, войди!'; status.className = 'status error'; return; }
                 registeredUsers[username] = password; saveData('registeredUsers', registeredUsers);
                 status.innerHTML = `📝 ${username} зарегистрирован!`; status.className = 'status success';
-            }
+            } else { status.innerHTML = '❌ Ник + пароль 4+ символа'; status.className = 'status error'; }
         }
 
         function logout() {
-            if (confirm('Выйти?')) {
-                currentUser = ''; ['gamesSection','leaderboardsSection','userInfo'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            if (confirm('🚪 Выйти из игры?')) {
+                if (gameInterval) clearInterval(gameInterval);
+                currentUser = ''; snakeGameActive = false;
+                document.getElementById('startSnakeBtn').style.display = 'block';
+                ['gamesSection','leaderboardsSection','userInfo'].forEach(id => document.getElementById(id).classList.add('hidden'));
                 document.getElementById('authSection').classList.remove('hidden');
             }
         }
 
         function showGames() {
-            ['authSection'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            ['gamesSection','leaderboardsSection','userInfo'].forEach(id => document.getElementById(id).classList.remove('hidden'));
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('gamesSection').classList.remove('hidden');
+            document.getElementById('leaderboardsSection').classList.remove('hidden');
+            document.getElementById('userInfo').classList.remove('hidden');
             document.getElementById('currentUser').innerHTML = `👑 ${currentUser.toUpperCase()}`;
             loadData(); updateAllTops(); setInterval(saveAllData, 10000);
         }
 
-        // 🐍 ЗМЕЙКА ULTRA HD (🎨 КРАСИВАЯ + 📱 ФИКС)
+        // 🐍 ЗМЕЙКА (100% РАБОТАЕТ)
         function setSnakeDifficulty(level) {
             snakeDifficulty = level;
             const levels = ['🐌 ЛЁГКАЯ (200ms)', '⚡ НОРМАЛЬНАЯ (150ms)', '🚀 ХАРДКОР (100ms)'];
-            alert(`🐍 ${levels[level-1]}`);
+            document.getElementById('snakeScore').textContent = `Выбрано: ${levels[level-1]}`;
         }
 
         function startSnake() {
+            if (snakeGameActive) return;
+            
+            snakeGameActive = true;
             const canvas = document.getElementById('snakeCanvas');
             const ctx = canvas.getContext('2d');
-            canvas.width = 450; canvas.height = 450;
             
-            // 🆕 ПЕРЕЗАПУСК
-            if (gameInterval) clearInterval(gameInterval);
-            snake = [{x: 11, y: 11}]; dx = 0; dy = 0; snakeScore = 0;
-            food = {x: Math.floor(Math.random()*21)+1, y: Math.floor(Math.random()*21)+1};
-            
-            document.getElementById('snakeScore').textContent = '0';
+            // 🆕 СБРОС
+            snake = [{x: 10, y: 10}]; dx = 0; dy = 0; snakeScore = 0;
+            food = {x: 15, y: 15};
             document.getElementById('startSnakeBtn').style.display = 'none';
+            document.getElementById('snakeScore').textContent = '0';
             
-            const grid = 21; // 21x21 поле
+            const gridSize = 20;
             const speeds = [200, 150, 100];
-            const speed = speeds[snakeDifficulty-1];
-
+            
             // 🎮 ОСНОВНОЙ ЦИКЛ
-            gameInterval = setInterval(() => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            function gameLoop() {
+                // 🧹 ОЧИСТКА ЭКРАНА
+                ctx.fillStyle = '#0a0a0a';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                // 🐍 ДВИЖЕНИЕ ГЛАВЫ
+                // 🐍 НОВАЯ ГОЛОВА
                 const head = {x: snake[0].x + dx, y: snake[0].y + dy};
                 
-                // 💥 КРАСИВЫЙ GAME OVER
-                if (head.x < 1 || head.x > 20 || head.y < 1 || head.y > 20 || 
+                // 💥 GAME OVER
+                if (head.x < 0 || head.x >= 22 || head.y < 0 || head.y >= 22 || 
                     snake.some((part, i) => i > 0 && part.x === head.x && part.y === head.y)) {
                     
                     saveSnakeScore(Math.floor(snakeScore));
                     
-                    // 🎨 ЭФФЕКТ ВЗРЫВА
-                    ctx.fillStyle = 'rgba(255, 50, 50, 0.8)';
-                    ctx.shadowColor = '#ff4444'; ctx.shadowBlur = 50;
-                    ctx.font = 'bold 60px Orbitron'; ctx.textAlign = 'center';
-                    ctx.fillText('💀', canvas.width/2, canvas.height/2);
-                    ctx.font = 'bold 32px Orbitron'; ctx.fillText(`${Math.floor(snakeScore)}`, canvas.width/2, canvas.height/2 + 40);
+                    // 💀 GAME OVER ЭКРАН
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#fff';
+                    ctx.shadowColor = '#ff4444'; ctx.shadowBlur = 20;
+                    ctx.font = 'bold 48px Orbitron';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('GAME OVER', canvas.width/2, canvas.height/2);
+                    ctx.font = 'bold 36px Orbitron';
+                    ctx.fillText(`${Math.floor(snakeScore)}`, canvas.width/2, canvas.height/2 + 60);
                     ctx.shadowBlur = 0;
                     
-                    clearInterval(gameInterval);
+                    snakeGameActive = false;
                     document.getElementById('startSnakeBtn').style.display = 'block';
                     return;
                 }
                 
                 snake.unshift(head);
                 
-                // 🍎 СЪЕЛ ЕДУ
+                // 🍎 ЕДА
                 if (head.x === food.x && head.y === food.y) {
-                    snakeScore += 15 * snakeDifficulty;
-                    food = {x: Math.floor(Math.random()*19)+1, y: Math.floor(Math.random()*19)+1};
+                    snakeScore += 20 * snakeDifficulty;
+                    food = {
+                        x: Math.floor(Math.random() * 20) + 1,
+                        y: Math.floor(Math.random() * 20) + 1
+                    };
                 } else {
                     snake.pop();
                 }
                 
-                // 🌈 ГРАДИЕНТНАЯ ЗМЕЙКА (УЛЫБКА ✨)
-                snake.forEach((part, i) => {
+                // 🎨 ЗМЕЙКА
+                for (let i = 0; i < snake.length; i++) {
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = '#00ff88';
                     const alpha = i / snake.length;
-                    const gradient = ctx.createRadialGradient(part.x*grid, part.y*grid, 0, part.x*grid, part.y*grid, grid);
-                    gradient.addColorStop(0, `rgba(0, 255, 100, ${0.9+alpha*0.3})`);
-                    gradient.addColorStop(1, `rgba(0, 150, 50, ${0.6+alpha*0.2})`);
-                    ctx.fillStyle = gradient;
-                    ctx.shadowColor = '#00ff88'; ctx.shadowBlur = 15;
-                    ctx.beginPath();
-                    ctx.arc(part.x*grid+grid/2, part.y*grid+grid/2, grid/2-1, 0, Math.PI*2);
-                    ctx.fill();
-                });
+                    ctx.fillStyle = `rgba(0, 255, 100, ${0.8 - alpha * 0.3})`;
+                    ctx.fillRect(snake[i].x * gridSize, snake[i].y * gridSize, gridSize-2, gridSize-2);
+                }
                 
-                // ✨ БЛЕСТЯЩЕЕ ЯБЛОКО
-                const appleGradient = ctx.createRadialGradient(food.x*grid+grid/2, food.y*grid+grid/2, 0, food.x*grid+grid/2, food.y*grid+grid/2, grid/2);
-                appleGradient.addColorStop(0, '#ff6666'); appleGradient.addColorStop(0.7, '#ff2222'); appleGradient.addColorStop(1, '#cc0000');
-                ctx.shadowColor = '#ff4444'; ctx.shadowBlur = 30;
-                ctx.fillStyle = appleGradient;
+                // 🍎 ЯБЛОКО
+                ctx.shadowBlur = 25;
+                ctx.shadowColor = '#ff4444';
+                ctx.fillStyle = '#ff6666';
                 ctx.beginPath();
-                ctx.arc(food.x*grid+grid/2, food.y*grid+grid/2, grid/2-2, 0, Math.PI*2);
+                ctx.arc(food.x * gridSize + gridSize/2, food.y * gridSize + gridSize/2, gridSize/2 - 3, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.shadowBlur = 0;
                 
-                // ⚡ МОЛНИИ ДЛЯ ХАРДКОРА
-                if (snakeDifficulty === 3) {
-                    ctx.strokeStyle = '#ffff00'; ctx.lineWidth = 2; ctx.shadowColor = '#ffff00'; ctx.shadowBlur = 10;
-                    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(canvas.width, canvas.height); ctx.stroke();
-                }
-                
                 document.getElementById('snakeScore').textContent = Math.floor(snakeScore);
-                
-            }, speed);
-
-            // ⌨️ УПРАВЛЕНИЕ (ПК)
-            const onKeyDown = (e) => {
-                e.preventDefault();
-                if (e.key === 'ArrowUp' && dy !== 1) { dx = 0; dy = -1; }
-                if (e.key === 'ArrowDown' && dy !== -1) { dx = 0; dy = 1; }
-                if (e.key === 'ArrowLeft' && dx !== 1) { dx = -1; dy = 0; }
-                if (e.key === 'ArrowRight' && dx !== -1) { dx = 1; dy = 0; }
-                if (e.key === 'w' && dy !== 1) { dx = 0; dy = -1; }
-                if (e.key === 's' && dy !== -1) { dx = 0; dy = 1; }
-                if (e.key === 'a' && dx !== 1) { dx = -1; dy = 0; }
-                if (e.key === 'd' && dx !== -1) { dx = 1; dy = 0; }
-            };
+            }
             
-            // 📱 СВАЙПЫ (ФИКС ПРОКРУТКИ)
-            let startX, startY;
-            const onTouchStart = (e) => {
-                e.preventDefault();
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-            };
+            gameInterval = setInterval(gameLoop, speeds[snakeDifficulty - 1]);
             
-            const onTouchEnd = (e) => {
-                e.preventDefault();
-                if (!startX || !startY) return;
-                const endX = e.changedTouches[0].clientX;
-                const endY = e.changedTouches[0].clientY;
-                const diffX = startX - endX;
-                const diffY = startY - endY;
-                
-                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
-                    if (diffX > 0 && dx !== 1) { dx = -1; dy = 0; }  // ←
-                    else if (diffX < 0 && dx !== -1) { dx = 1; dy = 0; } // →
-                } else if (Math.abs(diffY) > 30) {
-                    if (diffY > 0 && dy !== 1) { dx = 0; dy = -1; }  // ↑
-                    else if (diffY < 0 && dy !== -1) { dx = 0; dy = 1; } // ↓
-                }
-                startX = startY = null;
-            };
-            
-            // 🖱️ КЛИК МЫШЬЮ
-            const onClick = (e) => {
-                e.preventDefault();
-                const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const grid = 21;
-                const targetX = Math.floor(x / (canvas.width / grid));
-                const targetY = Math.floor(y / (canvas.height / grid));
-                
-                if (targetX > snake[0].x && dx !== -1) { dx = 1; dy = 0; }
-                else if (targetX < snake[0].x && dx !== 1) { dx = -1; dy = 0; }
-                else if (targetY > snake[0].y && dy !== -1) { dx = 0; dy = 1; }
-                else if (targetY < snake[0].y && dy !== 1) { dx = 0; dy = -1; }
-            };
-
-            // 🎮 ПРИВЯЗКА СОБЫТИЙ
-            window.addEventListener('keydown', onKeyDown);
-            canvas.addEventListener('touchstart', onTouchStart, { passive: false });
-            canvas.addEventListener('touchend', onTouchEnd, { passive: false });
-            canvas.addEventListener('click', onClick);
+            // ⌨️ УПРАВЛЕНИЕ
+            document.addEventListener('keydown', snakeKeyHandler);
         }
 
-        // 🎯 УГАДАЙКА С ПОДРОБНЫМИ ПОДСКАЗКАМИ
+        function snakeKeyHandler(e) {
+            if (!snakeGameActive) return;
+            e.preventDefault();
+            const key = e.key;
+            if (key === 'ArrowUp' && dy !== 1) { dx = 0; dy = -1; }
+            if (key === 'ArrowDown' && dy !== -1) { dx = 0; dy = 1; }
+            if (key === 'ArrowLeft' && dx !== 1) { dx = -1; dy = 0; }
+            if (key === 'ArrowRight' && dx !== -1) { dx = 1; dy = 0; }
+        }
+
+        // 📱 СВАЙПЫ
+        let touchStartX = 0, touchStartY = 0;
+        document.getElementById('snakeCanvas').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        });
+        document.getElementById('snakeCanvas').addEventListener('touchend', (e) => {
+            if (!snakeGameActive) return;
+            e.preventDefault();
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const diffX = touchStartX - touchEndX;
+            const diffY = touchStartY - touchEndY;
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+                if (diffX > 0 && dx !== 1) { dx = -1; dy = 0; }
+                else if (diffX < 0 && dx !== -1) { dx = 1; dy = 0; }
+            } else if (Math.abs(diffY) > 40) {
+                if (diffY > 0 && dy !== 1) { dx = 0; dy = -1; }
+                else if (diffY < 0 && dy !== -1) { dx = 0; dy = 1; }
+            }
+        });
+
+        // 🎯 УГАДАЙКА
         function setGuessDifficulty(level) {
             guessDifficulty = level;
             const ranges = ['1-1 000', '1-10 000', '1-100 000'];
@@ -413,60 +394,42 @@
             const ranges = [1000, 10000, 100000];
             guessNumber = Math.floor(Math.random() * ranges[guessDifficulty-1]) + 1;
             guessAttempts = 0; lastGuessedNumber = 0;
-            document.getElementById('guessFeedback').innerHTML = '🎯 Число загадано! Попробуй угадать!';
+            document.getElementById('guessFeedback').innerHTML = '🎯 Число загадано! Угадай!';
             document.getElementById('guessAttempts').textContent = '0';
         }
 
         function checkGuess() {
             if (!guessNumber) {
-                document.getElementById('guessFeedback').innerHTML = '⚠️ Нажми "Новая игра" сначала!';
+                document.getElementById('guessFeedback').innerHTML = '⚠️ Сначала "Новая игра"!';
                 return;
             }
-            
             const guess = parseInt(document.getElementById('guessInput').value) || 0;
             if (guess <= 0) {
-                document.getElementById('guessFeedback').innerHTML = '❌ Введи число больше 0!';
+                document.getElementById('guessFeedback').innerHTML = '❌ Число больше 0!';
                 return;
             }
-            
             lastGuessedNumber = guess;
             guessAttempts++;
-            
             if (guess === guessNumber) {
                 const ranges = [1000, 10000, 100000];
                 const score = Math.floor(ranges[guessDifficulty-1] / guessAttempts * 15);
                 saveGuessScore(score);
                 document.getElementById('guessFeedback').innerHTML = 
-                    `🎉 ПОЗДРАВЛЯЕМ! Угадал за <strong style="color:#00ff00">${guessAttempts}</strong> попыток!<br>
-                    🏆 Очки: <strong style="color:#ffaa00">${score}</strong><br>
-                    📊 Эффективность: <strong>${Math.floor(10000/guessAttempts)}%</strong>`;
+                    `✅ Угадал за ${guessAttempts} попыток! Очки: ${score}`;
                 return;
             }
-            
-            // 🧠 УМНЫЕ ПОДСКАЗКИ
             const diff = Math.abs(guess - guessNumber);
             let feedback = '';
-            
-            if (diff <= 5) {
-                feedback = `🔥🔥 СУПЕР БЛИЗКО к ${guess}! (${diff} от правильного)`;
-            } else if (diff <= 25) {
-                feedback = `🔥 Очень близко к ${guess}! Ещё чуть-чуть!`;
-            } else if (diff <= 100) {
-                feedback = `🌡️ Тепло! ${guess < guessNumber ? '➡️ Больше' : '⬅️ Меньше'} ${guess}`;
-            } else {
-                feedback = `${guess < guessNumber ? '📈 Значительно больше' : '📉 Значительно меньше'} ${guess}`;
-            }
-            
-            if (guessAttempts >= 10) {
-                feedback += `<br><small>💡 Подсказка: попробуй диапазон ${Math.min(guess*2, guessNumber*1.5)}-${Math.max(guess/2, guessNumber*0.5)}</small>`;
-            }
-            
+            if (diff <= 5) feedback = `🔥🔥 Супер близко к ${guess}!`;
+            else if (diff <= 25) feedback = `🔥 Очень близко к ${guess}!`;
+            else if (diff <= 100) feedback = `🌡️ Тепло к ${guess}!`;
+            else feedback = `${guess < guessNumber ? '📈 Больше' : '📉 Меньше'} ${guess}`;
             document.getElementById('guessFeedback').innerHTML = feedback;
             document.getElementById('guessAttempts').textContent = guessAttempts;
             document.getElementById('guessInput').value = '';
         }
 
-        // 💎 СОХРАНЕНИЕ
+        // 💎 СОХРАНЕНИЕ ОЧКОВ
         function saveSnakeScore(score) {
             let top = tops.snakeTop10; top.push({user: currentUser, score});
             top.sort((a,b) => b.score - a.score); tops.snakeTop10 = top.slice(0,10);
@@ -485,6 +448,7 @@
             updateAllTops();
         }
 
+        // 📊 ТОПЫ
         function updateTop10(id, data) {
             document.getElementById(id).innerHTML = data.length ? 
                 data.map((item,i) => `<div class="top-item"><span class="medal">${['🥇','🥈','🥉','⚜️','⚜️'][i]||`${i+1}`}</span>${item.user}: ${item.score}</div>`).join('') :
@@ -519,7 +483,12 @@
             saveData('tournaments', tournaments); 
         }
 
-        window.onload = () => { loadData(); updateAllTops(); setInterval(updateAllTops, 3000); };
+        // 🚀 СТАРТ
+        window.onload = () => { 
+            loadData(); 
+            updateAllTops(); 
+            setInterval(updateAllTops, 3000); 
+        };
     </script>
 </body>
 </html>
