@@ -180,12 +180,12 @@
         <!-- ✅ АВТОРИЗАЦИЯ -->
         <div id="authSection">
             <h2>🔐 ВХОД В ЛЕГЕНДУ АЛЕКСИНА</h2>
-            <input id="usernameInput" placeholder="👑 Ник (test / АлексинЛегенда)" maxlength="20">
-            <input id="passwordInput" type="password" placeholder="🔑 Пароль (1234 / 12345)" maxlength="20">
+            <input id="usernameInput" placeholder="👑 Твой ник..." maxlength="20">
+            <input id="passwordInput" type="password" placeholder="🔑 Пароль (минимум 4 символа)" maxlength="20">
             <button onclick="login()">🚀 ВОЙТИ</button>
             <button onclick="register()">📝 РЕГИСТРАЦИЯ</button>
             <p style="font-size: 0.9rem; opacity: 0.8;">
-                test/1234 | АлексинЛегенда/12345 | GamingPro2026/aleksin1
+                💡 test/1234 | АлексинЛегенда/12345 | GamingPro2026/aleksin1
             </p>
         </div>
 
@@ -238,17 +238,19 @@
         let guessNumber = null;
         let guessAttempts = 0;
         
+        // ✅ БАЗА ПОЛЬЗОВАТЕЛЕЙ (СОХРАНЯЕТСЯ НАВСЕГДА)
+        let registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
+        
         // ✅ ПОСТОЯННЫЙ ТАЙМЕР ТУРНИРА
         let tournamentStart = parseInt(localStorage.getItem('tournamentStart') || Date.now());
 
         // ✅ СУПЕРНАДЁЖНОЕ СОХРАНЕНИЕ
         function saveData(key, data) {
             localStorage.setItem(key, JSON.stringify(data));
-            // Дублируем в sessionStorage для надёжности
             sessionStorage.setItem(key, JSON.stringify(data));
         }
 
-        // ✅ РАБОЧИЕ ФУНКЦИИ АВТОРИЗАЦИИ
+        // ✅ РАБОЧИЕ ФУНКЦИИ АВТОРИЗАЦИИ (РЕГИСТРАЦИЯ + ТЕСТОВЫЕ)
         function login() {
             console.log('🔐 КНОПКА ВЫЗВАНА!');
             const username = document.getElementById('usernameInput').value.trim();
@@ -265,13 +267,16 @@
                 return;
             }
 
+            // ✅ ПРОВЕРЯЕМ ТЕСТОВЫЕ + ЗАРЕГАННЫХ ПОЛЬЗОВАТЕЛЕЙ
             const testAccounts = {
                 'АлексинЛегенда': '12345',
                 'GamingPro2026': 'aleksin1',
                 'test': '1234'
             };
 
-            if (testAccounts[username] && testAccounts[username] === password) {
+            const savedPassword = registeredUsers[username] || testAccounts[username];
+            
+            if (savedPassword && savedPassword === password) {
                 localStorage.setItem('userToken', 'valid');
                 localStorage.setItem('userName', username);
                 sessionStorage.setItem('userToken', 'valid');
@@ -303,14 +308,25 @@
                 return;
             }
             
-            localStorage.setItem(`pass_${username}`, btoa(password));
-            sessionStorage.setItem(`pass_${username}`, btoa(password));
-            alert('✅ Зарегистрирован! Теперь войди.');
+            // ✅ ПРОВЕРЯЕМ, НЕ СУЩЕСТВУЕТ ЛИ УЖЕ
+            if (registeredUsers[username]) {
+                alert('✅ ' + username + ' уже зарегистрирован! Нажми ВОЙТИ.');
+                return;
+            }
+            
+            // ✅ НОВЫЙ ПОЛЬЗОВАТЕЛЬ!
+            registeredUsers[username] = password;
+            saveData('registeredUsers', registeredUsers);
+            
+            alert('✅ ' + username + ' ЗАРЕГИСТРИРОВАН! Теперь нажми ВОЙТИ!');
         }
 
         function checkAuth() {
             const userToken = localStorage.getItem('userToken') || sessionStorage.getItem('userToken');
             currentUser = localStorage.getItem('userName') || sessionStorage.getItem('userName');
+            
+            // ✅ ОБНОВЛЯЕМ БАЗУ ПОЛЬЗОВАТЕЛЕЙ ПРИ ЗАГРУЗКЕ
+            registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '{}');
             
             if (userToken === 'valid' && currentUser) {
                 document.getElementById('authSection').style.display = 'none';
@@ -507,6 +523,7 @@
             if (currentUser) {
                 const scores = JSON.parse(localStorage.getItem('scores') || '{}');
                 saveData('scores', scores);
+                saveData('registeredUsers', registeredUsers);
             }
         }, 10000);
 
