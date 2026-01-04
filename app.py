@@ -67,6 +67,11 @@ def register():
         conn.close()
         return jsonify({'success': False, 'error': 'Пользователь уже существует'})
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify({'success': True})
+
 @app.route('/status')
 def status():
     if session.get('user_id'):
@@ -88,7 +93,6 @@ def save_score():
     conn.commit()
     conn.close()
     
-    save_tournament_score(username, score)
     return jsonify({'success': True})
 
 @app.route('/leaderboard')
@@ -106,23 +110,17 @@ def tournament():
         with open(TOURNAMENT_FILE, 'r') as f:
             data = json.load(f)
     except:
-        data = {'active': False}
-    
-    if data.get('active'):
-        return jsonify(data)
-    return jsonify({'active': False})
-
-def save_tournament_score(username, score):
-    try:
-        with open(TOURNAMENT_FILE, 'r+') as f:
-            data = json.load(f)
-            if not data.get('scores'):
-                data['scores'] = {}
-            data['scores'][username] = data['scores'].get(username, 0) + score
-            f.seek(0)
+        # ✅ НОВЫЙ ТУРНИР 24ч
+        data = {
+            'active': True,
+            'start_time': datetime.now().isoformat(),
+            'end_time': (datetime.now() + timedelta(hours=24)).isoformat(),
+            'scores': {}
+        }
+        with open(TOURNAMENT_FILE, 'w') as f:
             json.dump(data, f)
-    except:
-        pass
+    
+    return jsonify(data)
 
 init_db()
 
