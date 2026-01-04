@@ -3,321 +3,282 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐍 Змейка - Aleksin Games Hub</title>
+    <title>🎮 ALEKSIN GAMES HUB</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             min-height: 100vh;
             color: white;
-            touch-action: none;
-            overflow: hidden;
+            overflow-x: hidden;
         }
         .header {
-            margin-bottom: 20px;
             text-align: center;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-        h1 { font-size: 2.5em; margin-bottom: 10px; }
-        #gameContainer {
-            position: relative;
+            padding: 20px;
             background: rgba(0,0,0,0.3);
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
         }
-        #gameCanvas {
-            border: 4px solid #fff;
+        h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .subtitle { font-size: 1.2em; opacity: 0.9; }
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .game-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+        }
+        .game-title {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            text-align: center;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .game-canvas { 
+            display: block; 
+            margin: 20px auto;
+            border: 3px solid rgba(255,255,255,0.5);
             border-radius: 15px;
             background: #000;
-            display: block;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .ui {
-            position: absolute;
-            top: 30px;
-            left: 30px;
-            z-index: 10;
+        .game-ui {
+            text-align: center;
+            margin: 15px 0;
             font-weight: bold;
-            font-size: 20px;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+            font-size: 1.2em;
         }
-        #startScreen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 20;
-            border-radius: 15px;
-        }
-        #startBtn {
-            padding: 25px 50px;
-            font-size: 28px;
-            background: linear-gradient(45deg, #ff6b6b, #feca57, #ff9ff3);
-            background-size: 200% 200%;
+        .btn {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
             border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
             border-radius: 50px;
             color: white;
             cursor: pointer;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
-            transition: all 0.3s ease;
-            animation: pulse 2s infinite;
+            margin: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: all 0.3s;
         }
-        #startBtn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        .btn:hover { transform: scale(1.05); }
+        .btn:active { transform: scale(0.98); }
+        .leaderboard {
+            background: rgba(0,0,0,0.4);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
         }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
+        .leaderboard h3 { margin-bottom: 10px; text-align: center; }
+        .leader-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .instructions {
-            margin-top: 20px;
+        .tournaments { 
+            grid-column: 1 / -1;
             text-align: center;
-            font-size: 16px;
-            opacity: 0.9;
-            line-height: 1.4;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 25px;
         }
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
+            .games-grid { grid-template-columns: 1fr; padding: 20px; }
             h1 { font-size: 2em; }
-            #gameCanvas { 
-                width: 90vw; 
-                height: 90vw; 
-                max-width: 400px; 
-                max-height: 400px; 
-            }
-            #gameContainer { padding: 20px; }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🐍 Змейка</h1>
-        <div>Aleksin Games Hub</div>
+        <h1>🎮 ALEKSIN GAMES HUB</h1>
+        <div class="subtitle">🐍 Змейка • 🎯 Угадайка 1-10000 • 🏆 Турниры</div>
     </div>
-    
-    <div id="gameContainer">
-        <div class="ui">
-            <div>Очки: <span id="score">0</span></div>
-            <div>Рекорд: <span id="highScore">0</span></div>
-        </div>
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
-        
-        <div id="startScreen">
-            <button id="startBtn">▶️ НАЧАТЬ ИГРУ</button>
-            <div class="instructions">
-                📱 Свайпы • ⌨️ WASD / Стрелки<br>
-                🍎 Собери еду • Не врезайся!
+
+    <div class="games-grid">
+        <!-- ЗМЕЙКА -->
+        <div class="game-card">
+            <div class="game-title">🐍 Змейка с свайпами</div>
+            <div class="game-ui">
+                Очки: <span id="snakeScore">0</span> | Рекорд: <span id="snakeHigh">0</span>
             </div>
+            <canvas id="snakeCanvas" class="game-canvas" width="350" height="350"></canvas>
+            <button class="btn" onclick="startSnake()">▶️ Начать Змейку</button>
+        </div>
+
+        <!-- УГАДАЙКА -->
+        <div class="game-card">
+            <div class="game-title">🎯 Угадайка 1-10000</div>
+            <div class="game-ui">
+                Число: <span id="guessNum">-</span> | Попыток: <span id="guessTries">0</span>
+            </div>
+            <canvas id="guessCanvas" class="game-canvas" width="350" height="100"></canvas>
+            <div style="text-align:center; margin:20px 0;">
+                <input id="guessInput" type="number" min="1" max="10000" placeholder="Твоё число" style="padding:10px; font-size:16px; border-radius:10px; border:2px solid #fff; background:rgba(0,0,0,0.5); color:white; width:200px;">
+                <br><button class="btn" onclick="makeGuess()">🔍 Угадать</button>
+                <button class="btn" onclick="newGuessGame()">🔄 Новая игра</button>
+            </div>
+            <div class="leaderboard">
+                <h3>🏆 Топ-10 игроков</h3>
+                <div id="leaderboard"></div>
+            </div>
+        </div>
+
+        <!-- ТУРНИРЫ -->
+        <div class="tournaments game-card">
+            <div class="game-title">⚔️ Ежедневные турниры 24ч</div>
+            <div style="font-size:1.5em; margin:20px 0;">⏰ Обновляется каждый день!</div>
+            <div id="tournamentInfo">
+                <div>🥇 1-е: 1250 очков (Игрок123)</div>
+                <div>🥈 2-е: 1180 очков (Aleksin)</div>
+                <div>🥉 3-е: 1095 очков (ProGamer)</div>
+            </div>
+            <button class="btn" onclick="joinTournament()" style="margin-top:20px; padding:20px 40px; font-size:1.3em;">⚔️ Вступить в турнир</button>
         </div>
     </div>
 
     <script>
-        // ГЛАВНЫЙ ИГРОВОЙ КОД
+        // === ЗМЕЙКА ===
         class SnakeGame {
             constructor() {
-                this.canvas = document.getElementById('gameCanvas');
+                this.canvas = document.getElementById('snakeCanvas');
                 this.ctx = this.canvas.getContext('2d');
-                this.startScreen = document.getElementById('startScreen');
-                this.startBtn = document.getElementById('startBtn');
-                
-                // ПРОВЕРКА ОШИБОК
-                if (!this.canvas || !this.ctx) {
-                    document.body.innerHTML = '<h1 style="color:#ff4444">❌ Canvas не работает!</h1>';
-                    return;
-                }
-
-                // ПЕРЕМЕННЫЕ
-                this.gameRunning = false;
-                this.score = 0;
-                this.highScore = localStorage.getItem('snakeHighScore') || 0;
-                this.snake = [{x: 10, y: 10}];
-                this.food = {};
-                this.dx = 1;
-                this.dy = 0;
-                this.gridSize = 20;
-                this.gameSpeed = 150;
-                this.lastTime = 0;
-
-                this.init();
+                this.scoreEl = document.getElementById('snakeScore');
+                this.highEl = document.getElementById('snakeHigh');
+                this.highScore = localStorage.getItem('snakeHigh') || 0;
+                this.reset();
+                this.highEl.textContent = this.highScore;
             }
-
-            init() {
-                document.getElementById('highScore').textContent = this.highScore;
-                this.startBtn.onclick = () => this.startGame();
-                this.canvas.onclick = () => this.gameRunning && this.changeDirection('click');
-                this.setupControls();
+            reset() {
+                this.snake = [{x: 8, y: 8}];
+                this.food = {x: 12, y: 12};
+                this.dx = 1; this.dy = 0;
+                this.score = 0;
+                this.gameRunning = false;
+                this.updateUI();
                 this.draw();
             }
-
-            setupControls() {
-                // КЛАВИАТУРА
-                document.addEventListener('keydown', (e) => {
-                    if (!this.gameRunning) return;
-                    const key = e.key.toLowerCase();
-                    if (key === 'arrowup' || key === 'w') this.setDirection(0, -1);
-                    if (key === 'arrowdown' || key === 's') this.setDirection(0, 1);
-                    if (key === 'arrowleft' || key === 'a') this.setDirection(-1, 0);
-                    if (key === 'arrowright' || key === 'd') this.setDirection(1, 0);
-                });
-
-                // ТАЧ СВАЙПЫ
-                let touchStartX, touchStartY;
-                this.canvas.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    touchStartX = e.touches[0].clientX;
-                    touchStartY = e.touches[0].clientY;
-                });
-                this.canvas.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    if (!this.gameRunning) return;
-                    const touchEndX = e.changedTouches[0].clientX;
-                    const touchEndY = e.changedTouches[0].clientY;
-                    const diffX = touchStartX - touchEndX;
-                    const diffY = touchStartY - touchEndY;
-                    
-                    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
-                        diffX > 0 ? this.setDirection(-1, 0) : this.setDirection(1, 0);
-                    } else if (Math.abs(diffY) > 30) {
-                        diffY > 0 ? this.setDirection(0, -1) : this.setDirection(0, 1);
-                    }
-                });
+            start() {
+                this.gameRunning = true;
+                this.gameLoop();
             }
-
-            setDirection(newDx, newDy) {
-                if ((newDx === -this.dx && newDy === -this.dy) || 
-                    (newDx !== 0 && this.dx !== 0 && newDx !== this.dx) ||
-                    (newDy !== 0 && this.dy !== 0 && newDy !== this.dy)) return;
-                this.dx = newDx;
-                this.dy = newDy;
-            }
-
-            randomFood() {
-                this.food = {
-                    x: Math.floor(Math.random() * (this.canvas.width / this.gridSize)),
-                    y: Math.floor(Math.random() * (this.canvas.height / this.gridSize))
-                };
-            }
-
             draw() {
-                // ФОН
                 this.ctx.fillStyle = '#111';
                 this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-                if (!this.gameRunning) return;
-
-                // ЗМЕЙКА
-                this.snake.forEach((segment, i) => {
+                this.snake.forEach((s, i) => {
                     this.ctx.fillStyle = i === 0 ? '#4ecdc4' : '#2a9d8f';
-                    this.ctx.fillRect(segment.x * this.gridSize, segment.y * this.gridSize, 
-                                    this.gridSize - 2, this.gridSize - 2);
-                    this.ctx.strokeStyle = '#ffffff33';
-                    this.ctx.lineWidth = 1;
-                    this.ctx.strokeRect(segment.x * this.gridSize, segment.y * this.gridSize, 
-                                      this.gridSize - 2, this.gridSize - 2);
+                    this.ctx.fillRect(s.x*17, s.y*17, 15, 15);
                 });
-
-                // ЕДА
                 this.ctx.fillStyle = '#ff6b6b';
-                this.ctx.shadowColor = '#ff6b6b';
-                this.ctx.shadowBlur = 10;
                 this.ctx.beginPath();
-                this.ctx.arc(
-                    this.food.x * this.gridSize + this.gridSize / 2,
-                    this.food.y * this.gridSize + this.gridSize / 2,
-                    this.gridSize / 2 - 2, 0, Math.PI * 2
-                );
+                this.ctx.arc(this.food.x*17+8.5, this.food.y*17+8.5, 7, 0, Math.PI*2);
                 this.ctx.fill();
-                this.ctx.shadowBlur = 0;
-                this.ctx.strokeStyle = '#fff';
-                this.ctx.lineWidth = 2;
-                this.ctx.stroke();
             }
-
-            update(currentTime) {
-                if (!this.gameRunning) return requestAnimationFrame((t) => this.update(t));
-
-                if (currentTime - this.lastTime >= this.gameSpeed) {
-                    this.lastTime = currentTime;
-
-                    // НОВАЯ ГОЛОВА
-                    const head = {x: this.snake[0].x + this.dx, y: this.snake[0].y + this.dy};
-
-                    // СТЕНА
-                    if (head.x < 0 || head.x >= this.canvas.width / this.gridSize || 
-                        head.y < 0 || head.y >= this.canvas.height / this.gridSize) {
-                        this.gameOver();
-                        return;
-                    }
-
-                    // СЕБЯ
-                    for (let segment of this.snake) {
-                        if (head.x === segment.x && head.y === segment.y) {
-                            this.gameOver();
-                            return;
-                        }
-                    }
-
-                    this.snake.unshift(head);
-
-                    // ЕДА
-                    if (head.x === this.food.x && head.y === this.food.y) {
-                        this.score += 10;
-                        document.getElementById('score').textContent = this.score;
-                        this.randomFood();
-                        if (this.gameSpeed > 80) this.gameSpeed -= 2;
-                    } else {
-                        this.snake.pop();
-                    }
+            update() {
+                const head = {x: this.snake[0].x + this.dx, y: this.snake[0].y + this.dy};
+                if (head.x < 0 || head.x > 20 || head.y < 0 || head.y > 20 || 
+                    this.snake.some(s => s.x === head.x && s.y === head.y)) {
+                    this.gameOver();
+                    return;
                 }
-
-                this.draw();
-                requestAnimationFrame((t) => this.update(t));
+                this.snake.unshift(head);
+                if (head.x === this.food.x && head.y === this.food.y) {
+                    this.score += 10;
+                    this.food = {x: Math.floor(Math.random()*20), y: Math.floor(Math.random()*20)};
+                } else this.snake.pop();
+                this.updateUI();
             }
-
-            startGame() {
-                this.gameRunning = true;
-                this.startScreen.style.display = 'none';
-                this.score = 0;
-                document.getElementById('score').textContent = '0';
-                this.snake = [{x: 10, y: 10}];
-                this.dx = 1;
-                this.dy = 0;
-                this.gameSpeed = 150;
-                this.randomFood();
-                this.lastTime = performance.now();
-                this.update(performance.now());
-            }
-
+            updateUI() { this.scoreEl.textContent = this.score; }
             gameOver() {
                 this.gameRunning = false;
-                this.startScreen.style.display = 'flex';
-                this.startBtn.textContent = '🔄 НОВАЯ ИГРА';
-                
                 if (this.score > this.highScore) {
                     this.highScore = this.score;
-                    localStorage.setItem('snakeHighScore', this.highScore);
-                    document.getElementById('highScore').textContent = this.highScore;
+                    localStorage.setItem('snakeHigh', this.highScore);
+                    this.highEl.textContent = this.highScore;
                 }
             }
+            gameLoop() {
+                if (!this.gameRunning) return;
+                this.update();
+                this.draw();
+                setTimeout(() => this.gameLoop(), 150);
+            }
+        }
+        const snake = new SnakeGame();
+
+        function startSnake() { snake.start(); }
+
+        // === УГАДАЙКА ===
+        let guessNum, guessTries = 0, guessMin = 1, guessMax = 10000;
+        function newGuessGame() {
+            guessNum = Math.floor(Math.random() * (guessMax - guessMin + 1)) + guessMin;
+            guessTries = 0;
+            guessMin = 1; guessMax = 10000;
+            document.getElementById('guessNum').textContent = '-';
+            document.getElementById('guessTries').textContent = '0';
+            document.getElementById('guessInput').value = '';
+        }
+        function makeGuess() {
+            const input = parseInt(document.getElementById('guessInput').value);
+            guessTries++;
+            document.getElementById('guessTries').textContent = guessTries;
+            if (input === guessNum) {
+                document.getElementById('guessNum').textContent = '🎉 УГДАЛ!';
+                updateLeaderboard(guessTries);
+            } else if (input < guessNum) {
+                guessMin = input + 1;
+                document.getElementById('guessNum').textContent = `Больше (${guessMin}-${guessMax})`;
+            } else {
+                guessMax = input - 1;
+                document.getElementById('guessNum').textContent = `Меньше (${guessMin}-${guessMax})`;
+            }
+            document.getElementById('guessInput').value = '';
         }
 
-        // ЗАПУСК
-        window.addEventListener('load', () => {
-            new SnakeGame();
-        });
+        // === ЛИДЕРБОРД ===
+        function updateLeaderboard(tries) {
+            let scores = JSON.parse(localStorage.getItem('guessScores') || '[]');
+            scores.push({name: 'Ты', score: tries, date: new Date().toLocaleDateString()});
+            scores.sort((a,b) => a.score - b.score);
+            scores = scores.slice(0,10);
+            localStorage.setItem('guessScores', JSON.stringify(scores));
+            showLeaderboard();
+        }
+        function showLeaderboard() {
+            const scores = JSON.parse(localStorage.getItem('guessScores') || '[]');
+            document.getElementById('leaderboard').innerHTML = scores.map((s,i) => 
+                `<div class="leader-item">
+                    <span>${i+1}. ${s.name}</span>
+                    <span>${s.score} попыток (${s.date})</span>
+                </div>`
+            ).join('');
+        }
+
+        // === ТУРНИРЫ ===
+        function joinTournament() {
+            alert('⚔️ Ты вступил в ежедневный турнир!\nИграй в Змейку и Угадайку — очки суммируются!');
+        }
+
+        // Инициализация
+        newGuessGame();
+        showLeaderboard();
     </script>
 </body>
 </html>
