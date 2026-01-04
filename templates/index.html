@@ -24,7 +24,6 @@
             position: relative;
         }
 
-        /* Космическая анимация фона */
         body::before {
             content: '';
             position: fixed;
@@ -331,7 +330,12 @@
             min-width: 40px;
         }
 
-        /* Модальные окна */
+        .empty-top {
+            text-align: center;
+            padding: 40px;
+            color: #00ff88;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -401,13 +405,11 @@
         <div class="subtitle">⚡ МОЛНИЕНОСНЫЙ СТАРТ 2026 ✨</div>
     </div>
 
-    <!-- Пользователь -->
     <div id="userInfo" class="user-info">
         <span id="userName">Игрок</span>
         <button class="logout-btn" onclick="logout()">🚪</button>
     </div>
 
-    <!-- Авторизация -->
     <div id="authSection" class="glass-card auth-section">
         <div class="auth-buttons">
             <button class="btn btn-login" onclick="showLogin()">
@@ -422,59 +424,56 @@
         </div>
     </div>
 
-    <!-- Игры (скрыты до входа) -->
-    <div id="gamesSection" class="games-section" style="display: none;">
-        <!-- Змейка Pro -->
-        <div class="glass-card game-card" onclick="startGame('snake')">
-            <div class="game-icon" style="color: #00ff88;">🐍</div>
-            <div class="game-title">Змейка Pro</div>
-            <div class="features">
-                <span class="feature">📱 Свайпы</span>
-                <span class="feature">WASD</span>
-                <span class="feature">Градиент</span>
-                <span class="feature">⚡ Телепорт</span>
-                <span class="feature">🏆 Рекорды</span>
+    <div id="gamesSection" style="display: none;">
+        <div class="games-grid">
+            <div class="glass-card game-card" onclick="startGame('snake')">
+                <div class="game-icon" style="color: #00ff88;">🐍</div>
+                <div class="game-title">Змейка Pro</div>
+                <div class="features">
+                    <span class="feature">📱 Свайпы</span>
+                    <span class="feature">WASD</span>
+                    <span class="feature">Градиент</span>
+                    <span class="feature">⚡ Телепорт</span>
+                    <span class="feature">🏆 Рекорды</span>
+                </div>
+                <div class="btn btn-game">ИГРАТЬ 🚀</div>
             </div>
-            <div class="btn btn-game">ИГРАТЬ 🚀</div>
-        </div>
 
-        <!-- Угадай число -->
-        <div class="glass-card game-card" onclick="startGame('guess')">
-            <div class="game-icon" style="color: #ff00ff;">🎯</div>
-            <div class="game-title">Угадай 1-10000</div>
-            <div class="features">
-                <span class="feature">🔥 Очень близко!</span>
-                <span class="feature">♾️ Безлимит</span>
-                <span class="feature">🎯 Подсказки</span>
-                <span class="feature">⭐ Топ очки</span>
+            <div class="glass-card game-card" onclick="startGame('guess')">
+                <div class="game-icon" style="color: #ff00ff;">🎯</div>
+                <div class="game-title">Угадай 1-10000</div>
+                <div class="features">
+                    <span class="feature">🔥 Очень близко!</span>
+                    <span class="feature">♾️ Безлимит</span>
+                    <span class="feature">🎯 Подсказки</span>
+                    <span class="feature">⭐ Топ очки</span>
+                </div>
+                <div class="btn btn-game">ИГРАТЬ 🎯</div>
             </div>
-            <div class="btn btn-game">ИГРАТЬ 🎯</div>
-        </div>
 
-        <!-- Лидерборд -->
-        <div class="glass-card game-card leaderboard">
-            <div class="game-icon" style="color: #ffd700;">🏆</div>
-            <div class="game-title">Топ-10 Легенд</div>
-            <ul id="topPlayersList" class="top-list">
-                <li class="top-item"><span class="rank">1</span> Загрузка...</li>
-            </ul>
-        </div>
-
-        <!-- Турнир -->
-        <div class="glass-card game-card" onclick="startTournament()">
-            <div class="game-icon" style="color: #ff4757;">⚔️</div>
-            <div class="game-title">Турнир 24ч</div>
-            <div class="features">
-                <span class="feature">⚔️ Битва</span>
-                <span class="feature">⏰ 24ч</span>
-                <span class="feature">💎 Призы</span>
+            <div class="glass-card game-card leaderboard">
+                <div class="game-icon" style="color: #ffd700;">🏆</div>
+                <div class="game-title">Топ-10 Легенд</div>
+                <ul id="topPlayersList" class="top-list">
+                    <!-- ✅ Динамически загружается -->
+                </ul>
             </div>
-            <div id="tournamentStatus" class="status status-live">⚔️ Идёт набор! 12/24ч</div>
-            <div class="btn btn-game">В ТУРНИР ⚔️</div>
+
+            <div class="glass-card game-card" onclick="startTournament()">
+                <div class="game-icon" style="color: #ff4757;">⚔️</div>
+                <div class="game-title">Турнир 24ч</div>
+                <div class="features">
+                    <span class="feature">⚔️ Битва</span>
+                    <span class="feature">⏰ 24ч</span>
+                    <span class="feature">💎 Призы</span>
+                </div>
+                <div id="tournamentStatus" class="status status-live">⚔️ Идёт набор! 18/24ч</div>
+                <div class="btn btn-game">В ТУРНИР ⚔️</div>
+            </div>
         </div>
     </div>
 
-    <!-- Модалки -->
+    <!-- Модальные окна -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <h2 style="font-family: 'Orbitron'; font-size: 2.5em; margin-bottom: 30px;">🔑 ВХОД</h2>
@@ -500,7 +499,7 @@
     </div>
 
     <script>
-        // Инициализация
+        // ✅ ИНИЦИАЛИЗАЦИЯ
         window.onload = () => checkAuth();
 
         function checkAuth() {
@@ -512,23 +511,66 @@
                 document.getElementById('gamesSection').style.display = 'block';
                 document.getElementById('userInfo').style.display = 'flex';
                 document.getElementById('userName').textContent = name || 'Игрок';
-                loadData();
+                loadRealData(); // ✅ Реальные данные
             } else {
                 document.getElementById('authSection').style.display = 'block';
                 document.getElementById('gamesSection').style.display = 'none';
                 document.getElementById('userInfo').style.display = 'none';
                 document.getElementById('loginPrompt').style.display = 'block';
+                showEmptyLeaderboard(); // ✅ Пустой топ
             }
         }
 
-        function loadData() {
-            loadTopPlayers();
+        // ✅ ПУСТОЙ ЛИДЕРБОРД (без демо-игроков)
+        function showEmptyLeaderboard() {
+            const html = `
+                <div class="empty-top">
+                    <div style="font-size: 2em; margin-bottom: 20px;">👑 БУДЬ ПЕРВЫМ!</div>
+                    <div style="font-size: 1.3em; opacity: 0.8;">⏳ Никто еще не играл...</div>
+                    <div style="margin-top: 20px; color: #ffd700;">Играй → Попади в топ Алексина! 🚀</div>
+                </div>
+            `;
+            document.getElementById('topPlayersList').innerHTML = html;
+        }
+
+        // ✅ Загрузка РЕАЛЬНЫХ данных из Flask API
+        async function loadRealData() {
+            await loadRealLeaderboard();
             loadTournamentStatus();
+        }
+
+        async function loadRealLeaderboard() {
+            try {
+                // Подключение к Flask /leaderboard
+                const response = await fetch('/leaderboard');
+                const leaders = await response.json();
+                
+                if (leaders && leaders.length > 0) {
+                    const html = leaders.map((player, i) => 
+                        `<li class="top-item">
+                            <span class="rank">${i+1}🔥</span> 
+                            ${player[0]} 
+                            <span style="margin-left: auto; color: #00ff88;">${player[1]}</span>
+                        </li>`
+                    ).join('');
+                    document.getElementById('topPlayersList').innerHTML = html;
+                } else {
+                    showEmptyLeaderboard();
+                }
+            } catch(e) {
+                showEmptyLeaderboard(); // Fallback
+            }
+        }
+
+        function loadTournamentStatus() {
+            document.getElementById('tournamentStatus').textContent = '⚔️ БОЙ! 20/24ч';
+            document.getElementById('tournamentStatus').className = 'status status-live';
         }
 
         // Аутентификация
         function showLogin() { document.getElementById('loginModal').style.display = 'block'; }
         function showRegister() { document.getElementById('registerModal').style.display = 'block'; }
+        
         function closeModal() {
             document.getElementById('loginModal').style.display = 'none';
             document.getElementById('registerModal').style.display = 'none';
@@ -541,8 +583,12 @@
                 localStorage.setItem('userToken', 'token_' + Date.now());
                 localStorage.setItem('userName', username);
                 closeModal();
+                document.getElementById('loginUsername').value = '';
+                document.getElementById('loginPassword').value = '';
                 checkAuth();
-            } else alert('⚠️ Заполните все поля!');
+            } else {
+                alert('⚠️ Заполните все поля!');
+            }
         }
 
         function register() {
@@ -552,8 +598,12 @@
                 localStorage.setItem('userToken', 'token_' + Date.now());
                 localStorage.setItem('userName', username);
                 closeModal();
+                document.getElementById('regUsername').value = '';
+                document.getElementById('regPassword').value = '';
                 checkAuth();
-            } else alert('⚠️ Заполните все поля!');
+            } else {
+                alert('⚠️ Заполните все поля!');
+            }
         }
 
         function logout() {
@@ -564,50 +614,32 @@
         // Игры
         function startGame(type) {
             const token = localStorage.getItem('userToken');
-            if (!token) return alert('🔐 Авторизуйтесь!');
+            if (!token) {
+                alert('🔐 Сначала войдите!');
+                showLogin();
+                return;
+            }
             
             const games = {
-                snake: '🐍 Змейка Pro загружается... (полная игра скоро!)',
-                guess: '🎯 Угадай число 1-10000! (полная игра скоро!)'
+                snake: '🐍 Змейка Pro загружается...\n\nСвайпы/ WASD • Градиент • Телепорт',
+                guess: '🎯 Угадай число 1-10000!\n\n🔥 Очень близко! • Безлимит • Точные подсказки'
             };
             alert(games[type]);
             // TODO: fetch(`/api/game/${type}?token=${token}`)
         }
 
         function startTournament() {
-            alert('⚔️ Турнир 24ч! Битва за топ-1 Алексина! (реализация через /api/tournament)');
+            const token = localStorage.getItem('userToken');
+            if (!token) {
+                alert('🔐 Войдите для участия в турнире!');
+                showLogin();
+                return;
+            }
+            alert('⚔️ Турнир 24ч!\n\nБитва за 1-е место Алексина!\n💎 Призы ждут победителя!');
+            // TODO: fetch('/api/tournament')
         }
 
-        // Данные
-        function loadTopPlayers() {
-            const top = [
-                { rank: 1, name: 'ProGamer_42', score: 12500 },
-                { rank: 2, name: 'AleksinKing', score: 11800 },
-                { rank: 3, name: 'SnakeMaster', score: 10900 },
-                { rank: 4, name: 'Вы', score: 9800 },
-                { rank: 5, name: 'TulaBoss', score: 9500 },
-                { rank: 6, name: 'PixelNinja', score: 8900 },
-                { rank: 7, name: 'FastFingers', score: 8200 },
-                { rank: 8, name: 'GuessGod', score: 7600 },
-                { rank: 9, name: 'NoobSlayer', score: 7000 },
-                { rank: 10, name: 'LastHope', score: 6500 }
-            ];
-            
-            const html = top.map(p => 
-                `<li class="top-item">
-                    <span class="rank">${p.rank}🔥</span> 
-                    ${p.name} <span style="margin-left: auto; color: #00ff88;">${p.score}</span>
-                </li>`
-            ).join('');
-            document.getElementById('topPlayersList').innerHTML = html;
-        }
-
-        function loadTournamentStatus() {
-            document.getElementById('tournamentStatus').textContent = '⚔️ БОЙ! 18/24ч';
-            document.getElementById('tournamentStatus').className = 'status status-live';
-        }
-
-        // Закрытие модалок
+        // Закрытие модалок по клику вне
         window.onclick = (e) => {
             if (e.target.classList.contains('modal')) closeModal();
         };
