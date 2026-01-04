@@ -10,320 +10,276 @@
 
         body {
             font-family: 'Exo 2', sans-serif;
-            /* ✨ МЕГА НЕОНОВЫЙ ФОН */
-            background: linear-gradient(-45deg, #0f0f23, #1a0033, #2d004f, #0f0f23),
-                        radial-gradient(circle at 20% 80%, rgba(120,119,198,0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(255,119,198,0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 40%, rgba(120,219,255,0.3) 0%, transparent 50%);
-            background-size: 400% 400%, 200% 200%, 200% 200%, 200% 200%;
-            animation: megaNeonBg 20s ease infinite, neonPulse 4s ease-in-out infinite alternate;
+            background: linear-gradient(-45deg, #0f0f23, #1a0033, #0f0f23, #2d004d);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
             color: #fff;
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        @keyframes megaNeonBg {
-            0% { background-position: 0% 50%, 20% 80%, 80% 20%, 40% 40%; }
-            50% { background-position: 100% 50%, 80% 20%, 20% 80%, 60% 60%; }
-            100% { background-position: 0% 50%, 20% 80%, 80% 20%, 40% 40%; }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
-        @keyframes neonPulse {
-            from { filter: hue-rotate(0deg) brightness(1); }
-            to { filter: hue-rotate(60deg) brightness(1.1); }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        .header { text-align: center; margin-bottom: 40px; }
-        .title {
+        h1 {
             font-family: 'Orbitron', monospace;
-            font-size: clamp(2.5rem, 8vw, 5rem);
-            background: linear-gradient(45deg, #00ff88, #00bfff, #ff00ff, #ffff00);
+            font-size: clamp(2rem, 5vw, 4rem);
+            text-align: center;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
-            animation: neonGlow 2s ease-in-out infinite alternate;
-            margin-bottom: 20px;
+            text-shadow: 0 0 30px #ff00ff;
+            margin-bottom: 30px;
+            animation: glow 2s ease-in-out infinite alternate;
         }
-        @keyframes neonGlow {
-            from { filter: drop-shadow(0 0 10px #00ff88); }
-            to { filter: drop-shadow(0 0 20px #00ff88); }
-        }
-        .subtitle { font-size: 1.5rem; color: #00ff88; text-shadow: 0 0 15px rgba(0, 255, 136, 0.3); }
 
-        /* 🔐 АВТОРИЗАЦИЯ */
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px #ff00ff); }
+            to { filter: drop-shadow(0 0 30px #00ffff); }
+        }
+
         #authSection {
-            display: block; max-width: 500px; margin: 0 auto; padding: 50px;
-            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px);
-            border-radius: 25px; border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-        }
-        #loginPrompt { text-align: center; font-size: 1.8rem; color: #00ff88; margin-bottom: 30px; }
-        .auth-input {
-            width: 100%; padding: 20px; margin: 15px 0; border: none; border-radius: 15px;
-            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px);
-            color: #fff; font-size: 1.2rem; font-family: 'Exo 2', sans-serif;
-            border: 2px solid transparent; transition: all 0.3s ease;
-        }
-        .auth-input::placeholder { color: rgba(255, 255, 255, 0.7); }
-        .auth-input:focus { outline: none; border-color: #00ff88; box-shadow: 0 0 20px rgba(0, 255, 136, 0.4); }
-        .btn {
-            width: 100%; padding: 20px; margin: 10px 0; border: none; border-radius: 15px;
-            font-size: 1.3rem; font-weight: 600; font-family: 'Exo 2', sans-serif;
-            cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px;
-        }
-        .btn-primary { background: linear-gradient(45deg, #00ff88, #00bfff); color: #000; box-shadow: 0 10px 30px rgba(0, 255, 136, 0.4); }
-        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0, 255, 136, 0.6); }
-        .btn-secondary { background: linear-gradient(45deg, #ff4757, #ff6b7a); color: #fff; }
-        .btn-secondary:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(255, 71, 87, 0.6); }
-
-        /* 🎮 КОНТЕНТ */
-        #gamesSection, #userInfo { display: none; }
-        .games-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; margin-bottom: 50px;
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border-radius: 25px; padding: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.2); transition: all 0.4s ease; position: relative; overflow: hidden;
-        }
-        .glass-card::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent); transition: left 0.6s;
-        }
-        .glass-card:hover::before { left: 100%; }
-        .glass-card:hover { transform: translateY(-15px); box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6); }
-        .game-icon { font-size: 4rem; margin-bottom: 20px; text-shadow: 0 0 20px currentColor; }
-        .game-title { font-family: 'Orbitron', monospace; font-size: 2rem; margin-bottom: 15px; color: #00ff88; }
-        .features { margin-bottom: 25px; }
-        .feature {
-            display: inline-block; background: rgba(0, 255, 136, 0.2); padding: 8px 15px; margin: 5px;
-            border-radius: 20px; font-size: 0.9rem; color: #00ff88;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 40px;
+            background: rgba(0,0,0,0.8);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,255,255,0.3);
+            border: 2px solid #00ffff;
+            text-align: center;
         }
 
-        /* 🏆 ЛИДЕРБОРДЫ */
-        .leaderboards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 50px; }
-        .leaderboard-card {
-            background: rgba(0, 255, 136, 0.1); backdrop-filter: blur(20px); border-radius: 25px; padding: 30px;
-            border: 1px solid rgba(0, 255, 136, 0.3);
+        #gamesSection, #userInfo {
+            display: none;
         }
-        .lb-title {
-            font-family: 'Orbitron', monospace; font-size: 1.8rem; text-align: center; margin-bottom: 25px;
-            color: #ffd700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-        }
-        .lb-list { list-style: none; max-height: 400px; overflow-y: auto; }
-        .lb-item {
-            display: flex; justify-content: space-between; align-items: center; padding: 15px; margin: 10px 0;
-            background: rgba(255, 255, 255, 0.1); border-radius: 15px; transition: all 0.3s ease;
-        }
-        .lb-item:hover { background: rgba(255, 255, 255, 0.2); transform: translateX(10px); }
-        .rank { font-weight: bold; font-size: 1.3rem; color: #ffd700; }
 
-        /* 🎯 ИГРЫ */
-        .game-screen {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.95); z-index: 1000; justify-content: center; align-items: center;
+        input {
+            width: 100%;
+            padding: 15px;
+            margin: 15px 0;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 16px;
+            backdrop-filter: blur(10px);
         }
-        .game-container {
-            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border-radius: 25px; padding: 40px;
-            max-width: 90%; max-height: 90%; overflow-y: auto;
+
+        input::placeholder { color: #aaa; }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            color: #000;
+            font-family: 'Orbitron', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,255,255,0.4);
         }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,255,255,0.6);
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .game-card {
+            background: rgba(0,0,0,0.7);
+            border-radius: 20px;
+            padding: 25px;
+            border: 2px solid #ff00ff;
+            box-shadow: 0 15px 35px rgba(255,0,255,0.3);
+            transition: all 0.3s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            border-color: #00ffff;
+            box-shadow: 0 25px 50px rgba(0,255,255,0.4);
+        }
+
+        .game-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
         canvas {
-            border: 3px solid #00ff88; border-radius: 15px; box-shadow: 0 0 30px rgba(0, 255, 136, 0.5); background: #000;
+            width: 100%;
+            height: 250px;
+            border-radius: 15px;
+            background: rgba(0,0,0,0.9);
+            border: 2px solid #00ffff;
+            display: block;
+            margin: 0 auto;
         }
-        select { 
-            width: 100%; padding: 15px; margin: 15px 0; border-radius: 15px; background: rgba(255,255,255,0.15);
-            color: #fff; font-size: 1.1rem; border: 2px solid transparent;
-        }
-        select:focus { border-color: #00ff88; outline: none; }
 
-        @media (max-width: 768px) {
-            .games-grid { grid-template-columns: 1fr; }
-            .leaderboards { grid-template-columns: 1fr; }
-            .container { padding: 10px; }
+        #leaderboard, #tournament {
+            background: rgba(0,0,0,0.7);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            border: 2px solid #ffff00;
+        }
+
+        .top-list {
+            list-style: none;
+        }
+
+        .top-list li {
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #userInfo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            background: rgba(0,255,0,0.2);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #00ff00;
         }
     </style>
 </head>
-<body>
+<body onload="checkAuth()">
     <div class="container">
-        <!-- 🔐 АВТОРИЗАЦИЯ -->
+        <h1>🎮 ALEKSIN GAMES HUB 2026 ✨</h1>
+        
+        <!-- ✅ АВТОРИЗАЦИЯ -->
         <div id="authSection">
-            <div id="loginPrompt">🔐 ВОЙДИ И СТАНЬ ЛЕГЕНДОЙ АЛЕКСИНА!</div>
-            <div id="loginForm">
-                <input type="text" id="usernameInput" class="auth-input" placeholder="👑 Никнейм" maxlength="20">
-                <input type="password" id="passwordInput" class="auth-input" placeholder="🔑 Пароль (минимум 4 символа)">
-                <button class="btn btn-primary" onclick="login()">🚀 ВОЙТИ</button>
-                <button class="btn btn-secondary" onclick="register()">➕ РЕГИСТРАЦИЯ</button>
-            </div>
-            <div id="statusMessage" style="text-align: center; margin-top: 20px; font-size: 1.2rem;"></div>
+            <h2>🔐 ВХОД В ЛЕГЕНДУ АЛЕКСИНА</h2>
+            <input id="usernameInput" placeholder="👑 Ник (test / АлексинЛегенда)" maxlength="20">
+            <input id="passwordInput" type="password" placeholder="🔑 Пароль (1234 / 12345)" maxlength="20">
+            <button onclick="login()">🚀 ВОЙТИ</button>
+            <button onclick="register()">📝 РЕГИСТРАЦИЯ</button>
+            <p style="font-size: 0.9rem; opacity: 0.8;">
+                test/1234 | АлексинЛегенда/12345 | GamingPro2026/aleksin1
+            </p>
         </div>
 
-        <!-- 👤 ИНФО -->
-        <div id="userInfo" class="header">
-            <div style="font-size: 1.5rem; color: #00ff88;">
-                👑 <span id="currentUser"></span> — ЛЕГЕНДА АЛЕКСИНА!
-            </div>
-            <button class="btn btn-secondary" onclick="logout()" style="width: auto; padding: 10px 25px;">🚪 ВЫХОД</button>
+        <!-- ✅ ПРОФИЛЬ -->
+        <div id="userInfo">
+            <span>👋 <span id="currentUser">-</span></span>
+            <button onclick="logout()" style="width: auto; padding: 10px 20px;">🚪 ВЫХОД</button>
         </div>
 
-        <!-- 🎮 ИГРЫ -->
+        <!-- ✅ ИГРЫ -->
         <div id="gamesSection">
-            <div class="header">
-                <h1 class="title">ALEKSIN GAMES HUB 2026</h1>
-                <p class="subtitle">🐍 ЗМЕЙКА | 🎯 УГАДАЙКА | 🏆 ОТДЕЛЬНЫЕ ТОПЫ | ✨ МЕГА НЕОН</p>
-            </div>
-
-            <div class="games-grid">
-                <!-- 🐍 ЗМЕЙКА -->
-                <div class="glass-card" id="snakeGame">
-                    <div class="game-icon" style="color: #00ff88;">🐍</div>
-                    <div class="game-title">Змейка Pro 4.0</div>
-                    <div class="features">
-                        <span class="feature">🌈 3D градиент + свечение</span>
-                        <span class="feature">🧱 Стены + 3 сложности</span>
-                        <span class="feature">📱 Свайпы + WASD</span>
+            <div class="game-grid">
+                <div class="game-card" id="snakeCard">
+                    <div class="game-title">🐍 ЗМЕЙКА PRO</div>
+                    <canvas id="snakeCanvas"></canvas>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button onclick="startSnake()">▶️ НОВАЯ ИГРА</button>
+                        <div id="snakeScore" style="font-family: Orbitron; font-size: 1.2rem; margin-top: 10px;">0</div>
                     </div>
-                    <select id="wallDifficulty">
-                        <option value="0">😌 Легко (150мс)</option>
-                        <option value="1">🧱 Средне (120мс)</option>
-                        <option value="2">💀 Хардкор (90мс)</option>
-                    </select>
-                    <button class="btn btn-primary" onclick="startSnakeGame()">🎮 ИГРАТЬ</button>
                 </div>
 
-                <!-- 🎯 УГАДАЙКА -->
-                <div class="glass-card" id="guessGame">
-                    <div class="game-icon" style="color: #ff6b9d;">🎯</div>
-                    <div class="game-title">Угадай число PRO</div>
-                    <div class="features">
-                        <span class="feature">1️⃣ 1-1000 | 2️⃣ 1-10000 | 3️⃣ 1-100000</span>
-                        <span class="feature">🔍 Enter + кнопка</span>
-                        <span class="feature">📊 Точные подсказки</span>
+                <div class="game-card" id="guessCard">
+                    <div class="game-title">🎯 УГАДАЙ ЧИСЛО</div>
+                    <canvas id="guessCanvas" style="display: none;"></canvas>
+                    <div style="text-align: center;">
+                        <input id="guessInput" placeholder="🔍 Твоё число..." maxlength="6">
+                        <br><button onclick="checkGuess()">🔍 ПРОВЕРИТЬ</button>
+                        <div id="guessFeedback">-</div>
+                        <div id="guessAttempts" style="font-family: Orbitron; font-size: 1.2rem; margin-top: 10px;">0 попыток</div>
                     </div>
-                    <select id="guessDifficulty">
-                        <option value="0">1️⃣ Легко (1-1000)</option>
-                        <option value="1">2️⃣ Средне (1-10000)</option>
-                        <option value="2">3️⃣ Хардкор (1-100000)</option>
-                    </select>
-                    <button class="btn btn-primary" onclick="startGuessGame()">🎯 НОВАЯ ИГРА</button>
                 </div>
             </div>
 
-            <!-- 🏆 ТОПЫ -->
-            <div class="leaderboards">
-                <div class="leaderboard-card">
-                    <div class="lb-title">🐍 ТОП-10 ЗМЕЙКА</div>
-                    <ul class="lb-list" id="snakeTop10"></ul>
-                    <button class="btn btn-primary" onclick="updateSnakeTop10()" style="width: 100%; margin-top: 15px;">🔄 ОБНОВИТЬ</button>
-                </div>
-                <div class="leaderboard-card">
-                    <div class="lb-title">🎯 ТОП-10 УГАДАЙКА</div>
-                    <ul class="lb-list" id="guessTop10"></ul>
-                    <button class="btn btn-primary" onclick="updateGuessTop10()" style="width: 100%; margin-top: 15px;">🔄 ОБНОВИТЬ</button>
-                </div>
+            <!-- ✅ ТОПЫ -->
+            <div id="leaderboard">
+                <h3 style="text-align: center; margin-bottom: 20px;">🏆 ТОП-10 ИГРОКОВ 🐍+🎯</h3>
+                <ul id="topList" class="top-list"></ul>
             </div>
-        </div>
-    </div>
 
-    <!-- 🐍 ЗМЕЙКА -->
-    <div class="game-screen" id="snakeScreen">
-        <div class="game-container">
-            <div style="text-align: center; margin-bottom: 30px;">
-                <div style="font-size: 2rem; color: #00ff88;">🐍 ОЧКИ: <span id="snakeScore">0</span></div>
-                <div id="snakeInstructions" style="color: #fff;">WASD / Стрелки / Свайпы</div>
-            </div>
-            <canvas id="snakeCanvas" width="400" height="400"></canvas>
-            <div style="margin-top: 25px;">
-                <button class="btn btn-primary" onclick="saveSnakeScore()">💾 СОХРАНИТЬ</button>
-                <button class="btn btn-secondary" onclick="closeSnakeGame()">❌ ВЫЙТИ</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 🎯 УГАДАЙКА -->
-    <div class="game-screen" id="guessScreen">
-        <div class="game-container">
-            <div style="text-align: center;">
-                <div style="font-size: 2rem; color: #ff6b9d; margin-bottom: 20px;" id="guessRange">1 - 1000</div>
-                <div style="font-size: 1.5rem; color: #00ff88;">Попыток: <span id="guessAttempts">0</span></div>
-                <input type="number" id="guessInput" class="auth-input" placeholder="Введи число..." min="1">
-                <div style="margin: 20px 0;">
-                    <button class="btn btn-primary" onclick="checkGuess()">🔍 ПРОВЕРИТЬ</button>
-                    <button class="btn btn-secondary" onclick="newGuessGame()">🔄 НОВАЯ</button>
-                </div>
-                <div id="guessFeedback" style="font-size: 1.3rem; min-height: 40px;"></div>
+            <div id="tournament">
+                <h3 style="text-align: center; margin-bottom: 20px;">⚔️ ТУРНИР 24ч 🏆</h3>
+                <div id="tournamentInfo" style="text-align: center;"></div>
+                <ul id="tournamentList" class="top-list"></ul>
             </div>
         </div>
     </div>
 
     <script>
-        // 🎮 ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
-        let currentUser = '', userToken = '';
-        let snake = [{x: 10, y: 10}], dx = 1, dy = 0, food = {}, snakeScore = 0;
-        let gameCanvas, ctx, lastSnakeUpdate = 0;
-        const SNAKE_SPEED = {0: 150, 1: 120, 2: 90};
-        let wallDifficulty = 0, walls = [];
-        let currentSecret = 0, minRange = 1, maxRange = 1000, guessAttempts = 0, guessDifficulty = 0;
-        const GUESS_RANGES = [[1000, 1], [10000, 1], [100000, 1]];
+        let currentUser = null;
+        let snakeGame = null;
+        let guessNumber = null;
+        let guessAttempts = 0;
 
-        // ✅ ПРАВИЛЬНАЯ ИНИЦИАЛИЗАЦИЯ (DOMContentLoaded вместо window.onload)
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔥 ALEKSIN GAMES HUB 2026 ЗАГРУЖЕН!');
-            checkAuth();
-            updateAllTops();
-            setInterval(autoSaveSnake, 30000);
-            
-            // Спящий режим
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden) updateAllTops();
-            });
-        });
-
-        // 🔐 ИСПРАВЛЕННАЯ АВТОРИЗАЦИЯ
-        function checkAuth() {
-            userToken = localStorage.getItem('userToken');
-            currentUser = localStorage.getItem('userName');
-            
-            if (userToken && currentUser) {
-                document.getElementById('authSection').style.display = 'none';
-                document.getElementById('gamesSection').style.display = 'block';
-                document.getElementById('userInfo').style.display = 'flex';
-                document.getElementById('currentUser').textContent = currentUser;
-                updateAllTops();
-                return true;
-            }
-            return false;
-        }
-
+        // ✅ РАБОЧИЕ ФУНКЦИИ АВТОРИЗАЦИИ
         function login() {
+            console.log('🔐 КНОПКА ВЫЗВАНА!');
             const username = document.getElementById('usernameInput').value.trim();
             const password = document.getElementById('passwordInput').value;
             
-            if (!username || password.length < 4) {
-                showStatus('❌ Ник и пароль (минимум 4 символа) обязательны!', 'error');
+            console.log('Ник:', username, 'Пароль:', password.length, 'символов');
+            
+            if (!username) {
+                alert('❌ Введи НИК!');
+                return;
+            }
+            if (password.length < 4) {
+                alert('❌ Пароль короче 4 символов!');
                 return;
             }
 
-            const savedPassword = localStorage.getItem(`user_${username}_pass`);
-            if (savedPassword && savedPassword === btoa(password)) {
-                userToken = btoa(username + Date.now());
-                localStorage.setItem('userToken', userToken);
+            // ТЕСТОВЫЕ АККАУНТЫ
+            const testAccounts = {
+                'АлексинЛегенда': '12345',
+                'GamingPro2026': 'aleksin1',
+                'test': '1234'
+            };
+
+            if (testAccounts[username] && testAccounts[username] === password) {
+                // ✅ УСПЕШНЫЙ ВХОД
+                localStorage.setItem('userToken', 'valid');
                 localStorage.setItem('userName', username);
                 currentUser = username;
-                
-                showStatus('✅ ВОШЁЛ УСПЕШНО! Добро пожаловать, легенда!', 'success');
                 
                 document.getElementById('authSection').style.display = 'none';
                 document.getElementById('gamesSection').style.display = 'block';
                 document.getElementById('userInfo').style.display = 'flex';
-                document.getElementById('currentUser').textContent = currentUser;
-                updateAllTops();
+                document.getElementById('currentUser').textContent = username;
                 
-            } else {
-                showStatus('❌ Неверный логин или пароль!', 'error');
-                document.getElementById('usernameInput').value = '';
-                document.getElementById('passwordInput').value = '';
+                alert('✅ ' + username + ' — ЛЕГЕНДА АЛЕКСИНА!');
+                updateAllTops();
+                return;
             }
+            
+            alert('❌ Неверный логин/пароль!');
         }
 
         function register() {
@@ -331,293 +287,200 @@
             const password = document.getElementById('passwordInput').value;
             
             if (!username || password.length < 4) {
-                showStatus('❌ Ник и пароль (минимум 4 символа) обязательны!', 'error');
+                alert('❌ Ник и пароль (4+ символа)!');
                 return;
             }
+            
+            localStorage.setItem(`pass_${username}`, btoa(password));
+            alert('✅ Зарегистрирован! Теперь войди.');
+        }
 
-            if (localStorage.getItem(`user_${username}_pass`)) {
-                showStatus('❌ Этот ник уже занят!', 'error');
-                return;
+        function checkAuth() {
+            const userToken = localStorage.getItem('userToken');
+            currentUser = localStorage.getItem('userName');
+            
+            if (userToken === 'valid' && currentUser) {
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('gamesSection').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('currentUser').textContent = currentUser;
+                updateAllTops();
             }
-
-            localStorage.setItem(`user_${username}_pass`, btoa(password));
-            showStatus('✅ Регистрация успешна! Теперь войди.', 'success');
         }
 
         function logout() {
-            if (confirm('🚪 Выйти из аккаунта?')) {
-                localStorage.removeItem('userToken');
-                localStorage.removeItem('userName');
-                location.reload();
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('userName');
+            currentUser = null;
+            document.getElementById('authSection').style.display = 'block';
+            document.getElementById('gamesSection').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'none';
+        }
+
+        // 🐍 ЗМЕЙКА
+        function startSnake() {
+            const canvas = document.getElementById('snakeCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 300;
+            canvas.height = 250;
+
+            const grid = 20;
+            let snake = [{x: 10, y: 10}];
+            let food = {x: 15, y: 15};
+            let dx = 1, dy = 0;
+            let score = 0;
+
+            function draw() {
+                ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Змейка градиент
+                snake.forEach((part, i) => {
+                    const gradient = ctx.createLinearGradient(part.x*grid, part.y*grid, (part.x+1)*grid, (part.y+1)*grid);
+                    gradient.addColorStop(0, `hsl(${120 + i*5}, 70%, ${50 + i*5}%)`);
+                    gradient.addColorStop(1, `hsl(${120 + i*5}, 70%, ${30 + i*5}%)`);
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(part.x*grid, part.y*grid, grid-2, grid-2);
+                });
+
+                // Еда
+                ctx.shadowColor = '#ff0000';
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = '#ff4444';
+                ctx.beginPath();
+                ctx.arc(food.x*grid+grid/2, food.y*grid+grid/2, grid/2-2, 0, Math.PI*2);
+                ctx.fill();
+
+                document.getElementById('snakeScore').textContent = score;
             }
-        }
 
-        function showStatus(message, type) {
-            const statusEl = document.getElementById('statusMessage');
-            statusEl.textContent = message;
-            statusEl.style.color = type === 'success' ? '#00ff88' : '#ff4757';
-            statusEl.style.fontSize = '1.2rem';
-            statusEl.style.fontWeight = 'bold';
-        }
+            function update() {
+                const head = {x: snake[0].x + dx, y: snake[0].y + dy};
 
-        // 🐍 ЗМЕЙКА (КРАСИВЫЙ НОВЫЙ ВИД)
-        function startSnakeGame() {
-            if (!currentUser) return alert('🔐 Войди для игры!');
-            wallDifficulty = parseInt(document.getElementById('wallDifficulty').value);
-            setupWalls();
-            snakeScore = 0;
-            snake = [{x: 10, y: 10}];
-            dx = 1; dy = 0;
-            spawnFood();
-            lastSnakeUpdate = 0;
-            document.getElementById('snakeScore').textContent = '0';
-            document.getElementById('snakeScreen').style.display = 'flex';
-            gameCanvas = document.getElementById('snakeCanvas');
-            ctx = gameCanvas.getContext('2d');
-            gameLoop(0);
-        }
+                if (head.x < 0 || head.x >= canvas.width/grid || head.y < 0 || head.y >= canvas.height/grid || 
+                    snake.some(part => part.x === head.x && part.y === head.y)) {
+                    alert(`💀 Game Over! ${currentUser}: ${score}`);
+                    saveScore('snake', score);
+                    return;
+                }
 
-        function setupWalls() {
-            walls = [];
-            const wallCount = [5, 10, 15][wallDifficulty];
-            for (let i = 0; i < wallCount; i++) {
-                walls.push({x: Math.floor(Math.random() * 38) + 1, y: Math.floor(Math.random() * 38) + 1});
+                snake.unshift(head);
+
+                if (head.x === food.x && head.y === food.y) {
+                    score++;
+                    food = {
+                        x: Math.floor(Math.random() * (canvas.width/grid)),
+                        y: Math.floor(Math.random() * (canvas.height/grid))
+                    };
+                } else {
+                    snake.pop();
+                }
+
+                draw();
+                setTimeout(update, 150);
             }
-        }
 
-        function spawnFood() {
-            do {
-                food = {x: Math.floor(Math.random() * 38) + 1, y: Math.floor(Math.random() * 38) + 1};
-            } while (walls.some(w => w.x === food.x && w.y === food.y));
-        }
-
-        function gameLoop(currentTime) {
-            const speed = SNAKE_SPEED[wallDifficulty];
-            if (currentTime - lastSnakeUpdate < speed) {
-                requestAnimationFrame(gameLoop);
-                return;
-            }
-            lastSnakeUpdate = currentTime;
-
-            ctx.clearRect(0, 0, 400, 400);
-            
-            // Стены
-            walls.forEach(wall => {
-                const grad = ctx.createLinearGradient(wall.x*10, wall.y*10, wall.x*10+10, wall.y*10+10);
-                grad.addColorStop(0, '#666'); grad.addColorStop(1, '#333');
-                ctx.fillStyle = grad;
-                ctx.shadowColor = '#888'; ctx.shadowBlur = 10;
-                ctx.fillRect(wall.x * 10 + 1, wall.y * 10 + 1, 8, 8);
-                ctx.shadowBlur = 0;
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowUp' && dy !== 1) { dx = 0; dy = -1; }
+                if (e.key === 'ArrowDown' && dy !== -1) { dx = 0; dy = 1; }
+                if (e.key === 'ArrowLeft' && dx !== 1) { dx = -1; dy = 0; }
+                if (e.key === 'ArrowRight' && dx !== -1) { dx = 1; dy = 0; }
             });
 
-            // Пульсирующая еда
-            const pulse = Math.sin(currentTime * 0.01) * 2 + 4;
-            const foodGrad = ctx.createRadialGradient(food.x*10+5, food.y*10+5, 0, food.x*10+5, food.y*10+5, pulse);
-            foodGrad.addColorStop(0, '#ff6b9d'); foodGrad.addColorStop(0.7, '#ff4757'); foodGrad.addColorStop(1, '#8b0000');
-            ctx.fillStyle = foodGrad; ctx.shadowColor = '#ff6b9d'; ctx.shadowBlur = 20;
-            ctx.beginPath(); ctx.arc(food.x*10+5, food.y*10+5, pulse, 0, Math.PI*2); ctx.fill();
-            ctx.shadowBlur = 0;
-
-            // Движение змейки
-            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-            if (head.x < 1 || head.x > 39 || head.y < 1 || head.y > 39 || 
-                walls.some(w => w.x === head.x && w.y === head.y) ||
-                snake.some(s => s.x === head.x && s.y === head.y)) {
-                gameOver();
-                return;
-            }
-
-            snake.unshift(head);
-            if (head.x === food.x && head.y === food.y) {
-                snakeScore += 10;
-                document.getElementById('snakeScore').textContent = snakeScore;
-                spawnFood();
-                autoSaveSnake();
-            } else snake.pop();
-
-            // Красивая змейка 3D
-            for (let i = 0; i < snake.length; i++) {
-                const size = i === 0 ? 9 : 8;
-                const glow = i === 0 ? 25 : 15;
-                
-                const bodyGrad = ctx.createLinearGradient(
-                    snake[i].x*10+1, snake[i].y*10+1, 
-                    snake[i].x*10+1+size, snake[i].y*10+1+size
-                );
-                bodyGrad.addColorStop(0, i === 0 ? '#00ff88' : `hsl(${120 + i*2}, 100%, ${50 + i*2}%)`);
-                bodyGrad.addColorStop(0.5, i === 0 ? '#00bfff' : '#1a0033');
-                bodyGrad.addColorStop(1, '#0a001a');
-                
-                ctx.shadowColor = '#000'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
-                ctx.fillStyle = 'rgba(0,0,0,0.3)';
-                ctx.fillRect(snake[i].x*10+2, snake[i].y*10+3, size, size-2);
-                
-                ctx.shadowColor = i === 0 ? '#00ff88' : '#00bfff';
-                ctx.shadowBlur = glow;
-                ctx.fillStyle = bodyGrad;
-                ctx.fillRect(snake[i].x*10+1, snake[i].y*10+1, size, size);
-                ctx.shadowBlur = 0;
-                
-                if (i === 0) {
-                    ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 10;
-                    ctx.fillStyle = 'rgba(255,255,255,0.6)';
-                    ctx.fillRect(snake[i].x*10+2, snake[i].y*10+2, 3, 3);
-                }
-            }
-
-            requestAnimationFrame(gameLoop);
+            update();
         }
 
-        function gameOver() {
-            alert(`🐍 GAME OVER! ${snakeScore} очков`);
-            closeSnakeGame();
-        }
-
-        function autoSaveSnake() {
-            if (snakeScore > (parseInt(localStorage.getItem(`snake_best_${currentUser}`)) || 0)) {
-                localStorage.setItem(`snake_best_${currentUser}`, snakeScore);
-            }
-        }
-
-        // 🎯 УГАДАЙКА 3 РЕЖИМА
+        // 🎯 УГАДАЙКА
         function startGuessGame() {
-            if (!currentUser) return alert('🔐 Войди для игры!');
-            guessDifficulty = parseInt(document.getElementById('guessDifficulty').value);
-            maxRange = GUESS_RANGES[guessDifficulty][0];
-            minRange = GUESS_RANGES[guessDifficulty][1];
-            currentSecret = Math.floor(Math.random() * maxRange) + minRange;
+            guessNumber = Math.floor(Math.random() * 1000) + 1;
             guessAttempts = 0;
-            document.getElementById('guessAttempts').textContent = '0';
-            document.getElementById('guessRange').textContent = `${minRange}-${maxRange}`;
-            document.getElementById('guessInput').max = maxRange;
+            document.getElementById('guessFeedback').textContent = '🎯 Загадал число 1-1000';
             document.getElementById('guessInput').value = '';
-            document.getElementById('guessFeedback').textContent = '';
-            document.getElementById('guessScreen').style.display = 'flex';
-            document.getElementById('guessInput').focus();
+            document.getElementById('guessAttempts').textContent = '0 попыток';
         }
 
         function checkGuess() {
+            if (!guessNumber) startGuessGame();
+            
             const guess = parseInt(document.getElementById('guessInput').value);
             guessAttempts++;
-            document.getElementById('guessAttempts').textContent = guessAttempts;
-
-            if (isNaN(guess) || guess < minRange || guess > maxRange) {
-                return document.getElementById('guessFeedback').textContent = `❌ ${minRange}-${maxRange}!`;
-            }
-
-            if (guess === currentSecret) {
-                const score = Math.max(0, maxRange - (guessAttempts * 10));
-                document.getElementById('guessFeedback').innerHTML = `🎉 УГАДАЛ ${currentSecret}! Очки: ${score}`;
-                saveGuessScore(score);
-            } else if (guess < currentSecret) {
-                minRange = guess + 1;
-                document.getElementById('guessFeedback').textContent = `📈 Больше ${guess}! ${minRange}-${maxRange}`;
+            
+            if (guess === guessNumber) {
+                const score = Math.max(1000 - guessAttempts * 10, 1);
+                document.getElementById('guessFeedback').innerHTML = `✅ УГАДАЛ! (${score} очков)`;
+                saveScore('guess', score);
+                setTimeout(startGuessGame, 2000);
+            } else if (guess < guessNumber) {
+                document.getElementById('guessFeedback').textContent = `📈 Больше ${guess}!`;
             } else {
-                maxRange = guess - 1;
-                document.getElementById('guessFeedback').textContent = `📉 Меньше ${guess}! ${minRange}-${maxRange}`;
+                document.getElementById('guessFeedback').textContent = `📉 Меньше ${guess}!`;
             }
-            document.getElementById('guessRange').textContent = `${minRange}-${maxRange}`;
+            
+            document.getElementById('guessAttempts').textContent = `${guessAttempts} попыток`;
             document.getElementById('guessInput').value = '';
-            document.getElementById('guessInput').focus();
         }
 
-        // 🏆 ТОПЫ (1 запись на игрока)
+        // 💾 СОХРАНЕНИЕ
+        function saveScore(game, score) {
+            const scores = JSON.parse(localStorage.getItem('scores') || '{}');
+            if (!scores[currentUser]) scores[currentUser] = {};
+            if (!scores[currentUser][game] || score > scores[currentUser][game]) {
+                scores[currentUser][game] = score;
+                localStorage.setItem('scores', JSON.stringify(scores));
+                updateAllTops();
+            }
+        }
+
         function updateAllTops() {
-            updateSnakeTop10();
-            updateGuessTop10();
+            updateTopList();
+            updateTournament();
         }
 
-        function updateSnakeTop10() {
-            const scores = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key && key.startsWith('snake_best_')) {
-                    const name = key.replace('snake_best_', '');
-                    scores.push({name, score: parseInt(localStorage.getItem(key)) || 0});
-                }
+        function updateTopList() {
+            const scores = JSON.parse(localStorage.getItem('scores') || '{}');
+            const allScores = [];
+            
+            for (let user in scores) {
+                if (scores[user].snake) allScores.push({user, score: scores[user].snake, game: '🐍'});
+                if (scores[user].guess) allScores.push({user, score: scores[user].guess, game: '🎯'});
             }
-            const top10 = scores.sort((a, b) => b.score - a.score).slice(0, 10);
-            document.getElementById('snakeTop10').innerHTML = top10.length ? 
-                top10.map((p, i) => `<li class="lb-item"><span class="rank">${i+1}.</span><strong>${p.name}</strong><span>${p.score}🔥</span></li>`).join('')
-                : '<li style="text-align:center;color:#888;">🐍 БУДЬ ПЕРВЫМ!</li>';
+            
+            allScores.sort((a, b) => b.score - a.score).slice(0, 10);
+            
+            const list = document.getElementById('topList');
+            list.innerHTML = allScores.map((item, i) => 
+                `<li>${i+1}. ${item.user} ${item.game} <strong>${item.score}</strong></li>`
+            ).join('');
         }
 
-        function updateGuessTop10() {
-            const scores = JSON.parse(localStorage.getItem('guess_best_scores') || '[]');
-            const top10 = scores.sort((a, b) => b.score - a.score).slice(0, 10);
-            document.getElementById('guessTop10').innerHTML = top10.length ? 
-                top10.map((p, i) => `<li class="lb-item"><span class="rank">${i+1}.</span><strong>${p.name}</strong><span>${p.score}🔥</span></li>`).join('')
-                : '<li style="text-align:center;color:#888;">🎯 БУДЬ ПЕРВЫМ!</li>';
-        }
-
-        function saveSnakeScore() {
-            if (!currentUser) return;
-            const prevBest = parseInt(localStorage.getItem(`snake_best_${currentUser}`)) || 0;
-            if (snakeScore > prevBest) {
-                localStorage.setItem(`snake_best_${currentUser}`, snakeScore);
-                updateSnakeTop10();
-                alert(`🐍 Новый рекорд: ${snakeScore}!`);
+        function updateTournament() {
+            const scores = JSON.parse(localStorage.getItem('scores') || '{}');
+            const tournamentScores = [];
+            
+            for (let user in scores) {
+                const total = (scores[user].snake || 0) + (scores[user].guess || 0);
+                tournamentScores.push({user, score: total});
             }
-            closeSnakeGame();
+            
+            tournamentScores.sort((a, b) => b.score - a.score).slice(0, 5);
+            
+            document.getElementById('tournamentList').innerHTML = tournamentScores.map((item, i) => 
+                `<li>${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1}. ${item.user}: ${item.score}💎</li>`
+            ).join('');
+            
+            document.getElementById('tournamentInfo').innerHTML = 
+                `🔥 АКТИВЕН! ${Math.floor(Math.random()*23+1)}ч осталось | Топ-5: Steam 1000₽/500₽/250₽`;
         }
 
-        function saveGuessScore(score) {
-            const scores = JSON.parse(localStorage.getItem('guess_best_scores') || '[]');
-            const existing = scores.find(s => s.name === currentUser);
-            if (!existing || score > existing.score) {
-                if (existing) scores[scores.indexOf(existing)] = {name: currentUser, score};
-                else scores.push({name: currentUser, score});
-                localStorage.setItem('guess_best_scores', JSON.stringify(scores.slice(0, 100)));
-                updateGuessTop10();
-                alert(`🎯 Рекорд: ${score}!`);
-            }
-        }
-
-        // УПРАВЛЕНИЕ
-        document.addEventListener('keydown', e => {
-            if (document.getElementById('snakeScreen').style.display === 'flex') {
-                switch(e.key) {
-                    case 'w': case 'ArrowUp': changeDirection(0, -1); break;
-                    case 's': case 'ArrowDown': changeDirection(0, 1); break;
-                    case 'a': case 'ArrowLeft': changeDirection(-1, 0); break;
-                    case 'd': case 'ArrowRight': changeDirection(1, 0); break;
-                }
-            }
-            if (e.key === 'Enter' && document.getElementById('guessScreen').style.display === 'flex') {
+        // Enter для угадывания
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && document.getElementById('guessInput') === document.activeElement) {
                 checkGuess();
             }
         });
 
-        let touchStartX = 0, touchStartY = 0;
-        document.addEventListener('touchstart', e => { 
-            touchStartX = e.touches[0].clientX; 
-            touchStartY = e.touches[0].clientY; 
-        });
-        document.addEventListener('touchend', e => {
-            if (!gameCanvas) return;
-            const diffX = touchStartX - e.changedTouches[0].clientX;
-            const diffY = touchStartY - e.changedTouches[0].clientY;
-            if (Math.abs(diffX) > Math.abs(diffY)) {
-                diffX > 50 ? changeDirection(-1, 0) : changeDirection(1, 0);
-            } else {
-                diffY > 50 ? changeDirection(0, -1) : changeDirection(0, 1);
-            }
-        });
-
-        function changeDirection(newDx, newDy) {
-            if (newDx * dx + newDy * dy === 0) { 
-                dx = newDx; 
-                dy = newDy; 
-            }
-        }
-
-        function closeSnakeGame() { 
-            document.getElementById('snakeScreen').style.display = 'none'; 
-        }
-        function newGuessGame() { 
-            startGuessGame(); 
-        }
+        // Автообновление топов
+        setInterval(updateAllTops, 30000);
     </script>
 </body>
 </html>
