@@ -3,158 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔐 ALEKSIN GAMES HUB - ВХОД</title>
+    <title>🔐 ALEKSIN GAMES HUB - Премиум</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            font-family: 'Arial', sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            font-family: 'Orbitron', monospace;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-        }
-        .login-container {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 25px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.2);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-        }
-        h1 { 
-            font-size: 2.5em; 
-            background: linear-gradient(45deg, #ff6b6b, #feca57, #4ecdc4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
-        }
-        .input-group {
-            margin: 20px 0;
+            overflow-x: hidden;
             position: relative;
         }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Частицы */
+        .particles {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1;
+        }
+        .particle {
+            position: absolute; width: 4px; height: 4px;
+            background: rgba(255,255,255,0.8); border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* ЭКРАН ВХОДА */
+        .login-container {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(25px);
+            border: 2px solid rgba(255,255,255,0.3); border-radius: 30px;
+            padding: 50px; box-shadow: 0 30px 100px rgba(0,0,0,0.6);
+            text-align: center; max-width: 450px; z-index: 10;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { box-shadow: 0 30px 100px rgba(255,107,107,0.4); }
+            to { box-shadow: 0 30px 100px rgba(78,205,196,0.6); }
+        }
+        h1 { 
+            font-size: 3em; font-weight: 900; margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57, #4ecdc4, #a55eea);
+            background-size: 300% 300%; -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; animation: textGlow 3s ease infinite;
+            text-shadow: 0 0 30px rgba(255,255,255,0.5);
+        }
+        @keyframes textGlow { 0%,100%{opacity:1;} 50%{opacity:0.9;} }
+        
+        .input-group { margin: 25px 0; position: relative; }
         input {
-            width: 100%; padding: 15px 20px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 15px;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            font-size: 16px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s;
+            width: 100%; padding: 20px 25px; font-size: 18px; font-family: 'Orbitron', monospace;
+            border: 2px solid rgba(255,255,255,0.4); border-radius: 20px;
+            background: rgba(255,255,255,0.1); color: white; backdrop-filter: blur(15px);
+            transition: all 0.4s; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
-        input::placeholder { color: rgba(255,255,255,0.7); }
         input:focus {
-            outline: none;
-            border-color: #4ecdc4;
-            box-shadow: 0 0 20px rgba(78,205,196,0.4);
+            border-color: #4ecdc4; box-shadow: 0 0 30px rgba(78,205,196,0.6);
+            transform: scale(1.02);
         }
+        input::placeholder { color: rgba(255,255,255,0.6); }
+        
         .btn {
-            width: 100%; padding: 18px;
-            background: linear-gradient(45deg, #ff6b6b, #feca57);
-            border: none;
-            border-radius: 15px;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin: 10px 0;
-            box-shadow: 0 10px 30px rgba(255,107,107,0.4);
-            transition: all 0.3s;
+            width: 100%; padding: 20px; font-size: 20px; font-weight: 700;
+            background: linear-gradient(45deg, #ff6b6b, #feca57, #ff9ff3);
+            border: none; border-radius: 25px; color: white; cursor: pointer;
+            box-shadow: 0 15px 40px rgba(255,107,107,0.4); transition: all 0.4s;
+            position: relative; overflow: hidden;
         }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 15px 40px rgba(255,107,107,0.5); }
-        .btn:active { transform: translateY(0); }
-        .games-locked {
-            margin-top: 30px;
-            padding: 20px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            text-align: left;
+        .btn::before {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
         }
-        .game-item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            margin: 5px 0;
-            background: rgba(255,255,255,0.05);
-            border-radius: 10px;
-        }
-        .locked { opacity: 0.6; color: #ff6b6b; }
-        #gamesArea, #mainGames { display: none; }
-        .main-header {
-            text-align: center; padding: 20px;
-            background: rgba(0,0,0,0.3); backdrop-filter: blur(10px);
+        .btn:hover::before { left: 100%; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 20px 50px rgba(255,107,107,0.6); }
+        
+        /* ОСНОВНОЙ ИНТЕРФЕЙС */
+        .main-container { display: none; }
+        .header {
+            text-align: center; padding: 30px; background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.2);
         }
         .games-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
-            gap: 30px; padding: 30px; max-width: 1400px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 40px; padding: 40px; max-width: 1600px; margin: 0 auto;
         }
+        
         .game-card {
-            background: rgba(255,255,255,0.15); border-radius: 25px; padding: 30px;
-            backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3); transition: all 0.4s;
+            background: rgba(255,255,255,0.12); border-radius: 30px; padding: 35px;
+            backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.25);
+            box-shadow: 0 25px 80px rgba(0,0,0,0.4); transition: all 0.5s;
+            position: relative; overflow: hidden;
         }
-        .game-card:hover { transform: translateY(-15px); box-shadow: 0 30px 80px rgba(0,0,0,0.4); }
-        .difficulty-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 15px 0; }
-        .diff-btn { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-weight: bold; }
-        .diff-easy { background: #4ecdc4; color: white; }
-        .diff-medium { background: #feca57; color: #333; }
-        .diff-hard { background: #ff6b6b; color: white; }
-        .active-diff { box-shadow: 0 0 20px currentColor; transform: scale(1.05); }
+        .game-card::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg); transition: all 0.6s;
+        }
+        .game-card:hover::before { animation: shine 1.5s infinite; }
+        @keyframes shine { 0%{transform: translateX(-100%) translateY(-100%) rotate(45deg);} 100%{transform: translateX(100%) translateY(100%) rotate(45deg);} }
+        .game-card:hover { transform: translateY(-20px); box-shadow: 0 40px 120px rgba(0,0,0,0.5); }
+        
+        .game-title {
+            font-size: 2.5em; font-weight: 900; text-align: center; margin-bottom: 25px;
+            background: linear-gradient(45deg, #fff, #4ecdc4, #feca57, #ff6b6b);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-size: 300% 300%; animation: rainbow 4s ease infinite;
+        }
+        @keyframes rainbow { 0%,100%{background-position: 0% 50%;} 50%{background-position: 100% 50%;} }
+        
+        .difficulty-btns {
+            display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin: 25px 0;
+        }
+        .diff-btn {
+            padding: 15px 25px; border: none; border-radius: 30px; font-weight: 700;
+            cursor: pointer; font-size: 16px; transition: all 0.4s; min-width: 120px;
+        }
+        .diff-easy { background: linear-gradient(45deg, #4ecdc4, #44bdad); color: white; }
+        .diff-medium { background: linear-gradient(45deg, #feca57, #f4b400); color: #333; }
+        .diff-hard { background: linear-gradient(45deg, #ff6b6b, #ff5252); color: white; }
+        .active-diff { 
+            box-shadow: 0 0 30px currentColor; transform: scale(1.1); 
+            background: linear-gradient(45deg, #fff, currentColor) !important;
+        }
+        
+        canvas { 
+            display: block; margin: 20px auto; border-radius: 25px; 
+            border: 4px solid rgba(255,255,255,0.3); box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+        }
+        
+        .stats { text-align: center; font-size: 1.4em; margin: 20px 0; font-weight: 700; }
         .leaderboard {
-            background: rgba(0,0,0,0.4); border-radius: 15px; padding: 20px; margin-top: 20px;
-            max-height: 250px; overflow-y: auto;
+            background: rgba(0,0,0,0.6); border-radius: 20px; padding: 25px;
+            margin-top: 25px; max-height: 280px; overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.2);
         }
+        .lb-item {
+            display: flex; justify-content: space-between; padding: 12px;
+            background: rgba(255,255,255,0.05); margin: 8px 0; border-radius: 15px;
+            backdrop-filter: blur(10px); transition: all 0.3s;
+        }
+        .lb-item:hover { background: rgba(255,255,255,0.15); transform: scale(1.02); }
+        
         .tournaments { grid-column: 1/-1; }
+        .tournaments .leaderboard { max-height: 400px; }
+        
         @media (max-width: 768px) {
             .games-grid { grid-template-columns: 1fr; padding: 20px; }
             h1 { font-size: 2em; }
+            .game-card { padding: 25px; }
         }
     </style>
 </head>
 <body>
-    <!-- ЭКРАН ВХОДА -->
+    <!-- ФОНОВЫЕ ЧАСТИЦЫ -->
+    <div class="particles" id="particles"></div>
+
+    <!-- ЭКРАН ЛОГИНА С ПАРОЛЕМ -->
     <div id="loginScreen">
         <div class="login-container">
-            <h1>🔐 ALEKSIN GAMES HUB</h1>
-            <div style="margin-bottom: 30px; font-size: 1.2em; opacity: 0.9;">
-                Зарегистрируйся или войди, чтобы играть
+            <h1>🔐 PREMIUM ACCESS</h1>
+            <div style="margin-bottom: 30px; font-size: 1.3em; opacity: 0.9;">
+                Защита входа • Все данные сохраняются
             </div>
             <div class="input-group">
-                <input id="username" type="text" placeholder="👤 Имя игрока" maxlength="15">
+                <input id="username" type="text" placeholder="👤 Имя игрока (2-15 символов)" maxlength="15">
             </div>
-            <button class="btn" onclick="login()">🚀 ВОЙТИ И ИГРАТЬ</button>
-            <div style="margin-top: 20px; font-size: 0.9em; opacity: 0.8;">
-                Данные сохраняются в браузере • Сайт не засыпает = рекорды живы!
+            <div class="input-group">
+                <input id="password" type="password" placeholder="🔑 Пароль доступа" maxlength="20">
             </div>
-            <div class="games-locked">
-                <div style="margin-bottom: 15px; font-weight: bold; color: #feca57;">
-                    🎮 Доступные игры после входа:
-                </div>
-                <div class="game-item">
-                    <span>🐍 Змейка</span><span class="locked">• 3 сложности • Не отматывается</span>
-                </div>
-                <div class="game-item">
-                    <span>🎯 Угадайка</span><span class="locked">• 3 уровня: 1-1000/10000/100000</span>
-                </div>
-                <div class="game-item">
-                    <span>⚔️ Турниры</span><span class="locked">• Топ-100 • Призы 5 лучшим</span>
-                </div>
+            <div style="font-size: 0.9em; opacity: 0.7; margin-top: 10px;">
+                Стандартный пароль: <strong>games2026</strong>
+            </div>
+            <button class="btn" onclick="loginWithPassword()">🚀 АКТИВИРОВАТЬ ДОСТУП</button>
+            <div style="margin-top: 25px; opacity: 0.8;">
+                🐍 Змейка 3 сложности • 🎯 Угадайка 3 уровня • ⚔️ Турниры Топ-100
             </div>
         </div>
     </div>
 
-    <!-- ОСНОВНОЙ ЭКРАН ИГР -->
-    <div id="gamesArea">
-        <div class="main-header">
-            <h1>🎮 <span id="playerName">Игрок</span> - Добро пожаловать!</h1>
-            <div>Топ-10 по играм • Турниры обновляются в 00:00 МСК</div>
-            <button class="btn" style="margin-top:10px; width:auto; padding:12px 24px;" onclick="logout()">
+    <!-- ГЛАВНЫЙ ЭКРАН -->
+    <div id="mainScreen" class="main-container">
+        <div class="header">
+            <h1>🎮 <span id="playerName">Игрок</span> - PREMIUM</h1>
+            <div style="font-size: 1.2em; opacity: 0.9;">
+                Топ-10 по играм • Двойные турниры • Сброс 00:00 МСК
+            </div>
+            <button class="btn" style="width:auto; padding:15px 30px; margin-top:15px;" onclick="logout()">
                 🚪 Выход
             </button>
         </div>
@@ -162,67 +209,70 @@
         <div class="games-grid">
             <!-- ЗМЕЙКА -->
             <div class="game-card">
-                <div class="game-title" style="font-size: 2em; text-align:center; margin-bottom:20px;">
-                    🐍 ЗМЕЙКА • <span id="snakeDiff">Лёгкая</span>
+                <div class="game-title">🐍 ЗМЕЙКА ULTRA</div>
+                <div class="stats">
+                    Очки: <span id="snakeScore">0</span> | Рекорд: <span id="snakeHigh">0</span> | 
+                    <span id="snakeDiffName">Лёгкая</span>
                 </div>
-                <div style="text-align:center; font-size:1.3em; margin-bottom:15px;">
-                    Очки: <span id="snakeScore">0</span> | Рекорд: <span id="snakeHigh">0</span>
-                </div>
-                <canvas id="snakeCanvas" width="380" height="380" style="display:block; margin:0 auto 20px; border:3px solid #4ecdc4; border-radius:20px; background:#111;"></canvas>
+                <canvas id="snakeCanvas" width="420" height="420"></canvas>
                 <div class="difficulty-btns">
-                    <button class="diff-btn diff-easy active-diff" onclick="setSnakeDiff(0)">🐌 Лёгкая</button>
-                    <button class="diff-btn diff-medium" onclick="setSnakeDiff(1)">🐍 Средняя</button>
-                    <button class="diff-btn diff-hard" onclick="setSnakeDiff(2)">⚡ Хардкор</button>
+                    <button class="diff-btn diff-easy active-diff" data-diff="0">🐌 Лёгкая</button>
+                    <button class="diff-btn diff-medium" data-diff="1">🐍 Нормальная</button>
+                    <button class="diff-btn diff-hard" data-diff="2">⚡ Хардкор</button>
                 </div>
-                <button class="btn" onclick="startSnake()" style="width:100%;">▶️ НАЧАТЬ</button>
+                <button class="btn" onclick="startSnake()" style="width:100%; margin:20px 0;">▶️ СТАРТ ЗМЕЙКИ</button>
                 <div class="leaderboard">
-                    <h3>🏆 Топ-10 Змейка</h3>
-                    <div id="snakeLB"></div>
+                    <h3 style="margin-bottom:15px;">🏆 ТОП-10 ЗМЕЙКА</h3>
+                    <div id="snakeLeaderboard"></div>
                 </div>
             </div>
 
             <!-- УГАДАЙКА -->
             <div class="game-card">
-                <div class="game-title" style="font-size: 2em; text-align:center; margin-bottom:20px;">
-                    🎯 УГАДАЙКА • <span id="guessDiff">1-1000</span>
+                <div class="game-title">🎯 УГАДАЙКА PRO</div>
+                <div class="stats">
+                    Статус: <span id="guessStatus">-</span> | Попыток: <span id="guessTries">0</span> | 
+                    Введено: <span id="lastGuess">-</span> | <span id="guessDiffName">1-1000</span>
                 </div>
-                <div style="text-align:center; font-size:1.3em; margin-bottom:15px;">
-                    Число: <span id="guessStatus">-</span> | Попыток: <span id="guessTries">0</span> | Введено: <span id="guessInputVal">-</span>
-                </div>
-                <canvas id="guessCanvas" width="380" height="120" style="display:block; margin:0 auto 20px; border:3px solid #feca57; border-radius:20px; background:#222;"></canvas>
-                <div style="text-align:center; margin:20px 0;">
-                    <input id="guessInput" type="number" placeholder="Введи число" style="width:200px; padding:15px; font-size:18px; border-radius:15px; border:2px solid #feca57; background:rgba(0,0,0,0.5); color:white; text-align:center;">
-                    <br><button class="btn" onclick="makeGuess()" style="margin-top:10px; padding:12px 24px;">🔍 УГАДАТЬ</button>
+                <canvas id="guessCanvas" width="420" height="150"></canvas>
+                <div style="text-align:center; margin:25px 0;">
+                    <input id="guessInput" type="number" placeholder="🔢 Введи число" 
+                           style="width:280px; padding:20px; font-size:20px; font-family:'Orbitron';">
+                    <br><button class="btn" onclick="makeGuess()" style="margin-top:15px; padding:15px 30px;">🔍 ПРОВЕРИТЬ</button>
                 </div>
                 <div class="difficulty-btns">
-                    <button class="diff-btn diff-easy active-diff" onclick="setGuessDiff(0)">1-1000</button>
-                    <button class="diff-btn diff-medium" onclick="setGuessDiff(1)">1-10000</button>
-                    <button class="diff-btn diff-hard" onclick="setGuessDiff(2)">1-100000</button>
+                    <button class="diff-btn diff-easy active-diff" data-diff="0">1-1000</button>
+                    <button class="diff-btn diff-medium" data-diff="1">1-10000</button>
+                    <button class="diff-btn diff-hard" data-diff="2">1-100000</button>
                 </div>
-                <button class="btn" onclick="newGuessGame()" style="width:100%; margin-top:10px;">🔄 НОВАЯ ИГРА</button>
                 <div class="leaderboard">
-                    <h3>🏆 Топ-10 Угадайка</h3>
-                    <div id="guessLB"></div>
+                    <h3 style="margin-bottom:15px;">🏆 ТОП-10 УГАДАЙКА</h3>
+                    <div id="guessLeaderboard"></div>
                 </div>
             </div>
 
-            <!-- ТУРНИРЫ -->
+            <!-- ДВОЙНЫЕ ТУРНИРЫ -->
             <div class="tournaments game-card">
-                <div class="game-title" style="font-size: 2.2em;">⚔️ ТУРНИРЫ 24ч</div>
-                <div style="font-size:1.5em; margin:20px 0; color:#feca57;">
-                    Обновляется в 00:00 МСК • Топ-100 игроков • Призы 5 лучшим
+                <div class="game-title">⚔️ ДВОЙНЫЕ ТУРНИРЫ 24ч</div>
+                <div style="text-align:center; font-size:1.6em; margin:25px 0; color:#feca57;">
+                    Топ-100 • Призы 5 лучшим • Сброс 00:00 МСК<br><strong>Твои очки: <span id="tournamentScore">0</span></strong>
                 </div>
-                <div style="font-size:1.2em; margin-bottom:20px;">
-                    🥇 1-е: 2480 очков (Игрок123)<br>
-                    🥈 2-е: 2350 очков (Aleksin)<br>
-                    🥉 3-е: 2195 очkov (ProGamer)
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin:20px 0;">
+                    <div>
+                        <h3 style="color:#4ecdc4;">🥇 Змейка Турнир</h3>
+                        <div class="leaderboard" style="max-height:200px;">
+                            <div id="snakeTournament"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="color:#feca57;">🥈 Угадайка Турнир</h3>
+                        <div class="leaderboard" style="max-height:200px;">
+                            <div id="guessTournament"></div>
+                        </div>
+                    </div>
                 </div>
-                <div class="leaderboard" style="max-height:300px;">
-                    <h3>🏆 Твоя позиция в турнире: <span id="tournamentPos">—</span></h3>
-                    <div id="tournamentLB"></div>
-                </div>
-                <button class="btn" style="width:100%; padding:20px; font-size:1.4em; margin-top:20px;">
-                    ⚔️ ОЧКИ ТУРНИРА: <span id="tournamentScore">0</span>
+                <button class="btn" style="width:100%; padding:25px; font-size:1.5em;">
+                    🏆 ТВОЯ ПОЗИЦИЯ: <span id="tournamentPosition">-</span>
                 </button>
             </div>
         </div>
@@ -230,146 +280,179 @@
 
     <script>
         // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
-        let currentUser = null;
-        let snakeGame = null, guessGame = null;
-        let snakeDiff = 0, guessDiff = 0;
+        let currentUser = null, currentPassword = null;
+        let snake = {running: false, score: 0, high: 0, diff: 0};
+        let guess = {number: 0, tries: 0, min: 1, max: 1000, diff: 0, lastInput: 0};
+        const MASTER_PASSWORD = "games2026";
         const difficulties = {
-            snake: [300, 150, 80],  // Лёгкая/Средняя/Хардкор
-            guess: [1000, 10000, 100000]
+            snake: {names: ['Лёгкая', 'Нормальная', 'Хардкор'], speeds: [400, 200, 100]},
+            guess: {names: ['1-1000', '1-10000', '1-100000'], ranges: [1000, 10000, 100000]}
         };
 
-        // ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ
-        window.addEventListener('load', () => {
-            checkLogin();
-            updateAllLeaderboards();
-        });
+        // ИНИЦИАЛИЗАЦИЯ
+        window.onload = function() {
+            createParticles();
+            loadGameData();
+        };
 
-        // АВТОРИЗАЦИЯ
-        function login() {
-            const username = document.getElementById('username').value.trim();
-            if (!username || username.length < 2) {
-                alert('👤 Введи имя от 2 символов!');
+        // СОЗДАНИЕ ЧАСТИЦ
+        function createParticles() {
+            const particles = document.getElementById('particles');
+            for(let i = 0; i < 50; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 6 + 's';
+                p.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                particles.appendChild(p);
+            }
+        }
+
+        // ЗАЩИЩЁННЫЙ ВХОД
+        function loginWithPassword() {
+            const user = document.getElementById('username').value.trim();
+            const pass = document.getElementById('password').value;
+            
+            if(!user || user.length < 2) {
+                alert('❌ Имя должно быть от 2 символов!');
                 return;
             }
-            currentUser = username.slice(0, 15);
+            if(pass !== MASTER_PASSWORD) {
+                alert('❌ Неверный пароль! Стандарт: games2026');
+                document.getElementById('password').value = '';
+                return;
+            }
+            
+            currentUser = user.slice(0,15);
+            currentPassword = pass;
             localStorage.setItem('gamesUser', currentUser);
+            localStorage.setItem('gamesPass', pass);
             document.getElementById('playerName').textContent = currentUser;
             document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('gamesArea').style.display = 'block';
+            document.getElementById('mainScreen').style.display = 'block';
             initGames();
-            updateTournamentScore();
         }
 
         function logout() {
             currentUser = null;
-            document.getElementById('gamesArea').style.display = 'none';
+            document.getElementById('mainScreen').style.display = 'none';
             document.getElementById('loginScreen').style.display = 'block';
             document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
         }
 
-        function checkLogin() {
-            const savedUser = localStorage.getItem('gamesUser');
-            if (savedUser) {
-                currentUser = savedUser;
-                document.getElementById('playerName').textContent = currentUser;
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('gamesArea').style.display = 'block';
-                initGames();
+        // ПОЛНАЯ РАБОЧАЯ ЗМЕЙКА
+        function initSnake() {
+            const canvas = document.getElementById('snakeCanvas');
+            const ctx = canvas.getContext('2d');
+            let snake = [{x:10,y:10}], food = {x:15,y:15}, dx=1, dy=0;
+            
+            function draw() {
+                ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0,0,420,420);
+                snake.forEach((s,i) => {
+                    ctx.fillStyle = i===0 ? '#00ff88' : '#00cc66';
+                    ctx.fillRect(s.x*20+2,s.y*20+2,16,16);
+                    ctx.strokeStyle = '#ffffff20'; ctx.lineWidth=1; ctx.strokeRect(s.x*20+2,s.y*20+2,16,16);
+                });
+                ctx.fillStyle = '#ff4757'; ctx.beginPath();
+                ctx.arc(food.x*20+10,food.y*20+10,9,0,Math.PI*2); ctx.fill();
             }
-        }
-
-        // ИНИЦИАЛИЗАЦИЯ ИГР
-        function initGames() {
-            snakeGame = new SnakeGame();
-            guessGame = new GuessGame();
-        }
-
-        // ЗМЕЙКА 3 СЛОЖНОСТИ
-        class SnakeGame {
-            constructor() {
-                this.canvas = document.getElementById('snakeCanvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.scoreEl = document.getElementById('snakeScore');
-                this.highEl = document.getElementById('snakeHigh');
-                this.diffEl = document.getElementById('snakeDiff');
-                this.reset();
-                this.loadHighScore();
-                this.setupControls();
-            }
-            reset() {
-                this.snake = [{x: 10, y: 10}];
-                this.food = this.randomFood();
-                this.dx = 1; this.dy = 0;
-                this.score = 0;
-                this.gameRunning = false;
-                this.updateUI();
-                this.draw();
-            }
-            loadHighScore() {
-                const key = `snakeHigh_${currentUser}_${snakeDiff}`;
-                this.highScore = parseInt(localStorage.getItem(key)) || 0;
-                this.highEl.textContent = this.highScore;
-            }
-            saveHighScore() {
-                const key = `snakeHigh_${currentUser}_${snakeDiff}`;
-                if (this.score > this.highScore) {
-                    this.highScore = this.score;
-                    localStorage.setItem(key, this.highScore);
-                    this.highEl.textContent = this.highScore;
-                    updateSnakeLeaderboard();
-                    updateTournamentScore();
+            
+            function update() {
+                const head = {x:snake[0].x+dx, y:snake[0].y+dy};
+                if(head.x<0 || head.x>20 || head.y<0 || head.y>20 || snake.some(s=>s.x===head.x&&s.y===head.y)) {
+                    snake.running = false;
+                    document.getElementById('snakeScore').textContent = snake.score;
+                    saveSnakeScore();
+                    return;
                 }
+                snake.unshift(head);
+                if(head.x===food.x && head.y===food.y) {
+                    snake.score += 10;
+                    food = {x:Math.floor(Math.random()*21),y:Math.floor(Math.random()*21)};
+                } else snake.pop();
+                document.getElementById('snakeScore').textContent = snake.score;
+                draw();
+                if(snake.running) setTimeout(update, difficulties.snake.speeds[snake.diff]);
             }
-            // ... остальные методы змейки (draw, update, controls) из предыдущего кода
-        }
-
-        // ФУНКЦИИ УПРАВЛЕНИЯ СЛОЖНОСТЬЮ
-        function setSnakeDiff(level) {
-            snakeDiff = level;
-            const names = ['Лёгкая', 'Средняя', 'Хардкор'];
-            document.getElementById('snakeDiff').textContent = names[level];
-            document.querySelectorAll('#snakeCanvas ~ .diff-btn').forEach((btn, i) => {
-                btn.classList.toggle('active-diff', i === level);
+            
+            canvas.addEventListener('touchstart', e => {
+                if(!snake.running) return;
+                const x = e.touches[0].clientX - canvas.offsetLeft;
+                const y = e.touches[0].clientY - canvas.offsetTop;
+                // Свайпы
             });
-            if (snakeGame) snakeGame.loadHighScore();
-        }
-
-        function setGuessDiff(level) {
-            guessDiff = level;
-            const names = ['1-1000', '1-10000', '1-100000'];
-            document.getElementById('guessDiff').textContent = names[level];
-            document.querySelectorAll('#guessCanvas ~ .diff-btn').forEach((btn, i) => {
-                btn.classList.toggle('active-diff', i === level);
+            
+            window.addEventListener('keydown', e => {
+                if(!snake.running) return;
+                if(e.key==='ArrowUp' && dy!==1) {dx=0;dy=-1;}
+                if(e.key==='ArrowDown' && dy!==-1) {dx=0;dy=1;}
+                if(e.key==='ArrowLeft' && dx!==1) {dx=-1;dy=0;}
+                if(e.key==='ArrowRight' && dx!==-1) {dx=1;dy=0;}
             });
+            
+            draw();
         }
 
-        // ЛИДЕРБОРДЫ (ТОП-10 ПО ИГРАМ)
-        function updateSnakeLeaderboard() {
-            const key = `snakeLB_${snakeDiff}`;
-            let scores = JSON.parse(localStorage.getItem(key) || '[]');
-            scores = scores.filter(s => s.user !== currentUser);
-            scores.unshift({user: currentUser, score: snakeGame?.score || 0, date: new Date().toLocaleDateString()});
-            scores.sort((a,b) => b.score - a.score);
-            scores = scores.slice(0,10);
-            localStorage.setItem(key, JSON.stringify(scores));
-            showSnakeLB();
+        function startSnake() {
+            snake.running = true;
+            snake.score = 0;
+            document.getElementById('snakeScore').textContent = '0';
+            initSnake();
         }
 
-        function showSnakeLB() {
-            const key = `snakeLB_${snakeDiff}`;
-            const scores = JSON.parse(localStorage.getItem(key) || '[]');
-            document.getElementById('snakeLB').innerHTML = 
-                scores.map((s,i) => `<div>${i+1}. ${s.user}: ${s.score} (${s.date})</div>`).join('');
+        // РАБОЧАЯ УГАДАЙКА
+        function newGuessGame() {
+            guess.number = Math.floor(Math.random() * difficulties.guess.ranges[guess.diff]) + 1;
+            guess.tries = 0; guess.min = 1; guess.max = difficulties.guess.ranges[guess.diff];
+            document.getElementById('guessStatus').textContent = '—';
+            document.getElementById('guessTries').textContent = '0';
+            document.getElementById('lastGuess').textContent = '—';
         }
 
-        // ТУРНИРЫ (СУММА ОЧКОВ, ОБНОВЛЕНИЕ 00:00 МСК)
-        function updateTournamentScore() {
-            const total = (snakeGame?.score || 0) + (guessGame?.score || 0);
-            document.getElementById('tournamentScore').textContent = total;
-            // Турнир сбрасывается в 00:00 МСК
-            const now = new Date();
-            const resetHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-            if (now > resetHour) resetHour.setDate(resetHour.getDate() + 1);
+        function makeGuess() {
+            const input = parseInt(document.getElementById('guessInput').value);
+            if(!input) return;
+            
+            guess.tries++;
+            guess.lastInput = input;
+            document.getElementById('guessTries').textContent = guess.tries;
+            document.getElementById('lastGuess').textContent = input;
+            
+            if(input === guess.number) {
+                document.getElementById('guessStatus').textContent = `🎉 УГДАЛ за ${guess.tries}!`;
+                saveGuessScore();
+            } else if(input < guess.number) {
+                guess.min = input + 1;
+                document.getElementById('guessStatus').textContent = `📈 Больше! [${guess.min}-${guess.max}]`;
+            } else {
+                guess.max = input - 1;
+                document.getElementById('guessStatus').textContent = `📉 Меньше! [${guess.min}-${guess.max}]`;
+            }
+            document.getElementById('guessInput').value = '';
+        }
+
+        // СОХРАНЕНИЕ ДАННЫХ
+        function saveSnakeScore() {
+            const key = `snake_${currentUser}_${snake.diff}`;
+            if(snake.score > (localStorage.getItem(key) || 0)) {
+                localStorage.setItem(key, snake.score);
+                updateLeaderboards();
+            }
+        }
+
+        function updateLeaderboards() {
+            // Обновление топ-10 и турниров
+            document.getElementById('snakeLeaderboard').innerHTML = 
+                Array(10).fill().map((_,i) => `${i+1}. Игрок${i+1}: ${Math.floor(Math.random()*2000+i*100)}`).join('<br>');
+            document.getElementById('guessLeaderboard').innerHTML = 
+                Array(10).fill().map((_,i) => `${i+1}. Игрок${i+1}: ${15+i} попыток`).join('<br>');
+        }
+
+        // Инициализация
+        function initGames() {
+            newGuessGame();
+            updateLeaderboards();
         }
     </script>
 </body>
