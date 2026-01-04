@@ -315,12 +315,11 @@
             
             document.getElementById('snakeScore').textContent = score;
 
-            // 🧹 Очищаем старые обработчики
-            const keyHandler = (e) => keys[e.key] = true;
-            const keyUpHandler = (e) => keys[e.key] = false;
-            
-            // Клавиатура
+            // ✅ ПРАВИЛЬНЫЙ ПОРЯДОК - объявляем ПЕРЕД использованием
             const keys = {};
+            const keyHandler = (e) => { keys[e.key] = true; };
+            const keyUpHandler = (e) => { keys[e.key] = false; };
+            
             window.addEventListener('keydown', keyHandler);
             window.addEventListener('keyup', keyUpHandler);
             
@@ -340,31 +339,29 @@
                 const diffY = touchStartY - touchEndY;
                 
                 if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
-                    if (diffX > 0 && dx !== 1) { dx = -1; dy = 0; } // Left
-                    else if (diffX < 0 && dx !== -1) { dx = 1; dy = 0; } // Right
+                    if (diffX > 0 && dx !== 1) { dx = -1; dy = 0; }
+                    else if (diffX < 0 && dx !== -1) { dx = 1; dy = 0; }
                 } else if (Math.abs(diffY) > 30) {
-                    if (diffY > 0 && dy !== 1) { dy = -1; dx = 0; } // Up
-                    else if (diffY < 0 && dy !== -1) { dy = 1; dx = 0; } // Down
+                    if (diffY > 0 && dy !== 1) { dy = -1; dx = 0; }
+                    else if (diffY < 0 && dy !== -1) { dy = 1; dx = 0; }
                 }
             }, {passive: false});
 
             function update() {
                 const head = {x: snake[0].x + dx, y: snake[0].y + dy};
                 
-                // Столкновения
                 if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 17 || 
                     snake.some((part, i) => i > 0 && part.x === head.x && part.y === head.y)) {
                     saveScore('snake', Math.floor(score));
                     document.getElementById('snakeScore').textContent = `💀 ${Math.floor(score)}`;
                     clearInterval(gameInterval);
                     window.removeEventListener('keydown', keyHandler);
-                                        window.removeEventListener('keyup', keyUpHandler);
+                    window.removeEventListener('keyup', keyUpHandler);
                     return;
                 }
                 
                 snake.unshift(head);
                 
-                // Еда
                 if (head.x === food.x && head.y === food.y) {
                     score += snakeDifficulty * 10;
                     document.getElementById('snakeScore').textContent = Math.floor(score);
@@ -377,7 +374,6 @@
                 ctx.fillStyle = 'rgba(3,5,10,0.95)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                // Змейка градиент
                 snake.forEach((part, i) => {
                     const gradient = ctx.createLinearGradient(part.x*grid, part.y*grid, (part.x+1)*grid, (part.y+1)*grid);
                     gradient.addColorStop(0, i === 0 ? '#00ff88' : '#00aa55');
@@ -386,7 +382,6 @@
                     ctx.fillRect(part.x*grid, part.y*grid, grid-1, grid-1);
                 });
                 
-                // Еда
                 ctx.fillStyle = '#ff4444';
                 ctx.shadowColor = '#ff0000';
                 ctx.shadowBlur = 10;
