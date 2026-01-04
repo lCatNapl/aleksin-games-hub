@@ -1,4 +1,4 @@
-# app.py — ПОЛНЫЙ ФИКС ВЫХОДА + ВСЕ БАГИ
+# 🔥 app.py — ФИНАЛЬНАЯ ВЕРСИЯ БЕЗ ПРОВЕРОК
 from flask import Flask, render_template, request, jsonify, session
 import sqlite3, hashlib, os, json
 from datetime import datetime, timedelta
@@ -13,7 +13,6 @@ DISK_PATH = os.environ.get('RENDER_DISK_PATH', './persistent')
 DB_PATH = os.path.join(DISK_PATH, 'users.db')
 os.makedirs(DISK_PATH, exist_ok=True)
 
-# 🔥 ИНИЦИАЛИЗАЦИЯ БАЗЫ
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -28,13 +27,6 @@ def init_db():
 @app.route('/')
 def index():
     return render_template('index.html')
-
-@app.route('/status')
-def status():
-    return jsonify({
-        'logged_in': 'username' in session,
-        'username': session.get('username', '')
-    })
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -75,7 +67,7 @@ def login():
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    session.clear()  # 🔥 ГАРАНТИРОВАННАЯ ОЧИСТКА СЕССИИ
+    session.clear()
     return jsonify({'success': True})
 
 @app.route('/save_score', methods=['POST'])
