@@ -120,6 +120,7 @@
             background: rgba(255,255,255,0.1); border-radius: 15px; font-weight: 600;
         }
         .rank { font-size: 1.5em; font-weight: 900; color: #ffd700; min-width: 40px; }
+        .rank.gold { color: #ffd700; text-shadow: 0 0 10px #ffd700; }
         .empty-top { text-align: center; padding: 40px; color: #00ff88; }
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -205,11 +206,11 @@
                 <div class="game-icon" style="color: #ff4757;">⚔️</div>
                 <div class="game-title">Турнир 24ч</div>
                 <div class="features">
-                    <span class="feature">⚔️ Битва</span><span class="feature">⏰ 20/24ч</span>
-                    <span class="feature">💎 Призы</span>
+                    <span class="feature">⚔️ Битва</span><span class="feature">⏰ 24ч</span>
+                    <span class="feature">💎 Топ-5 призы</span>
                 </div>
                 <div id="tournamentStatus" class="status status-live">⚔️ АКТИВЕН!</div>
-                <button class="btn btn-game" onclick="joinTournament()">УЧАСТВОВАТЬ ⚔️</button>
+                <button class="btn btn-game" onclick="joinTournament()">ТОП-100 ⚔️</button>
             </div>
         </div>
     </div>
@@ -241,7 +242,7 @@
 
     <script>
         let currentGameSecret = 0;
-        let gameCanvas = null;
+        let tournamentActive = true;
 
         window.onload = () => checkAuth();
 
@@ -254,14 +255,37 @@
                 document.getElementById('gamesSection').style.display = 'block';
                 document.getElementById('userInfo').style.display = 'flex';
                 document.getElementById('userName').textContent = name || 'Игрок';
-                showEmptyLeaderboard();
-                loadTournamentStatus();
+                loadLeaderboard();
+                updateTournament();
             } else {
                 document.getElementById('authSection').style.display = 'block';
                 document.getElementById('gamesSection').style.display = 'none';
                 document.getElementById('userInfo').style.display = 'none';
                 document.getElementById('loginPrompt').style.display = 'block';
             }
+        }
+
+        // 🔥 ТОП-10 ЛИДЕРБОРД
+        function loadLeaderboard() {
+            const scores = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+            const list = document.getElementById('topPlayersList');
+            
+            if (scores.length === 0) {
+                showEmptyLeaderboard();
+                return;
+            }
+            
+            list.innerHTML = '';
+            scores.slice(0, 10).forEach((player, i) => {
+                const li = document.createElement('li');
+                li.className = 'top-item';
+                li.innerHTML = `
+                    <span class="rank ${i < 3 ? 'gold' : ''}">${i+1}🏆</span>
+                    <span style="flex: 1; font-size: 1.2em;">${player.name}</span>
+                    <span style="color: #ffd700; font-weight: 900;">${player.score.toLocaleString()}🔥</span>
+                `;
+                list.appendChild(li);
+            });
         }
 
         function showEmptyLeaderboard() {
@@ -274,8 +298,74 @@
             `;
         }
 
-        function loadTournamentStatus() {
-            document.getElementById('tournamentStatus').textContent = '⚔️ АКТИВЕН! 20/24ч';
+        // 🔥 ТУРНИР С ТОПОМ-100
+        function updateTournament() {
+            const now = Date.now();
+            const endTime = parseInt(localStorage.getItem('tournamentEnd')) || now + 24*60*60*1000;
+            
+            if (now > endTime) {
+                tournamentActive = false;
+                document.getElementById('tournamentStatus').innerHTML = 
+                    '<span style="color: #ffd700;">🏆 ТУРНИР ОКОНЧЕН!</span><br>Топ-5 получили призы!';
+                return;
+            }
+            
+            const leftHours = Math.max(0, Math.floor((endTime - now) / (1000*60*60)));
+            document.getElementById('tournamentStatus').innerHTML = 
+                `⚔️ АКТИВЕН! ${24-leftHours}ч осталось`;
+        }
+
+        function showTournamentTop() {
+            const tournament = JSON.parse(localStorage.getItem('tournament') || '{}');
+            const players = Object.entries(tournament).map(([name, score]) => ({name, score: parseInt(score)}));
+            
+            if (players.length === 0) {
+                alert('⚔️ Турнир пуст! Стань первым участником!');
+                return;
+            }
+            
+            players.sort((a, b) => b.score - a.score);
+            let topHTML = '🏆 ТОП-100 ТУРНИРА АЛЕКСИН ГЕЙМС\n\n';
+            
+            players.slice(0, 100).forEach((player, i) => {
+                const prize = i < 5 ? ['🥇1️⃣', '🥈2️⃣', '🥉3️⃣', '🎁4️⃣', '🎁5️⃣'][i] : `${i+1}.`;
+                topHTML += `${prize} ${player.name}: ${player.score.toLocaleString()} очков\n`;
+            });
+            
+            topHTML += `\n💎 ПРИЗЫ ПОЛУЧИЛИ ТОП-5!`;
+            alert(topHTML);
+        }
+
+        // 🔥 СОХРАНЕНИЕ РЕКОРДОВ
+        function saveScore(gameType, score) {
+            const user = localStorage.getItem('userName');
+            
+            // ГЛАВНЫЙ ЛИДЕРБОРД (ТОП-10)
+            const scores = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+            const existing = scores.find(p => p.name === user);
+            const points = gameType === 'snake' ? score * 2 : score * 1.5;
+            
+            if (existing) {
+                existing.score = Math.max(existing.score, points);
+            } else {
+                scores.push({name: user, score: points});
+            }
+            
+            scores.sort((a, b) => b.score - a.score);
+            localStorage.setItem('leaderboard', JSON.stringify(scores.slice(0, 50)));
+            
+            // ТУРНИР (ТОП-100)
+            if (tournamentActive) {
+                const tournament = JSON.parse(localStorage.getItem('tournament') || '{}');
+                tournament[user] = (tournament[user] || 0) + points;
+                localStorage.setItem('tournament', JSON.stringify(tournament));
+                localStorage.setItem('tournamentEnd', Date.now() + 24*60*60*1000);
+            }
+            
+            alert(`✅ ${user} +${Math.round(points)} очков!\n🎮 Обнови страницу → проверь топ!`);
+            closeGame();
+            loadLeaderboard();
+            updateTournament();
         }
 
         // АВТОРИЗАЦИЯ
@@ -314,7 +404,7 @@
 
         function logout() { localStorage.clear(); checkAuth(); }
 
-        // ✅ ЗМЕЙКА - ПОЛНАЯ ИГРА!
+        // ЗМЕЙКА
         function launchSnake() {
             const token = localStorage.getItem('userToken');
             if (!token) { alert('🔐 Войдите!'); showLogin(); return; }
@@ -345,7 +435,6 @@
             `;
             document.body.appendChild(gameBoard);
             
-            // ЛОГИКА ЗМЕЙКИ
             const canvas = document.getElementById('snakeCanvas');
             const ctx = canvas.getContext('2d');
             const grid = 20;
@@ -355,11 +444,11 @@
             let score = 0;
             
             document.getElementById('snakeScore').textContent = score;
+            document.getElementById('highScore').textContent = localStorage.getItem('snakeHighScore') || 0;
             
             function gameLoop() {
                 const head = {x: snake[0].x + dx, y: snake[0].y + dy};
                 
-                // ТЕЛЕПОРТ ЧЕРЕЗ СТЕНЫ
                 if (head.x < 0) head.x = canvas.width / grid - 1;
                 if (head.x >= canvas.width / grid) head.x = 0;
                 if (head.y < 0) head.y = canvas.height / grid - 1;
@@ -370,6 +459,7 @@
                 if (head.x === food.x && head.y === food.y) {
                     score += 100;
                     document.getElementById('snakeScore').textContent = score;
+                    localStorage.setItem('snakeHighScore', Math.max(parseInt(localStorage.getItem('snakeHighScore') || 0), score));
                     food = {
                         x: Math.floor(Math.random() * (canvas.width / grid)),
                         y: Math.floor(Math.random() * (canvas.height / grid))
@@ -378,7 +468,6 @@
                     snake.pop();
                 }
                 
-                // ОТРИСОВКА
                 ctx.fillStyle = '#000';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
@@ -403,13 +492,12 @@
             gameLoop();
         }
 
-        // ✅ УГАДАЙ ЧИСЛО
+        // УГАДАЙ ЧИСЛО
         function launchGuess() {
             const token = localStorage.getItem('userToken');
             if (!token) { alert('🔐 Войдите!'); showLogin(); return; }
             
             currentGameSecret = Math.floor(Math.random() * 10000) + 1;
-            let attempts = 0;
             
             closeGame();
             const gameBoard = document.createElement('div');
@@ -447,9 +535,10 @@
             attemptsEl.textContent = attempts;
             
             if (guess === currentGameSecret) {
+                const score = 10000 - attempts * 10;
                 document.getElementById('feedback').innerHTML = `
                     <div style="color: #00ff88; font-size: 2.5em;">🎉 ПОБЕДА! ${attempts} попыток!</div>
-                    <button onclick="saveScore('guess', ${attempts})" style="margin-top: 20px; padding: 15px 30px; background: #ffd700; color: black; border: none; border-radius: 15px; cursor: pointer; font-weight: bold;">💾 СОХРАНИТЬ РЕКОРД</button>
+                    <button onclick="saveScore('guess', ${score})" style="margin-top: 20px; padding: 15px 30px; background: #ffd700; color: black; border: none; border-radius: 15px; cursor: pointer; font-weight: bold;">💾 СОХРАНИТЬ РЕКОРД</button>
                 `;
             } else if (guess < currentGameSecret) {
                 document.getElementById('feedback').innerHTML = '<div style="color: #00ff88; font-size: 2em;">🔥 СЛИШКОМ МАЛО! Бери БОЛЬШЕ!</div>';
@@ -461,14 +550,14 @@
             document.getElementById('guessInput').focus();
         }
 
-                function joinTournament() {
+        function joinTournament() {
             const token = localStorage.getItem('userToken');
             if (!token) { 
                 alert('🔐 Войдите для турнира!'); 
                 showLogin(); 
                 return; 
             }
-            alert(`⚔️ ${localStorage.getItem('userName')} вступил в турнир 24ч!\n\n🎮 Играй в Змейку/Угадай → набирай очки → побеждай в Алексина! 🏆`);
+            showTournamentTop();
         }
 
         function closeGame() {
@@ -478,20 +567,10 @@
             if (guessGame) guessGame.remove();
         }
 
-        function saveScore(gameType, score) {
-            // Имитация сохранения в БД (работает с Flask API)
-            console.log(`💾 Сохранен рекорд: ${localStorage.getItem('userName')} - ${gameType} - ${score}`);
-            alert('✅ Рекорд сохранен в базу данных!\nОбнови страницу для проверки топа!');
-            closeGame();
-            showEmptyLeaderboard(); // Пока БД пустая
-        }
-
-        // Закрытие модалок по клику вне области
         window.onclick = (e) => {
             if (e.target.classList.contains('modal')) closeModal();
         };
 
-        // Блокировка F5/обновления во время игры
         window.onbeforeunload = () => {
             const gameActive = document.getElementById('snakeGame') || document.getElementById('guessGame');
             if (gameActive) return 'Игра в процессе! Ты точно хочешь выйти?';
