@@ -1,4 +1,4 @@
-# 🔥 app.py — ФИНАЛЬНАЯ ВЕРСИЯ БЕЗ ПРОВЕРОК
+# 🔥 app.py — ФИНАЛЬНАЯ ВЕРСИЯ (БЕЗ ОШИБОК SQLite)
 from flask import Flask, render_template, request, jsonify, session
 import sqlite3, hashlib, os, json
 from datetime import datetime, timedelta
@@ -20,7 +20,7 @@ def init_db():
                  (username TEXT PRIMARY KEY, password TEXT, total_score INTEGER DEFAULT 0)''')
     c.execute('''CREATE TABLE IF NOT EXISTS scores 
                  (id INTEGER PRIMARY KEY, username TEXT, game TEXT, score INTEGER, 
-                  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+                  timestamp TEXT DEFAULT (datetime('now')))''')  # 🔥 ФИКС SQLite 3.12
     conn.commit()
     conn.close()
 
@@ -93,7 +93,8 @@ def save_score():
 def leaderboard():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("""SELECT username, SUM(score) as total FROM scores 
+    c.execute("""SELECT username, COALESCE(SUM(score), 0) as total FROM users 
+                 LEFT JOIN scores ON users.username = scores.username 
                  GROUP BY username ORDER BY total DESC LIMIT 10""")
     top = [{'username': row[0], 'score': row[1]} for row in c.fetchall()]
     conn.close()
@@ -103,10 +104,11 @@ def leaderboard():
 def tournament():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    cutoff = datetime.now() - timedelta(hours=24)
-    c.execute("""SELECT username, SUM(score) as score FROM scores 
-                 WHERE timestamp > ? GROUP BY username 
-                 ORDER BY score DESC LIMIT 10""", (cutoff,))
+    cutoff = (datetime.now() - timedelta(hours=24)).strftime('%Y-%m-%d %H:%M:%S')
+    c.execute("""SELECT username, COALESCE(SUM(score), 0) as score FROM users 
+                 LEFT JOIN scores ON users.username = scores.username 
+                 WHERE scores.timestamp > ? OR scores.timestamp IS NULL
+                 GROUP BY username ORDER BY score DESC LIMIT 10""", (cutoff,))
     daily = [{'username': row[0], 'score': row[1]} for row in c.fetchall()]
     conn.close()
     return jsonify(daily)
