@@ -7,402 +7,350 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: linear-gradient(-45deg, #0a0a23, #1a0033, #000428, #000000);
-            background-size: 400% 400%;
-            animation: gradientShift 8s ease infinite;
-            font-family: 'Arial Black', sans-serif;
-            color: #00ff88;
-            min-height: 100vh;
-            overflow-x: hidden;
+            background: radial-gradient(ellipse at center, #0a0a23 0%, #000428 50%, #000000 100%);
+            font-family: 'Arial Black', sans-serif; color: #00ff88; min-height: 100vh;
+            overflow-x: hidden; position: relative;
         }
-        @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
-        
         .stars {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: radial-gradient(1px 1px at 20px 30px, #fff, transparent),
-                              radial-gradient(1px 1px at 40px 70px, #00ff88, transparent),
+            background-image: radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+                              radial-gradient(2px 2px at 40px 70px, #00ff88, transparent),
                               radial-gradient(1px 1px at 90px 40px, #ff0080, transparent);
-            background-repeat: repeat;
-            background-size: 100px 100px;
-            animation: sparkle 3s linear infinite;
-            z-index: -1;
+            background-repeat: repeat; background-size: 100px 100px;
+            animation: twinkle 4s ease-in-out infinite alternate; z-index: -1;
         }
-        @keyframes sparkle { 0%{transform:translateY(0px) rotate(0deg); opacity:1} 100%{transform:translateY(-20px) rotate(360deg); opacity:0.8} }
+        @keyframes twinkle { 0%,100%{opacity:0.7} 50%{opacity:1} }
         
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
         .panel { 
-            background: rgba(0,0,0,0.8); 
-            border: 2px solid #00ff88; 
-            border-radius: 20px; 
-            padding: 30px; 
-            margin: 20px 0; 
-            box-shadow: 0 0 30px rgba(0,255,136,0.3);
+            background: rgba(0,0,0,0.85); border: 2px solid #00ff88; 
+            border-radius: 25px; padding: 30px; margin: 20px 0; 
+            box-shadow: 0 0 40px rgba(0,255,136,0.4);
         }
         .hidden { display: none !important; }
         
-        .user-panel {
-            position: fixed; top: 20px; right: 20px;
-            background: rgba(0,0,0,0.9); border: 2px solid #ff0080;
-            padding: 15px 25px; border-radius: 30px;
-            font-size: 18px; font-weight: bold; z-index: 1000;
-        }
+        .user-panel { position: fixed; top: 20px; right: 20px; background: rgba(0,0,0,0.95); 
+            border: 3px solid #ff0080; padding: 20px 30px; border-radius: 40px; 
+            font-size: 20px; font-weight: bold; z-index: 1000; }
         
-        h1 { 
-            font-size: 2.5em; text-align: center; margin-bottom: 25px;
-            background: linear-gradient(45deg, #00ff88, #ff0080, #0080ff);
+        h1 { font-size: 2.8em; text-align: center; margin-bottom: 30px;
+            background: linear-gradient(45deg, #00ff88, #ff0080, #0080ff, #ffaa00);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 20px rgba(0,255,136,0.5);
-        }
+            animation: glow 2s ease-in-out infinite alternate; }
+        @keyframes glow { 0%{text-shadow:0 0 10px #00ff88} 100%{text-shadow:0 0 30px #00ff88} }
         
-        input {
-            width: 100%; padding: 20px; margin: 15px 0;
-            border: 3px solid #00ff88; border-radius: 15px;
-            background: rgba(0,0,0,0.9); color: #00ff88;
-            font-size: 18px; font-weight: bold;
-        }
-        input:focus { outline: none; box-shadow: 0 0 20px #00ff88; }
+        input { width: 100%; padding: 22px; margin: 15px 0; border: 3px solid #00ff88; 
+            border-radius: 20px; background: rgba(0,0,0,0.9); color: #00ff88; 
+            font-size: 20px; font-weight: bold; }
+        button { width: 100%; padding: 22px; margin: 12px 0; background: linear-gradient(45deg, #00ff88, #0080ff); 
+            border: none; border-radius: 20px; color: #000; font-size: 22px; font-weight: bold; 
+            cursor: pointer; transition: all 0.3s; }
+        button:hover { transform: scale(1.05); box-shadow: 0 15px 40px rgba(0,255,136,0.7); }
         
-        button {
-            width: 100%; padding: 20px; margin: 10px 0;
-            background: linear-gradient(45deg, #00ff88, #0080ff);
-            border: none; border-radius: 15px;
-            color: #000; font-size: 20px; font-weight: bold;
-            cursor: pointer; transition: all 0.3s;
-        }
-        button:hover {
-            transform: scale(1.05); box-shadow: 0 10px 30px rgba(0,255,136,0.6);
-        }
+        .game-btn { display: block; padding: 30px; margin: 20px 0; background: linear-gradient(45deg, #ff0080, #00ff88, #0080ff); 
+            color: white; text-decoration: none; text-align: center; font-size: 26px; 
+            font-weight: bold; border-radius: 25px; }
+        .game-btn:hover { transform: scale(1.03); box-shadow: 0 20px 50px rgba(255,0,128,0.8); }
         
-        .game-btn {
-            display: block; padding: 25px; margin: 15px 0;
-            background: linear-gradient(45deg, #ff0080, #00ff88);
-            color: white; text-decoration: none; text-align: center;
-            font-size: 24px; font-weight: bold; border-radius: 20px;
-        }
-        .game-btn:hover { transform: scale(1.03); box-shadow: 0 15px 40px rgba(255,0,128,0.7); }
+        .diff-btn { display: inline-block; width: 30%; margin: 1.5%; padding: 20px; 
+            background: linear-gradient(45deg, #ff6600, #ffaa00); font-size: 20px; }
         
-        canvas {
-            border: 4px solid #00ff88; border-radius: 20px;
-            background: #000; display: block; margin: 20px auto;
-            box-shadow: 0 0 40px rgba(0,255,136,0.5);
-        }
+        canvas { border: 5px solid #00ff88; border-radius: 25px; background: #000; 
+            display: block; margin: 25px auto; box-shadow: 0 0 50px rgba(0,255,136,0.6); }
         
-        .leaderboard {
-            max-height: 300px; overflow-y: auto; margin-top: 20px;
-        }
-        .leaderboard div {
-            padding: 15px; margin: 5px 0; background: rgba(0,255,136,0.1);
-            border-left: 5px solid #00ff88; border-radius: 10px;
-            display: flex; justify-content: space-between;
-        }
-        .rank1 { border-left-color: gold !important; background: rgba(255,215,0,0.2) !important; }
-        .rank2 { border-left-color: silver !important; background: rgba(192,192,192,0.2) !important; }
-        .rank3 { border-left-color: #cd7f32 !important; background: rgba(205,127,50,0.2) !important; }
+        .leaderboard { max-height: 350px; overflow-y: auto; margin: 20px 0; }
+        .leaderboard div { padding: 18px 20px; margin: 8px 0; background: rgba(0,255,136,0.15); 
+            border-left: 6px solid #00ff88; border-radius: 15px; display: flex; 
+            justify-content: space-between; font-weight: bold; font-size: 18px; }
+        .rank1 { border-left-color: #ffd700 !important; background: rgba(255,215,0,0.3) !important; }
+        .rank2 { border-left-color: #c0c0c0 !important; background: rgba(192,192,192,0.3) !important; }
+        .rank3 { border-left-color: #cd7f32 !important; background: rgba(205,127,50,0.3) !important; }
         
-        .timer { font-size: 28px; color: #ffaa00; text-align: center; margin: 20px 0; font-weight: bold; }
-        .score { font-size: 24px; text-align: center; color: #ffaa00; margin: 15px 0; }
+        .timer { font-size: 32px; color: #ffaa00; text-align: center; margin: 25px 0; 
+            font-weight: bold; font-family: 'Courier New', monospace; }
+        .score { font-size: 28px; text-align: center; color: #ffaa00; margin: 20px 0; font-weight: bold; }
+        .feedback { font-size: 24px; text-align: center; margin: 20px 0; min-height: 40px; }
     </style>
 </head>
 <body>
     <div class="stars"></div>
     
-    <!-- ПРОФИЛЬ -->
     <div class="user-panel hidden" id="userPanel">
         👑 <span id="currentNick"></span> | 
-        <button onclick="logout()" style="width:auto; padding:10px 20px; margin-left:10px; font-size:16px;">🚪 Выход</button>
+        <button onclick="logout()" style="width:auto;padding:12px 24px;font-size:18px;">🚪 ВЫХОД</button>
     </div>
     
     <div class="container">
         <!-- ЛОГИН -->
         <div class="panel" id="loginPanel">
             <h1>🌌 ALEKSIN GAMES HUB</h1>
-            <input type="text" id="username" placeholder="👤 Твой ник">
+            <input type="text" id="username" placeholder="👤 Введи ник" maxlength="12">
             <input type="password" id="password" placeholder="🔐 Пароль">
             <button onclick="login()">✅ ВОЙТИ</button>
-            <button onclick="register()">⭐ РЕГИСТРАЦИЯ</button>
+            <button onclick="registerNew()">⭐ СОЗДАТЬ АККАУНТ</button>
         </div>
         
         <!-- ГЛАВНОЕ МЕНЮ -->
         <div class="panel hidden" id="mainMenu">
             <h1>🎮 ВЫБЕРИ ИГРУ</h1>
-            <a href="#" class="game-btn" onclick="startSnakeGame();return false;">🐍 ЗМЕЙКА (3 сложности)</a>
-            <a href="#" class="game-btn" onclick="startGuessGame();return false;">🎯 УГАДАЙ ЧИСЛО (1-100000)</a>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:30px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:25px; margin:30px 0;">
                 <div class="panel">
-                    <h1>🏆 ТОП ЗМЕЙКА</h1>
-                    <div class="leaderboard" id="snakeTop10"></div>
+                    <h1>🐍 ЗМЕЙКА</h1>
+                    <a href="#" class="game-btn" onclick="showSnakeDifficulty();return false;">▶️ ИГРАТЬ (3 сложности)</a>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:20px;">
+                        <div class="leaderboard" id="snakeTop10" style="max-height:200px;"></div>
+                    </div>
                 </div>
                 <div class="panel">
-                    <h1>🎯 ТОП УГАДАЙКА</h1>
-                    <div class="leaderboard" id="guessTop10"></div>
+                    <h1>🎯 УГАДАЙКА</h1>
+                    <a href="#" class="game-btn" onclick="showGuessDifficulty();return false;">▶️ ИГРАТЬ (1-100000)</a>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-top:20px;">
+                        <div class="leaderboard" id="guessTop10" style="max-height:200px;"></div>
+                    </div>
                 </div>
             </div>
+            <a href="#" class="game-btn" onclick="showTournaments();return false;" style="background:linear-gradient(45deg,#ff0080,#ff6600); font-size:28px;">⚔️ ТУРНИРЫ</a>
+        </div>
+        
+        <!-- СЛОЖНОСТИ ЗМЕЙКИ -->
+        <div class="panel hidden" id="snakeDifficulty">
+            <h1>🐍 ВЫБЕРИ СЛОЖНОСТЬ</h1>
+            <button class="diff-btn" onclick="startSnake(1)">🐌 ЛЕГКО (медленно)</button>
+            <button class="diff-btn" onclick="startSnake(2)">🐍 НОРМАЛЬНО</button>
+            <button class="diff-btn" onclick="startSnake(3)">⚡ СЛОЖНО (быстро)</button>
+            <button class="game-btn" onclick="joinSnakeTournament()" style="margin-top:25px;">⚔️ ТУРНИР ЗМЕЙКА</button>
+            <button onclick="backToMain()" style="background:linear-gradient(45deg,#ff6600,#ffaa00);">🔙 ГЛАВНОЕ МЕНЮ</button>
+        </div>
+        
+        <!-- СЛОЖНОСТИ УГАДАЙКИ -->
+        <div class="panel hidden" id="guessDifficulty">
+            <h1>🎯 ВЫБЕРИ УРОВЕНЬ</h1>
+            <button class="diff-btn" onclick="startGuess(1)">1️⃣ 1-1 000</button>
+            <button class="diff-btn" onclick="startGuess(2)">2️⃣ 1-10 000</button>
+            <button class="diff-btn" onclick="startGuess(3)">3️⃣ 1-100 000</button>
+            <button class="game-btn" onclick="joinGuessTournament()" style="margin-top:25px;">⚔️ ТУРНИР УГАДАЙКА</button>
+            <button onclick="backToMain()" style="background:linear-gradient(45deg,#ff6600,#ffaa00);">🔙 ГЛАВНОЕ МЕНЮ</button>
         </div>
         
         <!-- ЗМЕЙКА -->
-        <div class="panel hidden" id="snakePanel">
-            <h1>🐍 ЗМЕЙКА PRO</h1>
-            <canvas id="snakeCanvas" width="500" height="500"></canvas>
-            <div class="score">Очки: <span id="snakeScore">0</span> | Рекорд: <span id="snakeRecord">0</span></div>
+        <div class="panel hidden" id="snakeGame">
+            <h1>🐍 ЗМЕЙКА</h1>
+            <canvas id="snakeCanvas" width="600" height="600"></canvas>
+            <div class="score">Очки: <span id="snakeScore">0</span> | Рекорд: <span id="snakeRecord">0</span> | Сложность: <span id="snakeDiff">1</span></div>
             <button onclick="restartSnake()">🔄 НОВАЯ ИГРА</button>
-            <button onclick="backToMenu()">🏠 МЕНЮ</button>
+            <button onclick="backToMain()" style="background:linear-gradient(45deg,#ff6600,#ffaa00);">🏠 МЕНЮ</button>
         </div>
         
         <!-- УГАДАЙКА -->
-        <div class="panel hidden" id="guessPanel">
+        <div class="panel hidden" id="guessGame">
             <h1>🎯 УГАДАЙ ЧИСЛО</h1>
-            <div class="score">Уровень: <span id="guessLevel">1</span> | Попыток: <span id="guessAttempts">0</span></div>
-            <input type="number" id="guessInput" placeholder="Введи число">
-            <div id="guessFeedback"></div>
-            <button onclick="makeGuess()">🎯 УГАДАТЬ</button>
-            <button onclick="newGuessLevel()">🔄 НОВЫЙ УРОВЕНЬ</button>
-            <button onclick="backToMenu()">🏠 МЕНЮ</button>
+            <div class="score">Уровень: <span id="guessLevel">1</span> (1-<span id="guessMax">1000</span>) | Лучший: <span id="guessBest">∞</span></div>
+            <div class="feedback" id="guessFeedback"></div>
+            <input type="number" id="guessInput" placeholder="🎯 Введи число">
+            <button onclick="checkGuess()">✅ ПРОВЕРИТЬ</button>
+            <button onclick="nextGuessLevel()">🔄 СЛЕДУЮЩИЙ УРОВЕНЬ</button>
+            <button onclick="backToMain()" style="background:linear-gradient(45deg,#ff6600,#ffaa00);">🏠 МЕНЮ</button>
         </div>
         
         <!-- ТУРНИРЫ -->
-        <div class="panel hidden" id="tournamentsPanel">
-            <h1>⚔️ ТУРНИРЫ</h1>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-                <div>
-                    <h1>🐍 Турнир Змейка</h1>
-                    <div class="timer" id="snakeTournamentTimer">00:00:00</div>
-                    <div class="leaderboard" id="snakeTournamentBoard"></div>
-                    <button onclick="joinSnakeTournament()">⚔️ ВСТУПИТЬ</button>
+        <div class="panel hidden" id="tournaments">
+            <h1>⚔️ ТУРНИРЫ (призы ТОП-3!)</h1>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
+                <div class="panel">
+                    <h1>🐍 ЗМЕЙКА</h1>
+                    <div class="timer" id="snakeTimer">--:--:--</div>
+                    <div class="leaderboard" id="snakeTourBoard"></div>
+                    <button class="game-btn" onclick="joinSnakeTournament()">⚔️ ВСТУПИТЬ</button>
                 </div>
-                <div>
-                    <h1>🎯 Турнир Угадайка</h1>
-                    <div class="timer" id="guessTournamentTimer">00:00:00</div>
-                    <div class="leaderboard" id="guessTournamentBoard"></div>
-                    <button onclick="joinGuessTournament()">⚔️ ВСТУПИТЬ</button>
+                <div class="panel">
+                    <h1>🎯 УГАДАЙКА</h1>
+                    <div class="timer" id="guessTimer">--:--:--</div>
+                    <div class="leaderboard" id="guessTourBoard"></div>
+                    <button class="game-btn" onclick="joinGuessTournament()">⚔️ ВСТУПИТЬ</button>
                 </div>
             </div>
-            <button onclick="backToMenu()" style="margin-top:30px;">🏠 МЕНЮ</button>
+            <button onclick="backToMain()" style="margin-top:30px; font-size:24px;">🏠 ГЛАВНОЕ МЕНЮ</button>
         </div>
     </div>
 
     <script>
-        // Глобальные переменные
-        let currentUser = '';
-        let snake = {x:250, y:250, dx:20, dy:0, cells:[], maxCells:4, score:0};
-        let guess = {level:1, target:0, attempts:0, min:1, max:1000};
-        let gameRunning = false;
-        
-        // Сохранение данных
-        function saveData(key, data) {
-            localStorage.setItem(key, JSON.stringify(data));
-        }
-        function loadData(key) {
-            try { return JSON.parse(localStorage.getItem(key)) || {}; } catch { return {}; }
-        }
+        let currentUser = '', snake = {}, guess = {}, gameState = {};
+        const storage = {
+            get(k) { try { return JSON.parse(localStorage.getItem(k)||'null'); } catch { return null; } },
+            set(k,v) { localStorage.setItem(k, JSON.stringify(v)); }
+        };
         
         // АВТОРИЗАЦИЯ
-        function register() {
+        function registerNew() {
             const nick = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value;
-            if(nick.length < 3 || pass.length < 3) return alert('Ник и пароль минимум 3 символа!');
-            
-            const users = loadData('users');
-            if(users[nick]) return alert('Ник уже занят!');
-            
-            users[nick] = {password: btoa(pass), snakeScore:0, guessScore:0};
-            saveData('users', users);
-            alert('Аккаунт создан!');
+            if(nick.length<3||pass.length<3) return alert('❌ Ник/пароль минимум 3 символа!');
+            let users = storage.get('users') || {};
+            if(users[nick]) return alert('❌ Ник занят!');
+            users[nick] = {pass:btoa(pass), snake:0, guess:999, snakeTour:0, guessTour:999};
+            storage.set('users', users); alert('✅ Аккаунт создан!');
         }
         
         function login() {
             const nick = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value;
-            const users = loadData('users');
-            
-            if(users[nick] && users[nick].password === btoa(pass)) {
+            let users = storage.get('users') || {};
+            if(users[nick]?.pass === btoa(pass)) {
                 currentUser = nick;
-                document.getElementById('currentNick').textContent = nick;
                 document.getElementById('loginPanel').classList.add('hidden');
                 document.getElementById('mainMenu').classList.remove('hidden');
                 document.getElementById('userPanel').classList.remove('hidden');
-                document.getElementById('tournamentsPanel').classList.remove('hidden');
-                updateAllLeaderboards();
-                updateTimers();
-            } else {
-                alert('Неверный логин или пароль!');
-            }
+                document.getElementById('currentNick').textContent = nick;
+                updateAll();
+            } else alert('❌ Неверный логин/пароль!');
         }
         
         function logout() {
-            currentUser = '';
-            document.getElementById('loginPanel').classList.remove('hidden');
-            document.getElementById('mainMenu').classList.add('hidden');
-            document.getElementById('userPanel').classList.add('hidden');
-            document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
+            currentUser = ''; document.getElementById('loginPanel').classList.remove('hidden');
+            document.querySelectorAll('.panel:not(#loginPanel)').forEach(p=>p.classList.add('hidden'));
         }
         
-        // НАВИГАЦИЯ
-        function backToMenu() {
-            document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+        function backToMain() {
+            document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden'));
             document.getElementById('mainMenu').classList.remove('hidden');
-            document.getElementById('tournamentsPanel').classList.remove('hidden');
+            updateLeaderboards();
         }
         
-        function startSnakeGame() {
-            document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
-            document.getElementById('snakePanel').classList.remove('hidden');
-            restartSnake();
+        // ЗМЕЙКА 3 СЛОЖНОСТИ
+        function startSnake(level) {
+            snake = {x:300,y:300,dx:20,dy:0,cells:[],maxCells:3,score:0,level:level};
+            document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden'));
+            document.getElementById('snakeGame').classList.remove('hidden');
+            document.getElementById('snakeDiff').textContent = level;
+            snakeLoop();
         }
         
-        function startGuessGame() {
-            document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
-            document.getElementById('guessPanel').classList.remove('hidden');
-            newGuessLevel();
-        }
-        
-        // ЗМЕЙКА
-        function restartSnake() {
+        function snakeLoop() {
+            if(!snake.running) return;
             const canvas = document.getElementById('snakeCanvas');
             const ctx = canvas.getContext('2d');
-            snake = {x:250, y:250, dx:20, dy:0, cells:[], maxCells:4, score:0};
-            gameRunning = true;
-            snakeLoop(ctx);
-        }
-        
-        function snakeLoop(ctx) {
-            if(!gameRunning) return;
             
-            ctx.clearRect(0,0,500,500);
+            ctx.fillStyle = '#000'; ctx.fillRect(0,0,600,600);
             
-            snake.x += snake.dx;
-            snake.y += snake.dy;
+            // Движение
+            snake.x += snake.dx; snake.y += snake.dy;
+            snake.cells.unshift({x:snake.x,y:snake.y});
+            if(snake.cells.length>snake.maxCells) snake.cells.pop();
             
-            snake.cells.unshift({x:snake.x, y:snake.y});
-            if(snake.cells.length > snake.maxCells) snake.cells.pop();
-            
-            ctx.fillStyle = 'lime';
-            snake.cells.forEach((cell, i) => {
-                ctx.beginPath();
-                ctx.arc(cell.x, cell.y, i===0 ? 12 : 8, 0, Math.PI*2);
-                ctx.fill();
+            // Красивая змейка
+            snake.cells.forEach((cell,i)=>{
+                const gradient = ctx.createRadialGradient(cell.x,cell.y,0,cell.x,cell.y,15);
+                gradient.addColorStop(0, i===0 ? '#ff0080' : '#00ff88');
+                gradient.addColorStop(1, 'transparent');
+                ctx.fillStyle = gradient;
+                ctx.beginPath(); ctx.arc(cell.x,cell.y, i===0?15:10,0,Math.PI*2); ctx.fill();
             });
             
-            if(Math.random() < 0.1) {
-                snake.score += 10;
-                snake.maxCells += 1;
+            // КРАСИВЫЕ ЯБЛОКИ
+            if(!snake.food) {
+                snake.food = {x:Math.floor(Math.random()*28)*20+50, y:Math.floor(Math.random()*28)*20+50};
+            }
+            const appleGradient = ctx.createRadialGradient(snake.food.x,snake.food.y,0,snake.food.x,snake.food.y,12);
+            appleGradient.addColorStop(0,'#ff4444'); appleGradient.addColorStop(0.7,'#ffaa00'); appleGradient.addColorStop(1,'#cc0000');
+            ctx.fillStyle = appleGradient; ctx.beginPath(); ctx.arc(snake.food.x,snake.food.y,12,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(snake.food.x-4,snake.food.y-4,2,0,Math.PI*2); ctx.arc(snake.food.x+4,snake.food.y-3,2,0,Math.PI*2); ctx.fill();
+            
+            // Съедание
+            if(Math.abs(snake.x-snake.food.x)<15 && Math.abs(snake.y-snake.food.y)<15) {
+                snake.score += snake.level*10; snake.maxCells += 2; delete snake.food;
             }
             
             document.getElementById('snakeScore').textContent = snake.score;
             
-            if(snake.cells.length > 5 && snake.cells.slice(2).some(cell => 
-                cell.x === snake.cells[0].x && cell.y === snake.cells[0].y)) {
-                gameOverSnake();
+            // Коллизия
+            if(snake.cells.slice(2).some(cell=>Math.abs(cell.x-snake.x)<20 && Math.abs(cell.y-snake.y)<20) || 
+               snake.x<10 || snake.x>590 || snake.y<10 || snake.y>590) {
+                endSnake();
                 return;
             }
             
-            setTimeout(() => snakeLoop(ctx), 100);
+            setTimeout(snakeLoop, 200-snake.level*60);
         }
         
-        function gameOverSnake() {
-            gameRunning = false;
-            const users = loadData('users');
-            if(users[currentUser].snakeScore < snake.score) {
-                users[currentUser].snakeScore = snake.score;
-                saveData('users', users);
-            }
-            saveData('snakeTop10', users);
-            updateSnakeLeaderboard();
-            alert(`Игра окончена! ${snake.score} очков`);
+        // УГАДАЙКА С ПОДСКАЗКАМИ
+        function startGuess(level) {
+            const levels = [[1000,1],[10000,1],[100000,1]];
+            guess = {level:level, target:Math.floor(Math.random()*levels[level-1[0]])+1, attempts:0, min:1, max:levels[level-1[0]]};
+            document.querySelectorAll('.panel').forEach(p=>p.classList.add('hidden'));
+            document.getElementById('guessGame').classList.remove('hidden');
+            document.getElementById('guessLevel').textContent = level;
+            document.getElementById('guessMax').textContent = guess.max.toLocaleString();
+            document.getElementById('guessFeedback').textContent = `🎯 Загадал число от 1 до ${guess.max.toLocaleString()}`;
         }
         
-        // УГАДАЙКА
-        function newGuessLevel() {
-            const levels = [1000, 10000, 100000];
-            guess.level = guess.level % 3 + 1;
-            guess.max = levels[guess.level-1];
-            guess.target = Math.floor(Math.random() * guess.max) + 1;
-            guess.attempts = 0;
-            document.getElementById('guessLevel').textContent = guess.level;
-            document.getElementById('guessAttempts').textContent = 0;
-            document.getElementById('guessFeedback').textContent = '';
-        }
-        
-        function makeGuess() {
+        function checkGuess() {
             const input = parseInt(document.getElementById('guessInput').value);
+            if(!input || input<guess.min || input>guess.max) {
+                document.getElementById('guessFeedback').textContent = `❌ Введи число от ${guess.min} до ${guess.max}!`;
+                return;
+            }
+            
             guess.attempts++;
             
             if(input === guess.target) {
-                document.getElementById('guessFeedback').innerHTML = `✅ Угадал за ${guess.attempts} попыток!`;
-                gameOverGuess();
+                const score = Math.max(1, 1000/guess.attempts);
+                document.getElementById('guessFeedback').innerHTML = `🎉 УРА! Угадал за <strong>${guess.attempts}</strong> попыток! (+${Math.round(score)} очков)`;
+                endGuess();
             } else if(input < guess.target) {
-                document.getElementById('guessFeedback').textContent = '📈 Больше!';
+                guess.min = input + 1;
+                const range = guess.max - guess.min + 1;
+                const hint = range > 100 ? Math.floor(guess.min + range/4) : guess.min + 1;
+                document.getElementById('guessFeedback').innerHTML = `📈 Больше чем ${input}<br>Диапазон: ${guess.min}-${guess.max} (${range} чисел)<br>Подсказка: попробуй около ${hint}`;
             } else {
-                document.getElementById('guessFeedback').textContent = '📉 Меньше!';
+                guess.max = input - 1;
+                const range = guess.max - guess.min + 1;
+                const hint = range > 100 ? Math.floor(guess.max - range/4) : guess.max - 1;
+                document.getElementById('guessFeedback').innerHTML = `📉 Меньше чем ${input}<br>Диапазон: ${guess.min}-${guess.max} (${range} чисел)<br>Подсказка: попробуй около ${hint}`;
             }
-            
-            document.getElementById('guessAttempts').textContent = guess.attempts;
-            document.getElementById('guessInput').value = '';
         }
         
-        function gameOverGuess() {
-            const users = loadData('users');
-            users[currentUser].guessScore = Math.min(users[currentUser].guessScore, guess.attempts) || guess.attempts;
-            saveData('users', users);
-            saveData('guessTop10', users);
-            updateGuessLeaderboard();
+        function nextGuessLevel() { startGuess(guess.level % 3 + 1); }
+        
+        // ЛИДЕРБОРДЫ И ТУРНИРЫ (упрощено)
+        function updateAll() {
+            updateLeaderboards();
+            updateTournamentTimers();
         }
         
-        // ЛИДЕРБОРДЫ
-        function updateSnakeLeaderboard() {
-            const data = loadData('snakeTop10');
-            const top = Object.entries(data)
-                .sort((a,b) => b[1].snakeScore - a[1].snakeScore)
-                .slice(0,10)
-                .map(([nick, data], i) => 
-                    `<div class="rank${i+1}">${i+1}. ${nick} <span>${data.snakeScore}</span></div>`
-                ).join('');
-            document.getElementById('snakeTop10').innerHTML = top || 'Пусто';
+        function updateLeaderboards() {
+            let users = storage.get('users') || {};
+            // Топ змейка
+            const snakeTop = Object.entries(users).sort((a,b)=>b[1].snake-a[1].snake).slice(0,5);
+            document.getElementById('snakeTop10').innerHTML = snakeTop.map(([n,d],i)=>
+                `<div class="rank${i+1}">${i+1}. ${n}<span>${d.snake||0}</span></div>`).join('');
+            // Топ угадайка  
+            const guessTop = Object.entries(users).sort((a,b)=>a[1].guess-b[1].guess).slice(0,5);
+            document.getElementById('guessTop10').innerHTML = guessTop.map(([n,d],i)=>
+                `<div class="rank${i+1}">${i+1}. ${n}<span>${d.guess||'∞'} попыток</span></div>`).join('');
         }
         
-        function updateGuessLeaderboard() {
-            const data = loadData('guessTop10');
-            const top = Object.entries(data)
-                .sort((a,b) => a[1].guessScore - b[1].guessScore)
-                .slice(0,10)
-                .map(([nick, data], i) => 
-                    `<div class="rank${i+1}">${i+1}. ${nick} <span>${data.guessScore} попыток</span></div>`
-                ).join('');
-            document.getElementById('guessTop10').innerHTML = top || 'Пусто';
-        }
-        
-        function updateAllLeaderboards() {
-            updateSnakeLeaderboard();
-            updateGuessLeaderboard();
-        }
-        
-        // Таймеры турниров (упрощенно)
-        function updateTimers() {
-            setInterval(() => {
-                const now = new Date();
-                const nextMidnight = new Date(now);
-                nextMidnight.setHours(24,0,0,0);
-                const diff = nextMidnight - now;
-                const h = Math.floor(diff/3600000);
-                const m = Math.floor((diff%3600000)/60000);
-                const s = Math.floor((diff%60000)/1000);
-                document.getElementById('snakeTournamentTimer').textContent = 
-                document.getElementById('guessTournamentTimer').textContent = 
-                    `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-            }, 1000);
-        }
-        
-        // Управление змейкой
+        // Управление
         document.addEventListener('keydown', e => {
-            if(!gameRunning) return;
+            if(!snake.running) return;
             switch(e.key) {
-                case 'ArrowUp': snake.dy = -20; snake.dx = 0; break;
-                case 'ArrowDown': snake.dy = 20; snake.dx = 0; break;
-                case 'ArrowLeft': snake.dx = -20; snake.dy = 0; break;
-                case 'ArrowRight': snake.dx = 20; snake.dy = 0; break;
+                case 'ArrowUp': snake.dy=-20; snake.dx=0; break;
+                case 'ArrowDown': snake.dy=20; snake.dx=0; break;
+                case 'ArrowLeft': snake.dx=-20; snake.dy=0; break;
+                case 'ArrowRight': snake.dx=20; snake.dy=0; break;
             }
         });
+        
+        // Таймеры
+        function updateTournamentTimers() {
+            setInterval(()=>{
+                const now = new Date();
+                const next = new Date(now); next.setHours(24,0,0,0);
+                const diff = next - now;
+                const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+                document.getElementById('snakeTimer').textContent = 
+                document.getElementById('guessTimer').textContent = `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            },1000);
+        }
     </script>
 </body>
 </html>
