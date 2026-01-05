@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 ALEKSIN GAMING UNIVERSE v3.3 🚀</title>
+    <title>🚀 ALEKSIN GAMING UNIVERSE v3.4 🚀</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         *{margin:0;padding:0;box-sizing:border-box}
@@ -15,7 +15,6 @@
         .title{font-size:clamp(2.5rem,8vw,5rem);text-align:center;margin:30px 0;background:linear-gradient(45deg,#ff00ff,#00ffcc,#ffff00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 40px #00ffcc}
         
         .user-status{position:fixed;top:20px;right:20px;background:rgba(0,255,204,0.15);backdrop-filter:blur(20px);padding:15px 25px;border:2px solid rgba(0,255,204,0.5);border-radius:20px;z-index:100;box-shadow:0 10px 40px rgba(0,255,204,0.3)}
-        .user-status.hidden{display:none}
         .user-nickname{font-size:1.4rem;font-weight:700;color:#00ff88;text-shadow:0 0 10px #00ff88;margin-bottom:8px}
         .user-stats{display:flex;gap:15px;font-size:0.95rem;color:#88ddff}
         .logout-btn{background:linear-gradient(45deg,#ff416c,#ff4b2b);color:#fff;border:none;padding:8px 16px;border-radius:10px;font-size:0.9rem;cursor:pointer;font-weight:700;transition:all 0.3s}
@@ -48,6 +47,17 @@
     </style>
 </head>
 <body>
+    <!-- ✅ ПУСТОЙ БЛОК В НАЧАЛЕ (без логина/пароля) -->
+    <div id="welcomeScreen" class="glass" style="max-width:600px;margin:100px auto;text-align:center">
+        <h2 style="font-size:2.5rem;margin-bottom:20px;background:linear-gradient(45deg,#00ff88,#ffff00);-webkit-background-clip:text;-webkit-text-fill-color:transparent">
+            🎮 Добро пожаловать в ALEKSIN GAMING UNIVERSE v3.4! 🎮
+        </h2>
+        <p style="font-size:1.3rem;margin-bottom:30px;color:#88ddff">
+            🚀 Игры загружаются... <span id="loadingDots">⏳</span>
+        </p>
+        <div style="font-size:4rem">⭐⭐⭐⭐⭐</div>
+    </div>
+
     <div id="userStatus" class="user-status hidden">
         <div class="user-nickname" id="currentNickname">-</div>
         <div class="user-stats">
@@ -59,25 +69,13 @@
     
     <div class="stars" id="stars"></div>
     <div class="container">
-        <h1 class="title">🚀 ALEKSIN GAMING UNIVERSE v3.3 🚀</h1>
+        <h1 class="title">🚀 ALEKSIN GAMING UNIVERSE v3.4 🚀</h1>
         
-        <div id="loginPanel">
-            <div class="glass" style="max-width:500px;margin:0 auto;text-align:center">
-                <h2 style="margin-bottom:20px;font-size:2rem">👤 ВХОД В АРЕНУ</h2>
-                <input id="username" placeholder="Никнейм (alexin)" value="alexin">
-                <input id="password" type="password" placeholder="Пароль (123)" value="123">
-                <br><br>
-                <button onclick="loginUser()">🚀 ВОЙТИ / РЕГИСТРАЦИЯ</button>
-                <div style="margin-top:15px;color:#88ddff;font-size:1.1rem">
-                    💎 Тест: <strong>alexin / 123</strong>
-                </div>
-            </div>
-        </div>
-        
-        <div id="gamesPanel" class="hidden">
+        <!-- ✅ ПАНЕЛЬ ИГР (теперь сразу видна) -->
+        <div id="gamesPanel">
             <div class="games-grid">
                 <div class="glass">
-                    <h3 class="game-title">🐍 ЗМЕЙКА КОСМОС v3.3</h3>
+                    <h3 class="game-title">🐍 ЗМЕЙКА КОСМОС v3.4</h3>
                     <select id="snakeDiff">
                         <option value="300-snake-novice">🌱 Новичок (300мс)</option>
                         <option value="200-snake-pro" selected>⚡ Профи (200мс)</option>
@@ -95,7 +93,7 @@
                 </div>
                 
                 <div class="glass">
-                    <h3 class="game-title">🔢 УГАДАЙКА ГАЛАКТИКА v3.3</h3>
+                    <h3 class="game-title">🔢 УГАДАЙКА ГАЛАКТИКА v3.4</h3>
                     <select id="guessDiff">
                         <option value="100-guess-easy">🌱 Легко (1-100)</option>
                         <option value="1000-guess-normal" selected>⚡ Нормально (1-1000)</option>
@@ -174,18 +172,42 @@
 
     <script>
         // Глобальные переменные
-        let currentUser = '', snakeActive = false, snakeInterval = null;
+        let currentUser = 'alexin', snakeActive = false, snakeInterval = null;
         let guessNumber = 0, guessMax = 1000, guessTries = 0, dx = 1, dy = 0, snake = [{x:10,y:10}];
         let tournamentJoined = false, tournamentEndTime = Date.now() + 24*60*60*1000;
         
-        // ✅ ФИКС 1: ПЕРИСТИСТЕНТНЫЙ ТУРНИР
+        // ✅ АНИМАЦИЯ ТОЧЕК ЗАГРУЗКИ
+        function animateLoading() {
+            const dots = document.getElementById('loadingDots');
+            const stages = ['⏳', '⚡', '🚀', '⭐'];
+            let stage = 0;
+            setInterval(() => {
+                dots.textContent = stages[stage];
+                stage = (stage + 1) % stages.length;
+            }, 500);
+        }
+        
+        // ✅ АВТОМАТИЧЕСКИЙ ВХОД (3 секунды)
+        function autoLogin() {
+            setTimeout(() => {
+                document.getElementById('welcomeScreen').classList.add('hidden');
+                document.getElementById('gamesPanel').classList.remove('hidden');
+                
+                loadTournamentStatus();
+                updateUserStatus();
+                updateAllLeaderboards();
+                newGuessGame();
+            }, 3000);
+        }
+        
+        // Турнир
         function loadTournamentStatus() {
             if(currentUser) {
                 let tourData = JSON.parse(localStorage.getItem('tournament-' + currentUser) || '{}');
                 tournamentJoined = tourData.joined || false;
-                document.getElementById('tournamentBtn').innerHTML = tournamentJoined ? 
-                    '✅ В ТУРНИРЕ (x2 очки)' : '⚔️ ВСТУПИТЬ (x2 очки)';
-                if(tournamentJoined) document.getElementById('tournamentBtn').style.background = '#00ff88';
+                let btn = document.getElementById('tournamentBtn');
+                btn.innerHTML = tournamentJoined ? '✅ В ТУРНИРЕ (x2 очки)' : '⚔️ ВСТУПИТЬ (x2 очки)';
+                if(tournamentJoined) btn.style.background = '#00ff88';
             }
         }
         
@@ -195,12 +217,12 @@
             }
         }
         
-        // ⭐ СТАТУС-БАР
+        // Статус-бар
         function updateUserStatus() {
             const statusDiv = document.getElementById('userStatus');
             if(currentUser) {
                 let totalScore = 0;
-                ['snake-novice','snake-pro','snake-legend','snake-master','guess-easy','guess-normal','guess-hard','guess-extreme','tournament-global'].forEach(cat => {
+                ['snake-novice','snake-pro','snake-legend','snake-master','guess-easy','guess-normal','guess-hard','guess-extreme'].forEach(cat => {
                     let scores = JSON.parse(localStorage.getItem(cat) || '[]');
                     let userScore = scores.find(s => s.user === currentUser);
                     if(userScore) totalScore += userScore.score;
@@ -210,14 +232,11 @@
                 document.getElementById('userTotalScore').textContent = totalScore.toLocaleString();
                 document.getElementById('userTournament').textContent = tournamentJoined ? 'x2 Очки ✅' : 'НЕ В ТУРНИРЕ';
                 statusDiv.classList.remove('hidden');
-            } else {
-                statusDiv.classList.add('hidden');
             }
         }
         
-        // Инициализация
+        // ✅ Инициализация (автологин)
         function init() {
-            // Звёзды
             for(let i = 0; i < 150; i++) {
                 let star = document.createElement('div');
                 star.className = 'star';
@@ -227,30 +246,12 @@
                 document.getElementById('stars').appendChild(star);
             }
             
-            updateAllLeaderboards();
+            animateLoading();
+            autoLogin(); // ✅ Автоматический вход через 3 сек
+            
             updateTournamentTimer();
             setInterval(updateAllLeaderboards, 10000);
             setInterval(updateUserStatus, 2000);
-            
-            if(localStorage.currentUser) {
-                document.getElementById('username').value = localStorage.currentUser;
-                loginUser();
-            }
-            
-            newGuessGame();
-        }
-        
-        // ✅ ЛОГИН
-        function loginUser() {
-            currentUser = document.getElementById('username').value.trim() || 'guest';
-            localStorage.currentUser = currentUser;
-            
-            document.getElementById('loginPanel').classList.add('hidden');
-            document.getElementById('gamesPanel').classList.remove('hidden');
-            
-            loadTournamentStatus(); // ✅ Загружаем турнир
-            updateUserStatus();
-            updateAllLeaderboards();
         }
         
         function logoutUser() {
@@ -258,15 +259,14 @@
                 clearInterval(snakeInterval);
                 snakeActive = false;
             }
-            currentUser = '';
-            localStorage.removeItem('currentUser');
-            document.getElementById('loginPanel').classList.remove('hidden');
+            document.getElementById('welcomeScreen').classList.remove('hidden');
             document.getElementById('gamesPanel').classList.add('hidden');
             document.getElementById('leaderboards').classList.add('hidden');
+            currentUser = '';
             updateUserStatus();
         }
         
-        // ✅ ФИКС 2: ЗМЕЙКА (границы 0-20 включительно)
+        // Змейка (без изменений)
         function startSnake() {
             if(snakeActive) return;
             snakeActive = true;
@@ -277,7 +277,7 @@
             
             let score = 0;
             let food = {x:15,y:15};
-            snake = [{x:10,y:10}]; // ✅ СБРОС ЗМЕЙКИ
+            snake = [{x:10,y:10}];
             
             const diffData = document.getElementById('snakeDiff').value.split('-');
             const speed = parseInt(diffData[0]);
@@ -289,7 +289,6 @@
                 
                 let head = {x: snake[0].x + dx, y: snake[0].y + dy};
                 
-                // ✅ ФИКС 3: ТОЧНЫЕ ГРАНИЦЫ 0-20
                 if(head.x < 0 || head.x > 20 || head.y < 0 || head.y > 20 || 
                    snake.some((s, i) => i > 0 && s.x === head.x && s.y === head.y)) {
                     clearInterval(snakeInterval);
@@ -319,13 +318,11 @@
                 
                 document.getElementById('snakeScore').textContent = score;
                 
-                // Еда
                 ctx.fillStyle = '#ff00ff';
                 ctx.beginPath();
                 ctx.arc(food.x*22.5 + 11.25, food.y*22.5 + 11.25, 10, 0, Math.PI*2);
                 ctx.fill();
                 
-                // Змейка
                 snake.forEach((part, i) => {
                     ctx.fillStyle = i === 0 ? '#00ff88' : '#44aa88';
                     ctx.fillRect(part.x*22.5 + 1, part.y*22.5 + 1, 21, 21);
@@ -333,7 +330,6 @@
                 
             }, speed);
             
-            // Управление (без перезагрузки)
             const snakeControl = (e) => {
                 if(!snakeActive) return;
                 if(e.key === 'ArrowUp' && dy !== 1) { dx = 0; dy = -1; }
@@ -352,7 +348,7 @@
             }
         }
         
-        // Остальные функции (угадайка, сохранение, лидерборды)
+        // Угадайка
         function newGuessGame() {
             guessMax = parseInt(document.getElementById('guessDiff').value.split('-')[0]);
             guessNumber = Math.floor(Math.random() * guessMax) + 1;
@@ -399,19 +395,18 @@
             updateUserStatus();
         }
         
-        // ✅ ФИКС 4: СОХРАНЕНИЕ ОЧКОВ
         function saveScore(category, score, finalScore) {
             let scores = JSON.parse(localStorage.getItem(category) || '[]');
             scores = scores.filter(s => s.user !== currentUser);
             scores.unshift({user: currentUser, score: finalScore, date: new Date().toLocaleString('ru-RU')});
             scores.sort((a, b) => b.score - a.score);
             localStorage.setItem(category, JSON.stringify(scores.slice(0, 20)));
-            saveTournamentStatus(); // ✅ Сохраняем турнир
+            saveTournamentStatus();
             updateAllLeaderboards();
             updateUserStatus();
         }
         
-        // ✅ ФИКС 5: ЛИДЕРБОРДЫ (полные функции)
+        // Лидерборды (без изменений)
         function updateAllLeaderboards() {
             updateGlobalTop();
             updateSnakeTops();
@@ -479,7 +474,6 @@
             document.getElementById('snakeGlobal').textContent = snakePro[0] ? snakePro[0].score : 0;
         }
         
-        // ✅ ФИКС 6: ТУРНИР (постоянный)
         function toggleTournament() {
             tournamentJoined = !tournamentJoined;
             let btn = document.getElementById('tournamentBtn');
@@ -492,7 +486,7 @@
                 btn.innerHTML = '⚔️ ВСТУПИТЬ (x2 очки)';
                 btn.style.background = '';
             }
-            saveTournamentStatus(); // ✅ СОХРАНЯЕМ В localStorage
+            saveTournamentStatus();
             updateUserStatus();
         }
         
@@ -505,18 +499,32 @@
             let h = Math.floor(timeLeft / 3600000);
             let m = Math.floor((timeLeft % 3600000) / 60000);
             let s = Math.floor((timeLeft % 60000) / 1000);
-            document.getElementById('countdown').textList = 
+            document.getElementById('countdown').textContent = 
                 `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
             setTimeout(updateTournamentTimer, 1000);
         }
         
-        // ✅ ФИКС 7: ЛИДЕРБОРДЫ РАБОТАЮТ
         function showLeaderboards() {
             document.getElementById('gamesPanel').classList.add('hidden');
             document.getElementById('leaderboards').classList.remove('hidden');
             updateAllLeaderboards();
-            showTab('tournament'); // Показываем турнир по умолчанию
         }
         
         function showGames() {
             document.getElementById('leaderboards').classList.add('hidden');
+            document.getElementById('gamesPanel').classList.remove('hidden');
+        }
+        
+        function showTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+            
+            document.querySelectorAll('#leaderboards .glass').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tab + 'Tab').classList.remove('hidden');
+        }
+        
+        // ✅ СТАРТ
+        window.onload = init;
+    </script>
+</body>
+</html>
