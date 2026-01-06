@@ -2,1016 +2,655 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Неоновая Змейка — Профиль</title>
+    <title>Aleksin Games Hub 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body {
-            height: 100%;
-            overflow: hidden;
-            font-family: "Segoe UI", system-ui, sans-serif;
-            background: radial-gradient(circle at top, #1b2735 0%, #090a0f 60%, #030308 100%);
-            color: #f5f5f5;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Exo+2:wght@400;600&display=swap');
+        * { margin:0; padding:0; box-sizing:border-box; }
 
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background:
-                radial-gradient(circle at 10% 20%, rgba(0,255,170,0.15) 0, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(0,160,255,0.18) 0, transparent 55%),
-                radial-gradient(circle at 50% 10%, rgba(255,0,200,0.1) 0, transparent 50%);
-            mix-blend-mode: screen;
-            pointer-events: none;
-            animation: bgMove 25s linear infinite alternate;
-            z-index: -1;
+        body {
+            font-family:'Exo 2',sans-serif;
+            background:linear-gradient(-45deg,#0f0f23,#1a0033,#001a33,#2d004d);
+            background-size:400% 400%;
+            animation:bgShift 15s ease infinite;
+            color:#fff;
+            min-height:100vh;
         }
-        @keyframes bgMove {
-            0% {transform: translate3d(0,0,0);}
-            100% {transform: translate3d(-40px, 30px, 0);}
+        @keyframes bgShift{
+            0%{background-position:0% 50%}
+            50%{background-position:100% 50%}
+            100%{background-position:0% 50%}
         }
+        .container{max-width:1200px;margin:0 auto;padding:20px;}
+        h1{
+            font-family:'Orbitron',sans-serif;
+            text-align:center;
+            font-size:clamp(2.2rem,4vw,3.4rem);
+            margin-bottom:20px;
+            background:linear-gradient(45deg,#ff00ff,#00ffff,#ffff00);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            text-shadow:0 0 25px #ff00ff;
+        }
+        #authSection{
+            max-width:420px;
+            margin:0 auto;
+            padding:25px;
+            background:rgba(0,0,0,0.75);
+            border-radius:18px;
+            border:1px solid #00ffff;
+            box-shadow:0 15px 35px rgba(0,255,255,0.35);
+            text-align:center;
+        }
+        #gamesSection,#userInfo{display:none;}
 
-        .glow {
-            text-shadow:
-                0 0 8px rgba(0,255,180,0.9),
-                0 0 18px rgba(0,255,220,0.8),
-                0 0 38px rgba(0,180,255,0.8);
+        input{
+            width:100%;
+            padding:12px 14px;
+            margin:8px 0;
+            border:none;
+            border-radius:10px;
+            background:rgba(255,255,255,0.08);
+            color:#fff;
+            font-size:15px;
         }
+        input::placeholder{color:#aaa;}
+        button{
+            width:100%;
+            padding:12px;
+            margin:6px 0;
+            border:none;
+            border-radius:10px;
+            background:linear-gradient(45deg,#ff00ff,#00ffff);
+            color:#000;
+            font-family:'Orbitron',sans-serif;
+            font-size:14px;
+            font-weight:700;
+            cursor:pointer;
+            box-shadow:0 6px 16px rgba(0,255,255,0.4);
+            transition:.25s;
+        }
+        button:hover{
+            transform:translateY(-2px);
+            box-shadow:0 10px 25px rgba(0,255,255,0.6);
+        }
+        #userInfo{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+            padding:10px 14px;
+            margin:18px 0;
+            background:rgba(0,255,0,0.15);
+            border-radius:14px;
+            border:1px solid #00ff88;
+            font-family:'Orbitron',sans-serif;
+        }
+        #userInfo button{width:auto;padding:8px 14px;font-size:13px;}
 
-        .page {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+        .game-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+            gap:20px;
+            margin-top:20px;
         }
-
-        .card {
-            width: 1200px;
-            height: 680px;
-            max-width: 100%;
-            max-height: 100%;
-            border-radius: 24px;
-            background: radial-gradient(circle at top left, rgba(0,255,170,0.08), transparent 60%),
-                        radial-gradient(circle at bottom right, rgba(0,170,255,0.1), transparent 65%),
-                        rgba(8,10,20,0.92);
-            border: 1px solid rgba(255,255,255,0.09);
-            box-shadow:
-                0 0 30px rgba(0,0,0,0.7),
-                0 0 45px rgba(0,255,160,0.15),
-                0 0 65px rgba(0,140,255,0.22);
-            backdrop-filter: blur(16px);
-            display: grid;
-            grid-template-columns: minmax(280px, 360px) minmax(520px, 1fr);
-            overflow: hidden;
-            position: relative;
+        .game-card{
+            background:rgba(0,0,0,0.78);
+            border-radius:18px;
+            padding:18px;
+            border:1px solid #ff00ff;
+            box-shadow:0 12px 30px rgba(255,0,255,0.35);
         }
-
-        .card::before, .card::after {
-            content: "";
-            position: absolute;
-            border-radius: 24px;
-            pointer-events: none;
+        .game-title{
+            font-family:'Orbitron',sans-serif;
+            text-align:center;
+            font-size:1.3rem;
+            margin-bottom:10px;
+            background:linear-gradient(45deg,#ff00ff,#00ffff);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
         }
-        .card::before { inset: 10px; border: 1px solid rgba(0,255,200,0.18); }
-        .card::after {
-            inset: 18px;
-            border: 1px dashed rgba(80,180,255,0.3);
-            opacity: 0.6;
+        canvas{
+            width:100%;
+            height:240px;
+            border-radius:14px;
+            background:radial-gradient(circle at 10% 10%,#111,#000);
+            border:1px solid #00ffff;
+            display:block;
         }
-
-        .left {
-            padding: 26px 26px 26px 30px;
-            border-right: 1px solid rgba(255,255,255,0.06);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            position: relative;
-            overflow: hidden;
+        .difficulty-row{
+            display:flex;
+            gap:6px;
+            margin-bottom:6px;
         }
-        .left::before {
-            content: "";
-            position: absolute;
-            inset: -40%;
-            background:
-               conic-gradient(from 0deg,
-                   rgba(0,255,180,0.0),
-                   rgba(0,255,180,0.5),
-                   rgba(0,140,255,0.0),
-                   rgba(255,0,200,0.4),
-                   rgba(0,255,180,0.0));
-            mix-blend-mode: screen;
-            opacity: 0.12;
-            animation: rotate 32s linear infinite;
+        .diff-btn{
+            flex:1;
+            font-size:12px;
+            padding:6px;
+            border-radius:999px;
         }
-        @keyframes rotate {
-            0% {transform: rotate(0deg);}
-            100% {transform: rotate(360deg);}
+        .diff-btn.active{
+            background:linear-gradient(45deg,#ffff00,#ffaa00);
+            color:#000;
         }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 14px;
-            z-index: 1;
+        #leaderboard,#tournament{
+            margin-top:22px;
+            padding:18px;
+            background:rgba(0,0,0,0.8);
+            border-radius:18px;
+            border:1px solid #ffff00;
         }
-
-        .brand-main {
-            display: flex;
-            align-items: center;
-            gap: 14px;
+        .top-title{
+            text-align:center;
+            font-family:'Orbitron',sans-serif;
+            margin-bottom:10px;
         }
-
-        .logo {
-            width: 42px;
-            height: 42px;
-            border-radius: 14px;
-            background: radial-gradient(circle at 30% 20%, #00ffb4 0, #0070ff 50%, #23003a 100%);
-            box-shadow:
-                0 0 18px rgba(0,255,180,0.7),
-                0 0 28px rgba(0,140,255,0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #0b1118;
-            font-weight: 900;
-            font-size: 20px;
+        .top-tabs{
+            display:flex;
+            flex-wrap:wrap;
+            gap:6px;
+            margin-bottom:10px;
         }
-
-        .brand-text-main {
-            font-size: 15px;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: rgba(200,255,250,0.85);
+        .top-tab{
+            padding:6px 10px;
+            border-radius:999px;
+            background:rgba(255,255,255,0.08);
+            cursor:pointer;
+            font-size:11px;
         }
-        .brand-text-sub {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            color: rgba(160,200,255,0.7);
+        .top-tab.active{
+            background:linear-gradient(45deg,#ff00ff,#00ffff);
+            color:#000;
         }
-
-        .theme-switcher {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 11px;
-            color: rgba(170,198,233,0.82);
+        ul.top-list{
+            list-style:none;
+            max-height:230px;
+            overflow-y:auto;
+            padding-right:4px;
         }
-        .theme-select {
-            border-radius: 999px;
-            padding: 4px 10px;
-            border: 1px solid rgba(255,255,255,0.18);
-            background: rgba(4,8,20,0.8);
-            color: #e5f2ff;
-            font-size: 11px;
+        ul.top-list li{
+            display:flex;
+            justify-content:space-between;
+            padding:6px 8px;
+            margin:2px 0;
+            border-radius:8px;
+            background:rgba(255,255,255,0.06);
+            font-size:13px;
+            font-family:'Orbitron',sans-serif;
         }
-
-        h1 {
-            font-size: 24px;
-            font-weight: 800;
-            line-height: 1.2;
-        }
-        .accent {
-            background: linear-gradient(90deg,#00ffb4 0%,#00c8ff 40%,#ff00e5 90%);
-            -webkit-background-clip: text;
-            color: transparent;
-        }
-
-        .subtitle {
-            font-size: 13px;
-            color: rgba(215,230,255,0.78);
-        }
-
-        .pill-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .pill {
-            border-radius: 999px;
-            padding: 6px 12px;
-            font-size: 11px;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            border: 1px solid rgba(0,255,200,0.35);
-            color: rgba(210,255,250,0.9);
-            background: linear-gradient(120deg,rgba(0,255,200,0.1),rgba(0,140,255,0.07));
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .status-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #00ffb4 0, #0070ff 60%);
-            box-shadow: 0 0 8px rgba(0,255,180,0.9);
-        }
-
-        form { display: flex; flex-direction: column; gap: 12px; z-index: 1; }
-
-        label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.14em;
-            color: rgba(162,189,223,0.85);
-        }
-
-        .input-wrapper {
-            margin-top: 4px;
-            border-radius: 12px;
-            padding: 9px 12px;
-            background: radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 60%);
-            border: 1px solid rgba(255,255,255,0.08);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .input-wrapper span.icon {
-            font-size: 14px;
-            color: rgba(0,255,200,0.9);
-        }
-        input {
-            border: none;
-            outline: none;
-            background: transparent;
-            color: #f5f5f5;
-            font-size: 13px;
-            width: 100%;
-        }
-        input::placeholder {
-            color: rgba(160,190,220,0.7);
-        }
-
-        .row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin-top: 4px;
-        }
-
-        .remember {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            color: rgba(170,198,233,0.82);
-        }
-
-        .switch {
-            position: relative;
-            width: 28px;
-            height: 16px;
-            border-radius: 999px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.12);
-            cursor: pointer;
-        }
-        .switch::after {
-            content: "";
-            position: absolute;
-            top: 1px;
-            left: 1px;
-            width: 12px;
-            height: 12px;
-            border-radius: 999px;
-            background: radial-gradient(circle at 30% 30%, #00ffb4 0, #0070ff 70%);
-            box-shadow: 0 0 10px rgba(0,255,180,0.7);
-            transition: transform .22s ease;
-        }
-        .switch.on::after { transform: translateX(10px); }
-
-        .link {
-            font-size: 11px;
-            color: rgba(0,210,255,0.92);
-            text-decoration: none;
-            position: relative;
-        }
-        .link::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            bottom: -1px;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg,#00ffb4,#00c8ff,#ff00e5);
-            opacity: 0;
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: .2s;
-        }
-        .link:hover::after { opacity: 1; transform: scaleX(1); }
-
-        .btn {
-            margin-top: 8px;
-            border-radius: 999px;
-            padding: 10px 16px;
-            border: none;
-            background: linear-gradient(135deg,#00ffb4 0%,#00b7ff 38%,#ff00e5 100%);
-            color: #050509;
-            font-weight: 700;
-            font-size: 13px;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow:
-                0 0 20px rgba(0,255,180,0.7),
-                0 0 36px rgba(0,160,255,0.8);
-            position: relative;
-            overflow: hidden;
-        }
-        .btn span.arrow { font-size: 15px; }
-        .btn::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(120deg,rgba(255,255,255,0.45),transparent 65%);
-            mix-blend-mode: screen;
-            opacity: 0;
-            transform: translateX(-100%);
-        }
-        .btn:hover::before {
-            opacity: 1;
-            transform: translateX(0);
-            transition: transform .45s ease;
-        }
-
-        .meta {
-            margin-top: 4px;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
-            color: rgba(137,164,201,0.85);
-        }
-
-        .profile-stats {
-            margin-top: 4px;
-            font-size: 11px;
-            color: rgba(190,215,245,0.9);
-        }
-        .profile-stats span.value {
-            color: #00ffb4;
-            font-weight: 700;
-        }
-
-        .right {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 26px;
-        }
-
-        .game-frame {
-            width: 100%;
-            max-width: 720px;
-            aspect-ratio: 16/9;
-            border-radius: 22px;
-            background: radial-gradient(circle at top, #061b1f 0, #02050c 60%);
-            border: 1px solid rgba(0,255,200,0.18);
-            box-shadow:
-                0 0 30px rgba(0,255,180,0.25),
-                0 0 50px rgba(0,130,255,0.4);
-            position: relative;
-            padding: 16px 18px 12px 18px;
-            display: grid;
-            grid-template-rows: auto 1fr auto;
-            gap: 8px;
-        }
-
-        .game-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.16em;
-            color: rgba(182,210,240,0.86);
-        }
-
-        .game-chip {
-            border-radius: 999px;
-            padding: 4px 10px;
-            background: linear-gradient(120deg,rgba(0,255,200,0.1),rgba(0,140,255,0.12));
-            border: 1px solid rgba(0,255,200,0.4);
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .game-chip-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: radial-gradient(circle,#00ffb4 0,#ff00e5 80%);
-            box-shadow: 0 0 9px rgba(0,255,180,0.9);
-        }
-
-        .stats { display: flex; gap: 8px; flex-wrap: wrap; }
-        .stat {
-            border-radius: 999px;
-            padding: 4px 9px;
-            border: 1px solid rgba(255,255,255,0.1);
-            color: rgba(186,210,240,0.9);
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .stat span.value { font-weight: 700; color: #00ffb4; }
-
-        .screen {
-            position: relative;
-            border-radius: 16px;
-            background: radial-gradient(circle at 10% 0%, rgba(0,255,200,0.18), transparent 55%),
-                        radial-gradient(circle at 90% 100%, rgba(0,140,255,0.25), transparent 55%),
-                        #02050b;
-            border: 1px solid rgba(0,255,200,0.24);
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .scanline {
-            position: absolute;
-            inset: 0;
-            background: repeating-linear-gradient(
-                to bottom,
-                rgba(255,255,255,0.09) 0,
-                rgba(255,255,255,0.09) 1px,
-                transparent 1px,
-                transparent 3px
-            );
-            mix-blend-mode: soft-light;
-            opacity: 0.15;
-            pointer-events: none;
-        }
-
-        canvas { image-rendering: pixelated; }
-
-        .overlay-text {
-            position: absolute;
-            text-align: center;
-            font-size: 17px;
-            font-weight: 800;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            color: rgba(240,255,255,0.94);
-            text-shadow:
-                0 0 12px rgba(0,255,190,0.9),
-                0 0 30px rgba(0,160,255,0.9);
-            pointer-events: none;
-        }
-        .overlay-sub {
-            margin-top: 10px;
-            font-size: 11px;
-            letter-spacing: 0.26em;
-            color: rgba(195,220,250,0.88);
-        }
-
-        .nickname-fly {
-            position: absolute;
-            right: 18px;
-            top: 42%;
-            transform: translateY(-50%);
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.22em;
-            color: rgba(220,245,255,0.9);
-            text-shadow:
-                0 0 6px rgba(0,255,200,0.7),
-                0 0 16px rgba(0,120,255,0.9);
-            opacity: 0.0;
-            transition: opacity .4s ease;
-            pointer-events: none;
-        }
-
-        .controls {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 11px;
-            color: rgba(175,202,235,0.88);
-        }
-        .keys { display: flex; gap: 6px; flex-wrap: wrap; }
-        .key {
-            min-width: 20px;
-            height: 20px;
-            border-radius: 5px;
-            border: 1px solid rgba(210,230,255,0.45);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 6px;
-            font-size: 10px;
-            background: radial-gradient(circle at 30% 0%, rgba(255,255,255,0.35), transparent 65%);
-            box-shadow: 0 1px 0 rgba(255,255,255,0.2);
-        }
-
-        .control-right {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 4px;
-        }
-        .speed-select {
-            border-radius: 999px;
-            padding: 4px 8px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(3,7,18,0.9);
-            color: #e5f2ff;
-            font-size: 10px;
-        }
-
-        @media (max-width: 900px) {
-            .card {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto auto;
-                height: 100%;
-            }
-            .left {
-                border-right: none;
-                border-bottom: 1px solid rgba(255,255,255,0.06);
-            }
-            .game-frame { aspect-ratio: 3/4; }
-            .nickname-fly { display: none; }
-        }
+        #timerLive,#statusLive{font-size:13px;margin:2px 0;}
     </style>
 </head>
-<body data-theme="neon">
-<div class="page">
-    <div class="card">
-        <!-- Левая панель -->
-        <div class="left">
-            <div class="brand">
-                <div class="brand-main">
-                    <div class="logo">S</div>
-                    <div>
-                        <div class="brand-text-main">Snake System</div>
-                        <div class="brand-text-sub">Neon access console</div>
-                    </div>
+<body>
+<div class="container">
+    <h1>🎮 ALEKSIN GAMES HUB 2026</h1>
+
+    <div id="authSection">
+        <div id="authStatus" style="min-height:18px;font-size:13px;margin-bottom:6px;"></div>
+        <input id="usernameInput" placeholder="👑 Ник" maxlength="20">
+        <input id="passwordInput" type="password" placeholder="🔑 Пароль (4+ символа)" maxlength="20">
+        <button onclick="login()">🚀 ВОЙТИ</button>
+        <button onclick="register()">📝 РЕГИСТРАЦИЯ</button>
+        <div style="font-size:12px;opacity:.75;margin-top:4px;">test/1234 • Aleksin/1234</div>
+    </div>
+
+    <div id="userInfo">
+        <span>👋 <span id="currentUser">-</span></span>
+        <span id="userTotal">0💎</span>
+        <button onclick="logout()">🚪 ВЫХОД</button>
+    </div>
+
+    <div id="gamesSection">
+        <div class="game-grid">
+            <!-- ЗМЕЙКА -->
+            <div class="game-card">
+                <div class="game-title">🐍 ЗМЕЙКА ULTRA</div>
+                <div class="difficulty-row">
+                    <button class="diff-btn active" id="snakeDiff1" onclick="setSnakeDiff(1)">🐌 Лёгкая</button>
+                    <button class="diff-btn" id="snakeDiff2" onclick="setSnakeDiff(2)">⚡ Норма</button>
+                    <button class="diff-btn" id="snakeDiff3" onclick="setSnakeDiff(3)">🚀 Хард</button>
                 </div>
-                <div class="theme-switcher">
-                    Тема:
-                    <select id="themeSelect" class="theme-select" onchange="changeTheme()">
-                        <option value="neon">Neon</option>
-                        <option value="violet">Violet</option>
-                        <option value="matrix">Matrix</option>
-                    </select>
+                <canvas id="snakeCanvas"></canvas>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+                    <button style="width:auto;padding:6px 10px;font-size:12px;" onclick="startSnake()">▶ Новая игра</button>
+                    <div style="font-family:'Orbitron';font-size:13px;">
+                        Очки: <span id="snakeScore">0</span> | 🍎 <span id="snakeApples">0</span>
+                    </div>
                 </div>
             </div>
 
-            <div>
-                <h1 class="glow">Вход в <span class="accent">Змейку</span></h1>
-                <p class="subtitle">Создай профиль со своим ником, выбери тему, скорость и покори рекорд в неоновой аркаде Змейка.</p>
+            <!-- УГАДАЙКА -->
+            <div class="game-card">
+                <div class="game-title">🎯 УГАДАЙ ЧИСЛО</div>
+                <div class="difficulty-row">
+                    <button class="diff-btn active" id="guessDiff1" onclick="setGuessDiff(1)">1–1K</button>
+                    <button class="diff-btn" id="guessDiff2" onclick="setGuessDiff(2)">1–10K</button>
+                    <button class="diff-btn" id="guessDiff3" onclick="setGuessDiff(3)">1–100K</button>
+                </div>
+                <div style="font-size:12px;opacity:.8;" id="guessRangeLabel">Диапазон: 1–1000</div>
+                <div style="margin-top:6px;">
+                    <input id="guessInput" placeholder="🔢 Введи число">
+                    <button style="margin-top:4px;" onclick="checkGuess()">🔍 ПРОВЕРИТЬ</button>
+                    <div id="guessFeedback" style="font-family:'Orbitron';font-size:13px;margin-top:4px;">
+                        Напиши число и жми ПРОВЕРИТЬ. Попыток бесконечно.
+                    </div>
+                    <div id="guessAttempts" style="font-size:12px;opacity:.8;margin-top:2px;">Попыток: 0</div>
+                </div>
             </div>
-
-            <div class="pill-row">
-                <div class="pill"><span class="status-dot"></span>ONLINE-АРКАДА</div>
-                <div class="pill">★ НИК + ПАРОЛЬ</div>
-                <div class="pill">∞ АВТО-СОХРАНЕНИЕ</div>
-            </div>
-
-            <form onsubmit="event.preventDefault(); startGame();">
-                <div>
-                    <label for="nickname">Никнейм</label>
-                    <div class="input-wrapper">
-                        <span class="icon">👤</span>
-                        <input id="nickname" type="text" placeholder="Например: NeonSnake" required>
-                    </div>
-                </div>
-
-                <div>
-                    <label for="password">Пароль</label>
-                    <div class="input-wrapper">
-                        <span class="icon">🔒</span>
-                        <input id="password" type="password" placeholder="Твой секретный код" required>
-                    </div>
-                </div>
-
-                <div>
-                    <label for="speedSelect">Скорость игры</label>
-                    <div class="input-wrapper">
-                        <span class="icon">⚡</span>
-                        <select id="speedSelect" class="speed-select" style="width:100%;background:transparent;border:none;padding:2px 0;">
-                            <option value="slow">Медленно</option>
-                            <option value="normal" selected>Нормально</option>
-                            <option value="fast">Быстро</option>
-                            <option value="insane">Безумие</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="remember">
-                        <div class="switch on" id="rememberSwitch" onclick="toggleRemember()"></div>
-                        <span>Запомнить профиль змейки</span>
-                    </div>
-                    <a href="#" class="link" onclick="resetGame();return false;">Сброс игры</a>
-                </div>
-
-                <button class="btn" type="submit">
-                    Запустить Змейку
-                    <span class="arrow">▶</span>
-                </button>
-
-                <div class="meta">Управление: стрелки • P — пауза • R — рестарт</div>
-                <div class="profile-stats">
-                    Рекорд: <span class="value" id="bestScore">000</span> • Игр сыграно: <span class="value" id="gamesPlayed">0</span>
-                </div>
-            </form>
         </div>
 
-        <!-- Правая панель: игра -->
-        <div class="right">
-            <div class="game-frame">
-                <div class="game-top">
-                    <div class="game-chip">
-                        <div class="game-chip-dot"></div>
-                        SNAKE ARCADE • v1.1
-                    </div>
-                    <div class="stats">
-                        <div class="stat">
-                            SCORE <span class="value" id="score">000</span>
-                        </div>
-                        <div class="stat">
-                            BEST <span class="value" id="bestScoreTop">000</span>
-                        </div>
-                        <div class="stat">
-                            SPEED <span class="value" id="speed">x1.0</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="screen">
-                    <canvas id="game" width="640" height="360"></canvas>
-                    <div class="scanline"></div>
-                    <div class="overlay-text" id="overlay">
-                        PRESS START
-                        <div class="overlay-sub">введи ник и пароль, выбери тему и нажми кнопку</div>
-                    </div>
-                    <div class="nickname-fly" id="nickFly"></div>
-                </div>
-
-                <div class="controls">
-                    <div>
-                        Клавиши:
-                        <div class="keys">
-                            <div class="key">↑</div>
-                            <div class="key">↓</div>
-                            <div class="key">←</div>
-                            <div class="key">→</div>
-                            <div class="key">P</div>
-                            <div class="key">R</div>
-                        </div>
-                    </div>
-                    <div class="control-right">
-                        <div>Режим: <span class="accent" id="modeLabel">Neon Snake Grid</span></div>
-                        <div>Профиль: <span id="currentNick" style="color:#00ffb4;font-weight:700;">—</span></div>
-                    </div>
-                </div>
+        <!-- ТОП-10 -->
+        <div id="leaderboard">
+            <div class="top-title">🏆 ТОП‑10 РЕКОРДОВ</div>
+            <div class="top-tabs">
+                <span class="top-tab active" id="tabSnake1" onclick="setTopFilter('snake',1)">🐍 Лёгкая</span>
+                <span class="top-tab" id="tabSnake2" onclick="setTopFilter('snake',2)">🐍 Норма</span>
+                <span class="top-tab" id="tabSnake3" onclick="setTopFilter('snake',3)">🐍 Хард</span>
+                <span class="top-tab" id="tabGuess1" onclick="setTopFilter('guess',1)">🎯 1–1K</span>
+                <span class="top-tab" id="tabGuess2" onclick="setTopFilter('guess',2)">🎯 1–10K</span>
+                <span class="top-tab" id="tabGuess3" onclick="setTopFilter('guess',3)">🎯 1–100K</span>
             </div>
+            <ul class="top-list" id="topList"></ul>
+        </div>
+
+        <!-- ТУРНИР -->
+        <div id="tournament">
+            <div class="top-title">⚔ ТУРНИР 24ч (00:00–00:00 МСК)</div>
+            <div id="timerLive"></div>
+            <div id="statusLive"></div>
+            <ul class="top-list" id="tournamentList"></ul>
         </div>
     </div>
 </div>
 
 <script>
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
-    const overlay = document.getElementById("overlay");
-    const scoreEl = document.getElementById("score");
-    const speedEl = document.getElementById("speed");
-    const bestScoreEl = document.getElementById("bestScore");
-    const bestScoreTopEl = document.getElementById("bestScoreTop");
-    const gamesPlayedEl = document.getElementById("gamesPlayed");
-    const currentNickEl = document.getElementById("currentNick");
-    const nickFlyEl = document.getElementById("nickFly");
+    // --- АВТОРИЗАЦИЯ ---
+    let currentUser = null;
+    let registeredUsers = JSON.parse(localStorage.getItem('agh_users') || '{}');
 
-    const gridSize = 20;
-    const cols = canvas.width / gridSize;
-    const rows = canvas.height / gridSize;
+    function saveUsers(){ localStorage.setItem('agh_users', JSON.stringify(registeredUsers)); }
 
-    let snake, direction, food, running, score, baseDelay, loopId, paused;
-    let gamesPlayed = 0;
-    let bestScore = 0;
-    let theme = 'neon';
-    let speedPreset = 'normal';
-
-    const audioEat = new Audio();
-    audioEat.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA="; // тишина-заглушка
-
-    const audioDie = new Audio();
-    audioDie.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=";
-
-    function neonRect(x, y, color) {
-        ctx.fillStyle = color;
-        ctx.fillRect(x, y, gridSize - 2, gridSize - 2);
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 18;
+    function login(){
+        const u = usernameInput.value.trim();
+        const p = passwordInput.value;
+        const st = authStatus;
+        if(!u || p.length<4){
+            st.textContent='Ник и пароль (4+ символа)'; st.style.color='#ff5555'; return;
+        }
+        const test = {test:'1234','Aleksin':'1234'};
+        const pass = registeredUsers[u]?.pass || test[u];
+        if(pass && pass===p){
+            currentUser = u;
+            localStorage.setItem('agh_token',u);
+            authSection.style.display='none';
+            gamesSection.style.display='block';
+            userInfo.style.display='flex';
+            currentUserSpan.textContent=u;
+            updateAll();
+        }else{
+            st.textContent='Неверный логин или пароль'; st.style.color='#ff5555';
+        }
     }
-
-    function resetGameState() {
-        snake = [
-            {x: Math.floor(cols / 2), y: Math.floor(rows / 2)},
-            {x: Math.floor(cols / 2) - 1, y: Math.floor(rows / 2)},
-            {x: Math.floor(cols / 2) - 2, y: Math.floor(rows / 2)}
-        ];
-        direction = {x: 1, y: 0};
-        food = randomFood();
-        running = false;
-        paused = false;
-        score = 0;
-        baseDelay = getDelayFromSpeedPreset();
-        updateScoreDisplays();
+    function register(){
+        const u = usernameInput.value.trim();
+        const p = passwordInput.value;
+        const st = authStatus;
+        if(!u || p.length<4){
+            st.textContent='Ник и пароль (4+ символа)'; st.style.color='#ff5555'; return;
+        }
+        if(registeredUsers[u]){
+            st.textContent='Такой ник уже есть — просто войди'; st.style.color='#00ffff'; return;
+        }
+        registeredUsers[u]={pass:p}; saveUsers();
+        st.textContent='Зарегистрирован! Теперь войди.'; st.style.color='#00ff88';
     }
-
-    function getDelayFromSpeedPreset() {
-        switch(speedPreset) {
-            case 'slow': return 180;
-            case 'normal': return 130;
-            case 'fast': return 90;
-            case 'insane': return 60;
-            default: return 130;
+    function logout(){
+        currentUser=null;
+        localStorage.removeItem('agh_token');
+        gamesSection.style.display='none';
+        userInfo.style.display='none';
+        authSection.style.display='block';
+    }
+    function checkAuth(){
+        const tok = localStorage.getItem('agh_token');
+        if(tok){
+            currentUser=tok;
+            authSection.style.display='none';
+            gamesSection.style.display='block';
+            userInfo.style.display='flex';
+            currentUserSpan.textContent=tok;
+            updateAll();
         }
     }
 
-    function randomFood() {
-        return {
-            x: Math.floor(Math.random() * cols),
-            y: Math.floor(Math.random() * rows)
+    const usernameInput=document.getElementById('usernameInput');
+    const passwordInput=document.getElementById('passwordInput');
+    const authStatus=document.getElementById('authStatus');
+    const authSection=document.getElementById('authSection');
+    const gamesSection=document.getElementById('gamesSection');
+    const userInfo=document.getElementById('userInfo');
+    const currentUserSpan=document.getElementById('currentUser');
+    const userTotal=document.getElementById('userTotal');
+
+    // --- ЗМЕЙКА ---
+    let snakeDiff=1;
+    let snakeTimer=null;
+    let snakeDir={x:1,y:0};
+    let snakeBody=[];
+    let snakeFood=null;
+    let snakeScore=0;
+    let snakeApples=0;
+
+    function setSnakeDiff(d){
+        snakeDiff=d;
+        for(let i=1;i<=3;i++){
+            document.getElementById('snakeDiff'+i).classList.toggle('active',i===d);
+        }
+    }
+
+    function startSnake(){
+        const c=document.getElementById('snakeCanvas');
+        const ctx=c.getContext('2d');
+        c.width=c.clientWidth;
+        c.height=c.clientHeight;
+        const cell=20;
+        const cols=Math.floor(c.width/cell);
+        const rows=Math.floor(c.height/cell);
+
+        snakeBody=[{x:Math.floor(cols/2),y:Math.floor(rows/2)}];
+        snakeDir={x:1,y:0};
+        snakeScore=0;
+        snakeApples=0;
+        placeFood();
+
+        document.onkeydown=e=>{
+            if(e.key==='ArrowUp'&&snakeDir.y!==1) snakeDir={x:0,y:-1};
+            if(e.key==='ArrowDown'&&snakeDir.y!==-1) snakeDir={x:0,y:1};
+            if(e.key==='ArrowLeft'&&snakeDir.x!==1) snakeDir={x:-1,y:0};
+            if(e.key==='ArrowRight'&&snakeDir.x!==-1) snakeDir={x:1,y:0};
         };
-    }
 
-    function drawGrid() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        if (theme === 'matrix') {
-            ctx.fillStyle = "#02040a";
-        } else {
-            ctx.fillStyle = "#02040b";
-        }
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if(snakeTimer) clearInterval(snakeTimer);
+        const speed=[200,140,90][snakeDiff-1];
 
-        if (theme === 'matrix') {
-            ctx.strokeStyle = "rgba(0,255,70,0.18)";
-        } else if (theme === 'violet') {
-            ctx.strokeStyle = "rgba(200,120,255,0.16)";
-        } else {
-            ctx.strokeStyle = "rgba(0,255,210,0.15)";
-        }
-        ctx.lineWidth = 1;
-        for (let x = 0; x <= canvas.width; x += gridSize) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-        }
-        for (let y = 0; y <= canvas.height; y += gridSize) {
-            ctx.beginPath();
-            ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-        }
-    }
-
-    function drawSnake() {
-        snake.forEach((part, idx) => {
-            const px = part.x * gridSize + 1;
-            const py = part.y * gridSize + 1;
-            const t = idx / snake.length;
-
-            let r, g, b;
-            if (theme === 'matrix') {
-                r = 20 + Math.floor(40 * t);
-                g = 255;
-                b = 20 + Math.floor(40 * (1 - t));
-            } else if (theme === 'violet') {
-                r = 220;
-                g = 100 + Math.floor(60 * t);
-                b = 255;
-            } else {
-                r = 0 + Math.floor(120 * t);
-                g = 255;
-                b = 180 + Math.floor(50 * (1 - t));
+        snakeTimer=setInterval(()=>{
+            const head={x:snakeBody[0].x+snakeDir.x,y:snakeBody[0].y+snakeDir.y};
+            // стены
+            if(head.x<0||head.y<0||head.x>=cols||head.y>=rows||
+               snakeBody.some(p=>p.x===head.x&&p.y===head.y)){
+                clearInterval(snakeTimer);
+                saveGameScore('snake',snakeScore,snakeDiff);
+                return;
             }
-            const color = "rgba(" + r + "," + g + "," + b + ",0.95)";
-            neonRect(px, py, color);
+            snakeBody.unshift(head);
+            if(head.x===snakeFood.x&&head.y===snakeFood.y){
+                snakeScore+=10*snakeDiff;
+                snakeApples++;
+                placeFood();
+            }else{
+                snakeBody.pop();
+            }
+            // рисуем
+            ctx.fillStyle='#050510';
+            ctx.fillRect(0,0,c.width,c.height);
+
+            // сетка лёгкая
+            ctx.strokeStyle='rgba(255,255,255,0.04)';
+            for(let x=0;x<cols;x++){ctx.beginPath();ctx.moveTo(x*cell,0);ctx.lineTo(x*cell,c.height);ctx.stroke();}
+            for(let y=0;y<rows;y++){ctx.beginPath();ctx.moveTo(0,y*cell);ctx.lineTo(c.width,y*cell);ctx.stroke();}
+
+            // хвост
+            snakeBody.forEach((p,i)=>{
+                const grd=ctx.createLinearGradient(p.x*cell,p.y*cell,(p.x+1)*cell,(p.y+1)*cell);
+                grd.addColorStop(0,`hsl(${120+i*4},80%,55%)`);
+                grd.addColorStop(1,`hsl(${180+i*4},80%,40%)`);
+                ctx.fillStyle=grd;
+                ctx.fillRect(p.x*cell+2,p.y*cell+2,cell-4,cell-4);
+            });
+            // голова с глазками
+            const h=snakeBody[0];
+            ctx.fillStyle='#00ffff';
+            ctx.fillRect(h.x*cell+2,h.y*cell+2,cell-4,cell-4);
+            ctx.fillStyle='#000';
+            ctx.beginPath();
+            ctx.arc(h.x*cell+cell*0.3,h.y*cell+cell*0.35,2,0,Math.PI*2);ctx.fill();
+            ctx.beginPath();
+            ctx.arc(h.x*cell+cell*0.7,h.y*cell+cell*0.35,2,0,Math.PI*2);ctx.fill();
+
+            // яблоко
+            ctx.save();
+            ctx.shadowColor='#ff0033';
+            ctx.shadowBlur=12;
+            ctx.beginPath();
+            ctx.fillStyle='#ff3355';
+            ctx.arc(snakeFood.x*cell+cell/2,snakeFood.y*cell+cell/2,cell*0.4,0,Math.PI*2);
+            ctx.fill();
+            ctx.restore();
+            // листик
+            ctx.strokeStyle='#33ff55';
+            ctx.lineWidth=2;
+            ctx.beginPath();
+            ctx.moveTo(snakeFood.x*cell+cell/2,snakeFood.y*cell+cell/2-8);
+            ctx.lineTo(snakeFood.x*cell+cell/2+4,snakeFood.y*cell+cell/2-12);
+            ctx.stroke();
+
+            document.getElementById('snakeScore').textContent=snakeScore;
+            document.getElementById('snakeApples').textContent=snakeApples;
+        },speed);
+
+        function placeFood(){
+            let fx,fy;
+            do{
+                fx=Math.floor(Math.random()*cols);
+                fy=Math.floor(Math.random()*rows);
+            }while(snakeBody.some(p=>p.x===fx&&p.y===fy));
+            snakeFood={x:fx,y:fy};
+        }
+    }
+
+    // --- УГАДАЙКА ---
+    let guessDiff=1;
+    let guessMax=1000;
+    let secret=0;
+    let attempts=0;
+
+    function setGuessDiff(d){
+        guessDiff=d;
+        const max=[1000,10000,100000][d-1];
+        guessMax=max;
+        document.getElementById('guessRangeLabel').textContent='Диапазон: 1–'+max.toLocaleString('ru-RU');
+        for(let i=1;i<=3;i++){
+            document.getElementById('guessDiff'+i).classList.toggle('active',i===d);
+        }
+        newSecret();
+    }
+    function newSecret(){
+        secret=1+Math.floor(Math.random()*guessMax);
+        attempts=0;
+        document.getElementById('guessAttempts').textContent='Попыток: 0';
+        document.getElementById('guessFeedback').textContent='Число загадано. Пиши догадки.';
+    }
+    function checkGuess(){
+        if(!secret) newSecret();
+        const val = parseInt(document.getElementById('guessInput').value);
+        if(isNaN(val)) return;
+        attempts++;
+        let fb='';
+        if(val<secret) fb='📈 Больше, чем '+val;
+        else if(val>secret) fb='📉 Меньше, чем '+val;
+        else{
+            const base=[1000,10000,100000][guessDiff-1];
+            const sc=Math.max(Math.floor(base/attempts),1);
+            fb='✅ Угадал '+secret+' за '+attempts+' попыток, '+sc+' очков! Новое число загадано.';
+            saveGameScore('guess',sc,guessDiff);
+            newSecret();
+        }
+        document.getElementById('guessFeedback').textContent=fb;
+        document.getElementById('guessAttempts').textContent='Попыток: '+attempts;
+        document.getElementById('guessInput').value='';
+    }
+
+    document.addEventListener('keydown',e=>{
+        if(e.key==='Enter' && document.activeElement===document.getElementById('guessInput')){
+            checkGuess();
+        }
+    });
+
+    // --- ХРАНЕНИЕ РЕКОРДОВ ---
+    // scores: { user: { snake: {1:score,...}, guess:{1:score,...} } }
+    function loadScores(){
+        return JSON.parse(localStorage.getItem('agh_scores')||'{}');
+    }
+    function saveScores(obj){
+        localStorage.setItem('agh_scores',JSON.stringify(obj));
+    }
+    function saveGameScore(game,score,diff){
+        if(!currentUser) return;
+        const sc=loadScores();
+        if(!sc[currentUser]) sc[currentUser]={snake:{},guess:{}};
+        const prev = sc[currentUser][game][diff]||0;
+        if(score>prev){
+            sc[currentUser][game][diff]=score;
+            saveScores(sc);
+        }
+        updateAll();
+    }
+
+    // --- ТОП-10 ПО ИГРАМ/СЛОЖНОСТЯМ ---
+    let topGame='snake';
+    let topDiff=1;
+
+    function setTopFilter(game,diff){
+        topGame=game; topDiff=diff;
+        ['snake1','snake2','snake3','guess1','guess2','guess3'].forEach(id=>{
+            const el=document.getElementById('tab'+id.charAt(0).toUpperCase()+id.slice(1));
+            if(!el) return;
         });
+        ['tabSnake1','tabSnake2','tabSnake3','tabGuess1','tabGuess2','tabGuess3'].forEach(id=>{
+            const el=document.getElementById(id);
+            if(!el) return;
+            const g=id.includes('Snake')?'snake':'guess';
+            const d=parseInt(id[id.length-1]);
+            el.classList.toggle('active',g===game && d===diff);
+        });
+        renderTop();
     }
 
-    function drawFood() {
-        const px = food.x * gridSize + 1;
-        const py = food.y * gridSize + 1;
-        let color;
-        if (theme === 'matrix') {
-            color = "rgba(0,255,120,0.95)";
-        } else if (theme === 'violet') {
-            color = "rgba(255,0,255,0.95)";
-        } else {
-            color = "rgba(255,0,210,0.95)";
+    function renderTop(){
+        const sc=loadScores();
+        const all=[];
+        for(const user in sc){
+            const val=sc[user][topGame]?.[topDiff]||0;
+            if(val>0) all.push({user,score:val});
         }
-        neonRect(px, py, color);
-    }
-
-    function tick() {
-        if (!running || paused) return;
-
-        const head = {...snake[0]};
-        head.x += direction.x;
-        head.y += direction.y;
-
-        if (head.x < 0) head.x = cols - 1;
-        if (head.x >= cols) head.x = 0;
-        if (head.y < 0) head.y = rows - 1;
-        if (head.y >= rows) head.y = 0;
-
-        if (snake.some(part => part.x === head.x && part.y === head.y)) {
-            gameOver();
-            return;
+        all.sort((a,b)=>b.score-a.score);
+        const list=document.getElementById('topList');
+        list.innerHTML='';
+        (all.slice(0,10)).forEach((r,i)=>{
+            const li=document.createElement('li');
+            li.innerHTML=`<span>${i+1}. ${r.user}</span><span>${r.score}</span>`;
+            list.appendChild(li);
+        });
+        if(all.length===0){
+            const li=document.createElement('li');
+            li.innerHTML='<span>Пока нет рекордов</span><span>0</span>';
+            list.appendChild(li);
         }
-
-        snake.unshift(head);
-
-        if (head.x === food.x && head.y === food.y) {
-            score += 10;
-            audioEat.currentTime = 0;
-            audioEat.play().catch(()=>{});
-            food = randomFood();
-            baseDelay = Math.max(40, baseDelay - 4);
-            updateScoreDisplays();
-        } else {
-            snake.pop();
-        }
-
-        drawGrid();
-        drawFood();
-        drawSnake();
-        drawNicknameOverlay();
-
-        loopId = setTimeout(() => requestAnimationFrame(tick), baseDelay);
     }
 
-    function updateScoreDisplays() {
-        scoreEl.textContent = String(score).padStart(3, "0");
-        bestScoreEl.textContent = String(bestScore).padStart(3, "0");
-        bestScoreTopEl.textContent = String(bestScore).padStart(3, "0");
-        const speedFactor = (130 / baseDelay).toFixed(1);
-        speedEl.textContent = "x" + speedFactor;
-    }
-
-    function startGame() {
-        const nick = document.getElementById("nickname").value.trim();
-        const pass = document.getElementById("password").value.trim();
-        if (!nick || !pass) return;
-
-        currentNickEl.textContent = nick;
-        nickFlyEl.textContent = nick;
-        nickFlyEl.style.opacity = "1";
-
-        const remember = document.getElementById("rememberSwitch").classList.contains("on");
-        if (remember && window.localStorage) {
-            const data = { nick, theme, speedPreset, bestScore, gamesPlayed };
-            localStorage.setItem("snakeProfile", JSON.stringify(data));
-        }
-
-        overlay.style.display = "none";
-        running = true;
-        paused = false;
-        if (loopId) clearTimeout(loopId);
-        tick();
-    }
-
-    function gameOver() {
-        running = false;
-        paused = false;
-        gamesPlayed++;
-        if (score > bestScore) bestScore = score;
-        gamesPlayedEl.textContent = gamesPlayed;
-        updateScoreDisplays();
-
-        if (window.localStorage) {
-            const stored = localStorage.getItem("snakeProfile");
-            if (stored) {
-                try {
-                    const data = JSON.parse(stored);
-                    data.bestScore = bestScore;
-                    data.gamesPlayed = gamesPlayed;
-                    localStorage.setItem("snakeProfile", JSON.stringify(data));
-                } catch(e){}
+    // --- ТУРНИР 24ч, СТАРТ В 00:00 МСК ---
+    // локально считаем, что время системы ~ МСК
+    // структура tournamentScores: [{user,score}]
+    function getTournamentStartTs(){
+        let ts = parseInt(localStorage.getItem('agh_tournament_start')||'0');
+        const now=new Date();
+        if(!ts){
+            const start=new Date();
+            start.setHours(0,0,0,0);
+            ts=start.getTime();
+            localStorage.setItem('agh_tournament_start',ts);
+        }else{
+            // если прошли сутки — сдвигаем на ближайший 00:00
+            const passed = Date.now()-ts;
+            if(passed>=24*3600*1000){
+                const n=new Date();
+                n.setHours(0,0,0,0);
+                ts=n.getTime();
+                localStorage.setItem('agh_tournament_start',ts);
             }
         }
-
-        overlay.style.display = "block";
-        overlay.innerHTML = "GAME OVER<br><div class=\"overlay-sub\">нажми кнопку &laquo;Запустить Змейку&raquo; или клавишу R</div>";
-        audioDie.currentTime = 0;
-        audioDie.play().catch(()=>{});
-        if (loopId) clearTimeout(loopId);
-        resetGameState();
+        return ts;
     }
 
-    function resetGame() {
-        resetGameState();
-        overlay.style.display = "block";
-        overlay.innerHTML = "PRESS START<div class=\"overlay-sub\">введи ник и пароль, выбери тему и нажми кнопку</div>";
-        drawGrid();
-        drawFood();
-        drawSnake();
-        drawNicknameOverlay();
+    function getTournamentScores(){
+        return JSON.parse(localStorage.getItem('agh_tournament_scores')||'[]');
+    }
+    function saveTournamentScores(arr){
+        localStorage.setItem('agh_tournament_scores',JSON.stringify(arr));
     }
 
-    function toggleRemember() {
-        const sw = document.getElementById("rememberSwitch");
-        sw.classList.toggle("on");
-    }
-
-    function changeTheme() {
-        const select = document.getElementById("themeSelect");
-        theme = select.value;
-        document.body.setAttribute("data-theme", theme);
-        const modeLabel = document.getElementById("modeLabel");
-        if (theme === "matrix") modeLabel.textContent = "Matrix Snake Grid";
-        else if (theme === "violet") modeLabel.textContent = "Violet Pulse Grid";
-        else modeLabel.textContent = "Neon Snake Grid";
-        drawGrid();
-        drawFood();
-        drawSnake();
-        drawNicknameOverlay();
-    }
-
-    function drawNicknameOverlay() {
-        const nick = currentNickEl.textContent;
-        if (!nick || nick === "—") {
-            nickFlyEl.style.opacity = "0";
-            return;
+    function addToTournament(totalScore){
+        if(!currentUser) return;
+        const arr=getTournamentScores();
+        const existing=arr.find(r=>r.user===currentUser);
+        if(existing){
+            if(totalScore>existing.score) existing.score=totalScore;
+        }else{
+            arr.push({user:currentUser,score:totalScore});
         }
-        nickFlyEl.style.opacity = running ? "1" : "0.8";
+        saveTournamentScores(arr);
     }
 
-    window.addEventListener("keydown", e => {
-        if (e.key === "r" || e.key === "R") {
-            e.preventDefault();
-            resetGame();
-            return;
+    function renderTournament(){
+        const startTs=getTournamentStartTs();
+        const now=Date.now();
+        const leftMs=startTs+24*3600*1000-now;
+        let hrs=Math.floor(leftMs/3600000);
+        let mins=Math.floor((leftMs%3600000)/60000);
+        if(leftMs<=0){hrs=0;mins=0;}
+        timerLive.textContent=`До конца турнира: ${hrs}ч ${mins}м`;
+        const arr=getTournamentScores().sort((a,b)=>b.score-a.score);
+        const list=document.getElementById('tournamentList');
+        list.innerHTML='';
+        (arr.slice(0,100)).forEach((r,i)=>{
+            const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':i<5?'🏅':'';
+            const li=document.createElement('li');
+            li.innerHTML=`<span>${i+1}. ${r.user} ${medal}</span><span>${r.score}</span>`;
+            list.appendChild(li);
+        });
+        if(arr.length===0){
+            const li=document.createElement('li');
+            li.innerHTML='<span>Пока нет участников</span><span>0</span>';
+            list.appendChild(li);
         }
-        if (!running) return;
-        if (e.key === "ArrowUp" && direction.y !== 1) direction = {x: 0, y: -1};
-        else if (e.key === "ArrowDown" && direction.y !== -1) direction = {x: 0, y: 1};
-        else if (e.key === "ArrowLeft" && direction.x !== 1) direction = {x: -1, y: 0};
-        else if (e.key === "ArrowRight" && direction.x !== -1) direction = {x: 1, y: 0};
-        else if (e.key === "p" || e.key === "P") {
-            if (!running) return;
-            paused = !paused;
-            overlay.style.display = paused ? "block" : "none";
-            overlay.innerHTML = paused
-                ? "PAUSE<div class=\"overlay-sub\">нажми P, чтобы продолжить</div>"
-                : "";
-            if (!paused) tick();
-        }
-    });
-
-    const speedSelectEl = document.getElementById("speedSelect");
-    speedSelectEl.addEventListener("change", () => {
-        speedPreset = speedSelectEl.value;
-        baseDelay = getDelayFromSpeedPreset();
-        updateScoreDisplays();
-    });
-
-    function loadProfile() {
-        if (!window.localStorage) return;
-        const stored = localStorage.getItem("snakeProfile");
-        if (!stored) return;
-        try {
-            const data = JSON.parse(stored);
-            if (data.nick) {
-                document.getElementById("nickname").value = data.nick;
-                currentNickEl.textContent = data.nick;
-                nickFlyEl.textContent = data.nick;
-                nickFlyEl.style.opacity = "0.8";
-            }
-            if (data.theme) {
-                theme = data.theme;
-                document.getElementById("themeSelect").value = theme;
-                changeTheme();
-            }
-            if (data.speedPreset) {
-                speedPreset = data.speedPreset;
-                document.getElementById("speedSelect").value = speedPreset;
-            }
-            if (typeof data.bestScore === "number") bestScore = data.bestScore;
-            if (typeof data.gamesPlayed === "number") gamesPlayed = data.gamesPlayed;
-            gamesPlayedEl.textContent = gamesPlayed;
-            baseDelay = getDelayFromSpeedPreset();
-            updateScoreDisplays();
-        } catch(e){}
+        statusLive.textContent='Приз получают топ‑5 по итогам суток.';
     }
 
-    resetGameState();
-    loadProfile();
-    drawGrid();
-    drawFood();
-    drawSnake();
-    drawNicknameOverlay();
+    function recomputeUserTotalAndTournament(){
+        const sc=loadScores();
+        let total=0;
+        const u=currentUser;
+        if(u && sc[u]){
+            const s=sc[u];
+            for(const d in s.snake) total+=s.snake[d];
+            for(const d in s.guess) total+=s.guess[d];
+        }
+        userTotal.textContent=total+'💎';
+        addToTournament(total);
+    }
+
+    // --- ОБНОВЛЕНИЯ ---
+    function updateAll(){
+        renderTop();
+        renderTournament();
+        recomputeUserTotalAndTournament();
+    }
+
+    setSnakeDiff(1);
+    setGuessDiff(1);
+    checkAuth();
+    setTopFilter('snake',1);
+    setInterval(()=>{ if(currentUser) updateAll(); }, 30000);
 </script>
 </body>
 </html>
