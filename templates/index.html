@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 ALEKSIN GAMES HUB v2.5 ✅</title>
+    <title>🚀 ALEKSIN GAMES HUB v2.6 ✅</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         *{margin:0;padding:0;box-sizing:border-box}
@@ -39,7 +39,7 @@
 <body>
     <div class="container">
         <div class="games">
-            <h1>🚀 ALEKSIN GAMES HUB v2.5</h1>
+            <h1>🚀 ALEKSIN GAMES HUB v2.6</h1>
             
             <!-- АВТОРИЗАЦИЯ -->
             <div id="authSection">
@@ -80,7 +80,7 @@
                     <button class="btn" onclick="startSnake('normal')">Нормальная</button>
                     <button class="btn" onclick="startSnake('hard')">Сложная</button>
                 </div>
-                <canvas id="snakeCanvas" width="400" height="400"></canvas>
+                <canvas id="snakeCanvas" width="400" height="400" tabindex="0"></canvas>
                 <div style="text-align:center;margin-top:15px">
                     <div id="snakeScore" style="font-size:1.5rem;font-weight:900;color:#00ff00">Счёт: 0</div>
                     <div id="snakeHighScore" style="color:#ff00ff">Рекорд: 0</div>
@@ -140,7 +140,7 @@
         // УГАДАЙКА
         let guessNumber = 0, guessAttempts = 0, guessMax = 1000;
         
-        // ✅ ИНИЦИАЛИЗАЦИЯ
+        // ✅ ИНИЦИАЛИЗАЦИЯ - БЕЗ ГЛОБАЛЬНЫХ СВАЙПОВ
         document.addEventListener('DOMContentLoaded', function() {
             loadData();
             if(currentUser) {
@@ -151,7 +151,7 @@
             }
             updateLeaderboards();
             updateTournament();
-            setInterval(updateTournament, 1000); // ✅ КАЖДУЮ СЕКУНДУ
+            setInterval(updateTournament, 1000);
         });
         
         // СОХРАНЕНИЕ
@@ -168,7 +168,7 @@
             });
         }
         
-        // ✅ ФИКСИРОВАННАЯ НАВИГАЦИЯ
+        // ✅ НАВИГАЦИЯ
         function showGame(game) {
             document.querySelectorAll('.game-section').forEach(section => {
                 section.classList.remove('active');
@@ -192,10 +192,10 @@
             currentGame = game;
         }
         
-        // ✅ ТУРНИР С СЕКУНДАМИ - ОБНОВЛЕНИЕ КАЖДУЮ СЕКУНДУ
+        // ✅ ТУРНИР С СЕКУНДАМИ
         function updateTournament() {
             const now = new Date();
-            const mskOffset = 3 * 60; // MSK +3 UTC
+            const mskOffset = 3 * 60;
             const utcHours = now.getUTCHours();
             const mskHours = (utcHours + 3) % 24;
             const secondsSinceMidnight = mskHours * 3600 + now.getUTCMinutes() * 60 + now.getUTCSeconds();
@@ -293,7 +293,7 @@
             saveData();
         }
         
-        // ЗМЕЙКА
+        // ✅ ЗМЕЙКА С СВАЙПАМИ ТОЛЬКО НА CANVAS
         function startSnake(difficulty) {
             currentDifficulty = difficulty;
             snakeScore = 0;
@@ -306,6 +306,30 @@
             if(snakeInterval) clearInterval(snakeInterval);
             const speeds = {easy:200, normal:120, hard:80};
             snakeInterval = setInterval(updateSnake, speeds[difficulty]);
+            
+            // ✅ СВАЙПЫ ТОЛЬКО НА ЭТОМ CANVAS
+            const canvas = document.getElementById('snakeCanvas');
+            canvas.focus();
+            let touchStartX = 0, touchStartY = 0;
+            
+            canvas.ontouchstart = function(e) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            };
+            
+            canvas.ontouchmove = function(e) {
+                e.preventDefault();
+                const deltaX = e.touches[0].clientX - touchStartX;
+                const deltaY = e.touches[0].clientY - touchStartY;
+                
+                if(Math.abs(deltaX) > Math.abs(deltaY) && snakeDirection.y === 0) {
+                    snakeDirection = deltaX > 0 ? {x:1,y:0} : {x:-1,y:0};
+                } else if(Math.abs(deltaY) > Math.abs(deltaX) && snakeDirection.x === 0) {
+                    snakeDirection = deltaY > 0 ? {x:0,y:1} : {x:0,y:-1};
+                }
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            };
         }
         
         function updateSnake() {
@@ -354,6 +378,7 @@
             });
         }
         
+        // КЛАВИАТУРА
         document.addEventListener('keydown', function(e) {
             if(!snakeGameRunning) return;
             
