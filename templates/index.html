@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 ALEKSIN GAMES HUB v3.7 ✅ МОБАЙЛ ФИКС + ГЛОБАЛ РЕКОРДЫ</title>
+    <title>🚀 ALEKSIN GAMES HUB v3.8 ✅ ANDROID ONLY + МОБАЙЛ ФИКС</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         *{margin:0;padding:0;box-sizing:border-box}
@@ -34,15 +34,31 @@
         @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
         @media (max-width:768px){.container{padding:10px}.btn{padding:12px 20px;font-size:1rem}}
         .empty-table td{color:#888;font-style:italic}
+        .iphone-block{text-align:center;padding:100px;background:#000;color:#ff4444;font-family:Arial;font-size:2rem}
     </style>
 </head>
 <body>
-    <div id="statusBar">👋 Гость</div>
-    <div id="logoutContainer">
+    <!-- ✅ ANTI-IPHONE БЛОКИРОВКА -->
+    <script>
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+            document.body.innerHTML = `
+                <div class="iphone-block">
+                    <h1>🚫 iPhone НЕ ПОДДЕРЖИВАЕТСЯ</h1>
+                    <p>Играй на <strong>Android</strong> или <strong>ПК</strong> 🚀</p>
+                    <p>Змейка PRO v3.8 — только для настоящих геймеров!</p>
+                    <div style="font-size:4rem;margin:50px">💀</div>
+                </div>
+            `;
+            document.title = "iPhone Заблокирован";
+        }
+    </script>
+
+    <div id="statusBar" style="display:none">👋 Гость</div>
+    <div id="logoutContainer" style="display:none">
         <button class="btn" id="logoutBtn" onclick="logout()">👋 ВЫЙТИ</button>
     </div>
     
-    <div class="container">
+    <div class="container" style="display:none">
         <div id="authSection" class="section active">
             <h2>🔐 Вход / Регистрация</h2>
             <input type="text" id="usernameInput" placeholder="test" value="test">
@@ -50,7 +66,7 @@
             <button class="btn" onclick="login()">🚀 ВОЙТИ</button>
         </div>
 
-        <h1>🚀 ALEKSIN GAMES HUB v3.7 ✅ МОБАЙЛ + ГЛОБАЛ РЕКОРДЫ</h1>
+        <h1>🚀 ALEKSIN GAMES HUB v3.8 ✅ ANDROID ONLY</h1>
         
         <div class="game-grid">
             <button class="btn" onclick="showGame('leaderboards')">🏆 ЛИДЕРБОРДЫ</button>
@@ -82,7 +98,7 @@
         </div>
 
         <div id="snakeSection" class="section">
-            <h2>🐍 ЗМЕЙКА PRO 📱 МОБАЙЛ ФИКС</h2>
+            <h2>🐍 ЗМЕЙКА PRO 📱 ANDROID ФИКС</h2>
             <div class="game-grid">
                 <button class="btn" onclick="startSnake('easy')">Лёгкая</button>
                 <button class="btn" onclick="startSnake('normal')">Средняя</button>
@@ -92,13 +108,20 @@
                 <canvas id="gameCanvas" width="400" height="400" tabindex="0"></canvas>
                 <div id="snakeScore" style="position:absolute;top:10px;left:10px;font-size:1.5rem;font-weight:700;color:#00ff00">Счёт: 0</div>
                 <div style="position:absolute;bottom:-50px;left:50%;transform:translateX(-50%);font-size:1.2rem">
-                    📱 Свайп ←→↑↓
+                    📱 Свайп ←→↑↓ (Android only!)
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // ✅ ПОДТВЕРЖДЕНИЕ Android/PC — показываем игру
+        if (!/iPad|iPhone|iPod/.test(navigator.userAgent) || window.MSStream) {
+            document.querySelector('.container').style.display = 'block';
+            document.getElementById('statusBar').style.display = 'block';
+            document.getElementById('logoutContainer').style.display = 'block';
+        }
+
         // ГЛОБАЛЬНЫЕ ДАННЫЕ — ВСЕ ИГРОКИ ВИДЯТ ОДИНАКОВО
         let currentUser = localStorage.getItem('aleksinUser') || null;
         let leaderboards = JSON.parse(localStorage.getItem('aleksinLeaderboards')) || {};
@@ -162,7 +185,6 @@
             isSnakeActive = false;
             snake = [];
             snakeScore = 0;
-            document.body.style.overflow = 'auto';
             
             currentUser = null;
             document.getElementById('statusBar').textContent = '👋 Гость';
@@ -301,7 +323,7 @@
             document.getElementById('guessInput').value = '';
         }
 
-        // ✅ ЗМЕЙКА МОБАЙЛ ФИКС — БЕЗ СКРОЛЛА И ПОВОРОТА
+        // ✅ ЗМЕЙКА ANDROID ONLY — МОБАЙЛ ФИКС
         function startSnake(difficulty) {
             currentGameType = 'snake';
             currentDifficulty = difficulty;
@@ -318,7 +340,6 @@
             gameRunning = true;
             if (snakeInterval) clearInterval(snakeInterval);
             
-            // ✅ МОБАЙЛ ФИКС: touchend вместо touchmove
             let touchStartX = 0, touchStartY = 0;
             
             const cleanupTouch = () => {
@@ -339,7 +360,6 @@
                 const deltaX = e.changedTouches[0].clientX - touchStartX;
                 const deltaY = e.changedTouches[0].clientY - touchStartY;
                 
-                // ✅ Короткие свайпы >30px БЕЗ конфликта
                 if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
                     if (deltaX > 0 && snakeDirection.x === 0) snakeDirection = {x:1,y:0};
                     else if (deltaX < 0 && snakeDirection.x === 0) snakeDirection = {x:-1,y:0};
@@ -353,10 +373,9 @@
             canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
             canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
             
-            // ✅ БЛОКИРОВКА СКРОЛЛА ТОЛЬКО НА CANVAS
             canvas.style.touchAction = 'none';
-            
             canvas.focus();
+            
             const speeds = {easy:200, normal:150, hard:100};
             
             function gameLoop() {
