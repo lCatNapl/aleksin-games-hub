@@ -1,15 +1,21 @@
+import os
 from flask import Flask, render_template, request, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, date
-import os
+from sqlalchemy import func
 
 app = Flask(__name__)
-app.secret_key = 'aleksin-games-hub-v4-super-secret-key-2026'
+app.secret_key = 'aleksin-games-hub-v4-super-secret-2026'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///aleksin_games.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# МОДЕЛЬ ДАННЫХ
+# МОДЕЛИ
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+
 class Score(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False)
@@ -18,26 +24,20 @@ class Score(db.Model):
     points = db.Column(db.Integer, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(255), nullable=False)
-
-# ✅ ИНИЦИАЛИЗАЦИЯ БАЗЫ
+# ИНИЦИАЛИЗАЦИЯ БАЗЫ + ТЕСТОВЫЙ АККАУНТ
 with app.app_context():
     db.create_all()
-    # ТЕСТОВЫЕ ДАННЫЕ
     if not User.query.filter_by(username='test').first():
         test_user = User(username='test', password='123456')
         db.session.add(test_user)
         db.session.commit()
-        print("✅ Тестовый аккаунт test:123456 создан")
+        print("✅ Test account 'test:123456' created")
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# ✅ ЛОГИН/РЕГИСТРАЦИЯ (ПРОВЕРКА)
+# ЛОГИН
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
@@ -45,14 +45,14 @@ def login():
     if user:
         session['username'] = data['username']
         return jsonify({'success': True})
-    return jsonify({'success': False}), 401
+    return jsonify({'success': False, 'error': 'Неверный логин/пароль'}), 401
 
 @app.route('/logout')
 def logout():
     session.pop('username', None)
     return jsonify({'success': True})
 
-# ✅ СОХРАНЕНИЕ РЕКОРДОВ
+# СОХРАНЕНИЕ РЕКОРДА
 @app.route('/api/scores', methods=['POST'])
 def save_score():
     if 'username' not in session:
@@ -69,7 +69,7 @@ def save_score():
     db.session.commit()
     return jsonify({'success': True})
 
-# ✅ ГЛОБАЛЬНЫЙ ТОП-10 ПО ИГРАМ
+# ГЛОБАЛЬНЫЙ ТОП-10 ПО ИГРЕ
 @app.route('/api/leaderboard/<game>')
 def leaderboard(game):
     if 'username' not in session:
@@ -86,7 +86,7 @@ def leaderboard(game):
         'timestamp': s.timestamp.isoformat()
     } for s in top10])
 
-# ✅ ТУРНИР СЕГОДНЯ (ТОП-100)
+# ТУРНИР СЕГОДНЯ (ТОП-100)
 @app.route('/api/tournament')
 def tournament():
     if 'username' not in session:
@@ -94,7 +94,7 @@ def tournament():
     
     today = date.today()
     daily_scores = db.session.query(Score)\
-        .filter(db.func.date(Score.timestamp) == today)\
+        .filter(func.date(Score.timestamp) == today)\
         .order_by(Score.points.desc())\
         .limit(100).all()
     
@@ -104,5 +104,7 @@ def tournament():
         'rank': i+1
     } for i, s in enumerate(daily_scores)])
 
+# ✅ РЕНДЕР: BIND TO 0.0.0.0:$PORT
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port, debug=False)
