@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 ALEKSIN GAMES HUB v4.0 | ГЛОБАЛЬНЫЕ ЛИДЕРБОРДЫ</title>
+    <title>🚀 ALEKSIN GAMES HUB v4.1 | ГЛОБАЛЬНЫЕ ЛИДЕРБОРДЫ</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -16,7 +16,7 @@
             overflow-x: hidden;
             min-height: 100vh;
         }
-        @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes gradientShift { 0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;} }
         
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
         .header {
@@ -26,36 +26,36 @@
             background-clip: text; font-size: 3em; font-weight: 900; text-shadow: 0 0 30px #ff00ff;
             animation: rgbGlow 2s ease-in-out infinite alternate;
         }
-        @keyframes rgbGlow { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
+        @keyframes rgbGlow { from{filter:hue-rotate(0deg);}to{filter:hue-rotate(360deg);} }
 
-        /* ✅ ANTI-IPHONE */
-        .iphone-block { display: none; }
-        @media only screen and (max-device-width: 812px) and (-webkit-min-device-pixel-ratio: 3) {
-            body::before {
-                content: "🚫 iPhone заблокирован! Только Android/PC"; position: fixed; top: 0; left: 0;
-                width: 100%; height: 100%; background: #000; color: #ff4444; font-size: 24px;
-                display: flex; align-items: center; justify-content: center; z-index: 9999;
-            }
-        }
-
-        .auth-panel, .games-panel { 
+        .auth-panel { 
             background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); border-radius: 20px;
             padding: 30px; margin: 20px 0; border: 2px solid; box-shadow: 0 0 50px rgba(0,255,255,0.3);
-            animation: float 3s ease-in-out infinite;
+            animation: float 3s ease-in-out infinite; max-width: 400px; margin: 20px auto;
         }
-        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+        @keyframes float { 0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);} }
 
-        .login-form { display: flex; flex-direction: column; gap: 15px; max-width: 300px; margin: 0 auto; }
+        .login-form, .register-form { 
+            display: flex; flex-direction: column; gap: 15px; 
+        }
+        .form-group { display: flex; gap: 10px; }
+        .form-group button { flex: 1; padding: 12px; }
+        
         input { padding: 15px; border: none; border-radius: 10px; background: rgba(255,255,255,0.1);
                 color: #fff; font-size: 16px; font-family: inherit; }
         input::placeholder { color: #aaa; }
         button {
-            padding: 15px; border: none; border-radius: 10px; background: linear-gradient(45deg, #ff00ff, #00ffff);
-            color: #000; font-weight: 700; font-size: 16px; cursor: pointer; transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(0,255,255,0.4);
+            padding: 15px; border: none; border-radius: 10px; font-weight: 700; font-size: 16px; 
+            cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(0,255,255,0.4);
         }
+        .login-btn { background: linear-gradient(45deg, #ff00ff, #00ffff); color: #000; }
+        .register-btn { background: linear-gradient(45deg, #00ff00, #00ff88); color: #000; }
         button:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(0,255,255,0.6); }
         button:active { transform: scale(0.98); }
+
+        .hidden { display: none !important; }
+        .status { text-align: center; font-size: 1.2em; margin: 10px 0; }
+        .welcome { color: #00ffff; font-size: 1.5em; }
 
         .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .game-card {
@@ -66,26 +66,26 @@
         .game-card h3 { color: #00ffff; margin-bottom: 10px; font-size: 1.5em; }
 
         .leaderboards, .tournament { 
-            background: rgba(0,255,0,0.1); border: 2px solid #00ff00; margin: 20px 0; border-radius: 15px; padding: 20px;
+            background: rgba(0,255,0,0.1); border: 2px solid #00ff00; margin: 20px 0; 
+            border-radius: 15px; padding: 20px;
         }
         .leaderboards h2, .tournament h2 { color: #00ff00; text-align: center; margin-bottom: 20px; }
         .leaderboard-list, .tournament-list { max-height: 300px; overflow-y: auto; }
         .leaderboard-list ol, .tournament-list ol { padding-left: 20px; }
         .leaderboard-list li, .tournament-list li {
-            padding: 8px; margin: 5px 0; background: rgba(255,255,255,0.1); border-radius: 8px;
-            display: flex; justify-content: space-between;
+            padding: 8px; margin: 5px 0; background: rgba(255,255,255,0.1); 
+            border-radius: 8px; display: flex; justify-content: space-between;
         }
-        .rank-1 { border-left: 5px solid #ffd700; } .rank-2 { border-left: 5px solid #c0c0c0; } 
-        .rank-3 { border-left: 5px solid #cd7f32; } .prize { color: #ffd700; font-weight: bold; }
+        .rank-1 { border-left: 5px solid #ffd700; } 
+        .rank-2 { border-left: 5px solid #c0c0c0; } 
+        .rank-3 { border-left: 5px solid #cd7f32; } 
+        .prize { color: #ffd700; font-weight: bold; }
 
-        .hidden { display: none !important; }
-        .status { text-align: center; font-size: 1.2em; margin: 10px 0; }
-        .welcome { color: #00ffff; font-size: 1.5em; }
-
-        /* МОБАЙЛ ЗМЕЙКА */
-        #gameCanvas { border: 3px solid #00ffff; border-radius: 10px; background: #000; display: block; margin: 10px auto; }
+        #gameCanvas { border: 3px solid #00ffff; border-radius: 10px; background: #000; 
+                      display: block; margin: 10px auto; }
         .controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 10px 0; }
-        .control-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(0,255,255,0.3); border: none; color: #fff; font-size: 18px; cursor: pointer; }
+        .control-btn { width: 60px; height: 60px; border-radius: 50%; background: rgba(0,255,255,0.3); 
+                       border: none; color: #fff; font-size: 18px; cursor: pointer; }
         .control-btn:active { background: #00ffff; transform: scale(0.9); }
 
         @media (max-width: 768px) {
@@ -96,56 +96,62 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="header">🚀 ALEKSIN GAMES HUB v4.0</h1>
+        <h1 class="header">🚀 ALEKSIN GAMES HUB v4.1</h1>
         
-        <!-- ✅ АВТОРИЗАЦИЯ -->
+        <!-- ✅ АВТОРИЗАЦИЯ + РЕГИСТРАЦИЯ -->
         <div id="authPanel" class="auth-panel">
-            <div class="status" id="status">🔐 ВХОД В СИСТЕМУ</div>
-            <form class="login-form">
+            <div class="status" id="status">🔐 ВХОД / РЕГИСТРАЦИЯ</div>
+            
+            <!-- ЛОГИН -->
+            <div id="loginForm" class="login-form">
                 <input type="text" id="username" placeholder="👤 Логин (test)" value="test">
                 <input type="password" id="password" placeholder="🔑 Пароль (123456)">
-                <button type="submit">🚀 ВОЙТИ</button>
-            </form>
-            <div style="text-align:center; margin-top:15px;">
-                <small>Демо: test / 123456</small>
+                <div class="form-group">
+                    <button type="submit" class="login-btn">🚀 ВОЙТИ</button>
+                    <button type="button" class="register-btn" onclick="showRegister()">📝 РЕГИСТРАЦИЯ</button>
+                </div>
+                <div style="text-align:center; font-size:14px;">
+                    <small>Демо: test / 123456</small>
+                </div>
+            </div>
+
+            <!-- РЕГИСТРАЦИЯ -->
+            <div id="registerForm" class="register-form hidden">
+                <h3 style="text-align:center; color:#00ff00;">📝 СОЗДАТЬ АККАУНТ</h3>
+                <input type="text" id="regUsername" placeholder="👤 vasya">
+                <input type="password" id="regPassword" placeholder="🔑 6+ символов">
+                <div class="form-group">
+                    <button onclick="doRegister()" class="register-btn">✅ СОЗДАТЬ</button>
+                    <button onclick="showLogin()" class="login-btn">🔙 К ЛОГИНУ</button>
+                </div>
             </div>
         </div>
 
-        <!-- ✅ ОСНОВНОЙ КОНТЕНТ (после логина) -->
+        <!-- ✅ ИГРЫ + ЛИДЕРБОРДЫ -->
         <div id="mainPanel" class="hidden">
             <div class="status welcome" id="welcome"></div>
-            <button onclick="logout()" style="float:right; padding:10px 20px; font-size:14px;">🚪 Выход</button>
+            <button onclick="logout()" style="float:right; padding:10px 20px; font-size:14px; background:#ff4444;color:#fff;border-radius:10px;border:none;">🚪 Выход</button>
             
             <div class="games-grid">
-                <!-- ЗМЕЙКА -->
                 <div class="game-card" onclick="startSnake('easy')">
-                    <h3>🐍 ЗМЕЙКА EASY</h3>
-                    <p>Классика с touch/WASD</p>
+                    <h3>🐍 ЗМЕЙКА EASY</h3><p>Классика touch/WASD</p>
                 </div>
                 <div class="game-card" onclick="startSnake('medium')">
-                    <h3>🐍 ЗМЕЙКА MEDIUM</h3>
-                    <p>Больше скорость!</p>
+                    <h3>🐍 ЗМЕЙКА MEDIUM</h3><p>Высокая скорость!</p>
                 </div>
-                <!-- УГАДАЙКА -->
                 <div class="game-card" onclick="startGuess('easy')">
-                    <h3>🎯 УГАДАЙКА EASY (1-100)</h3>
-                    <p>Подсказки + рекорд</p>
+                    <h3>🎯 УГАДАЙКА EASY (1-100)</h3><p>Подсказки + рекорд</p>
                 </div>
                 <div class="game-card" onclick="startGuess('hard')">
-                    <h3>🎯 УГАДАЙКА HARD (1-10000)</h3>
-                    <p>Для профи!</p>
+                    <h3>🎯 УГАДАЙКА HARD (1-10000)</h3><p>Для профи!</p>
                 </div>
             </div>
 
-            <!-- ✅ ГЛОБАЛЬНЫЕ ЛИДЕРБОРДЫ -->
             <div id="leaderboards" class="leaderboards hidden"></div>
-            
-            <!-- ✅ ТУРНИР -->
             <div id="tournament" class="tournament hidden"></div>
         </div>
     </div>
 
-    <!-- ✅ КАНВАС ДЛЯ ЗМЕЙКИ -->
     <canvas id="gameCanvas" width="400" height="400" class="hidden"></canvas>
     <div class="controls hidden" id="controls">
         <button class="control-btn" onclick="changeDirection('up')">↑</button>
@@ -156,18 +162,14 @@
 
     <script>
         let currentUser = null;
-        let gameState = { snake: null, guess: null };
+        let snakeDir = {x: 0, y: 0};
+        let gameActive = false;
 
-        // ✅ АВТООБНОВЛЕНИЕ ЛИДЕРБОРДОВ
-        setInterval(() => {
-            if (currentUser) {
-                updateLeaderboards();
-                updateTournament();
-            }
-        }, 5000);
+        // АВТООБНОВЛЕНИЕ ЛИДЕРБОРДОВ
+        setInterval(() => { if (currentUser) { updateLeaderboards(); updateTournament(); } }, 5000);
 
         // ✅ ЛОГИН
-        document.querySelector('.login-form').addEventListener('submit', async e => {
+        document.getElementById('loginForm').addEventListener('submit', async e => {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -178,21 +180,60 @@
                 body: JSON.stringify({username, password})
             });
             
-            if (response.ok) {
-                currentUser = username;
-                document.getElementById('status').textContent = `✅ Привет, ${username}!`;
-                document.getElementById('welcome').textContent = `🎮 Добро пожаловать, ${username}!`;
-                document.getElementById('authPanel').classList.add('hidden');
-                document.getElementById('mainPanel').classList.remove('hidden');
-                document.getElementById('gameCanvas').classList.remove('hidden');
-                updateLeaderboards();
-                updateTournament();
+            const result = await response.json();
+            if (result.success) {
+                loginSuccess(username);
             } else {
-                document.getElementById('status').textContent = '❌ Неверный логин/пароль';
+                document.getElementById('status').textContent = '❌ ' + (result.error || 'Ошибка');
             }
         });
 
-        // ✅ ГЛОБАЛЬНЫЙ ТОП-10
+        // ✅ РЕГИСТРАЦИЯ
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+
+        async function doRegister() {
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            
+            if (username.length < 3 || password.length < 3) {
+                alert('❌ Логин и пароль от 3 символов!');
+                return;
+            }
+            
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password})
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                loginSuccess(username);
+            } else {
+                alert('❌ ' + result.error);
+            }
+        }
+
+        // УСПЕШНЫЙ ВХОД/РЕГИСТРАЦИЯ
+        function loginSuccess(username) {
+            currentUser = username;
+            document.getElementById('status').textContent = `✅ Привет, ${username}!`;
+            document.getElementById('welcome').textContent = `🎮 Добро пожаловать, ${username}!`;
+            document.getElementById('authPanel').classList.add('hidden');
+            document.getElementById('mainPanel').classList.remove('hidden');
+            updateLeaderboards();
+            updateTournament();
+        }
+
+        // ГЛОБАЛЬНЫЙ ТОП-10
         async function updateLeaderboards() {
             const games = ['snake_easy', 'snake_medium', 'guess_easy', 'guess_hard'];
             let html = '<h2>🏆 ГЛОБАЛЬНЫЕ ТОП-10 (ВСЕ ИГРОКИ)</h2>';
@@ -201,8 +242,7 @@
                 try {
                     const response = await fetch(`/api/leaderboard/${game}`);
                     const top10 = await response.json();
-                    html += `<h3>${game.toUpperCase().replace('_', ' ')}</h3>`;
-                    html += '<ol class="leaderboard-list">';
+                    html += `<h3>${game.toUpperCase().replace('_', ' ')}</h3><ol class="leaderboard-list">`;
                     top10.forEach((player, i) => {
                         const rankClass = i < 3 ? `rank-${i+1}` : '';
                         html += `<li class="${rankClass}"><span>#${i+1} ${player.user}</span><span>${player.points} (${player.difficulty})</span></li>`;
@@ -216,20 +256,17 @@
             document.getElementById('leaderboards').classList.remove('hidden');
         }
 
-        // ✅ ТУРНИР 24ч
+        // ТУРНИР
         async function updateTournament() {
             try {
                 const response = await fetch('/api/tournament');
                 const top100 = await response.json();
-                let html = '<h2>⚔️ ТУРНИР СЕГОДНЯ (ТОП-100)</h2>';
-                html += '<ol class="tournament-list">';
-                
-                top100.slice(0, 100).forEach((player, i) => {
+                let html = '<h2>⚔️ ТУРНИР СЕГОДНЯ (ТОП-100)</h2><ol class="tournament-list">';
+                top100.slice(0,100).forEach((player, i) => {
                     const prize = i < 5 ? `<span class="prize">🥇 +${100*(6-(i+1))} очков</span>` : '';
-                    html += `<li>${player.rank}. ${player.user}: ${player.points} ${prize}</li>`;
+                    html += `<li>${player.rank || i+1}. ${player.user}: ${player.points} ${prize}</li>`;
                 });
                 html += '</ol>';
-                
                 document.getElementById('tournament').innerHTML = html;
                 document.getElementById('tournament').classList.remove('hidden');
             } catch(e) {
@@ -237,25 +274,23 @@
             }
         }
 
-        // ✅ СОХРАНЕНИЕ РЕКОРДА
+        // СОХРАНЕНИЕ РЕКОРДА
         async function saveScore(game, points, difficulty = 'normal') {
             await fetch('/api/scores', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({game, points, difficulty})
             });
-            updateLeaderboards();
-            updateTournament();
+            updateLeaderboards(); updateTournament();
         }
 
-        // ✅ ВЫХОД
+        // ВЫХОД
         async function logout() {
             await fetch('/logout');
             location.reload();
         }
 
-        // 🐍 ЗМЕЙКА (УПРОЩЁННАЯ)
-        let snakeDir = {x: 0, y: 0};
+        // 🐍 ЗМЕЙКА (ОСТАВЬ КАК БЫЛО)
         function startSnake(difficulty) {
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
@@ -265,27 +300,29 @@
             let snake = [{x: 10, y: 10}];
             let food = {x: 15, y: 15};
             let score = 0;
+            gameActive = true;
             
             function gameLoop() {
+                if (!gameActive) return;
+                
                 ctx.fillStyle = '#000';
                 ctx.fillRect(0, 0, 400, 400);
                 
-                // Змейка
                 ctx.fillStyle = '#00ff00';
                 snake.forEach(part => ctx.fillRect(part.x*20, part.y*20, 20, 20));
                 
-                // Еда
                 ctx.fillStyle = '#ff0000';
                 ctx.fillRect(food.x*20, food.y*20, 20, 20);
                 
-                // Движение
                 let head = {x: snake[0].x + snakeDir.x, y: snake[0].y + snakeDir.y};
                 
-                // Столкновения
                 if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || 
                     snake.some(s => s.x === head.x && s.y === head.y)) {
                     saveScore(`snake_${difficulty}`, score, difficulty);
                     alert(`Игра окончена! Рекорд: ${score}`);
+                    gameActive = false;
+                    canvas.classList.add('hidden');
+                    document.getElementById('controls').classList.add('hidden');
                     return;
                 }
                 
@@ -297,7 +334,6 @@
                     snake.pop();
                 }
                 
-                // Скорость по сложности
                 setTimeout(gameLoop, difficulty === 'easy' ? 200 : 100);
             }
             gameLoop();
@@ -314,7 +350,7 @@
             }
         }
 
-        // Touch controls
+        // TOUCH + КЛАВИАТУРА (ОСТАВЬ КАК БЫЛО)
         let touchStartX, touchStartY;
         document.addEventListener('touchstart', e => {
             touchStartX = e.touches[0].clientX;
@@ -337,29 +373,38 @@
             e.preventDefault();
         });
 
-        // 🎯 УГАДАЙКА (УПРОЩЁННАЯ)
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowUp') changeDirection('up');
+            if (e.key === 'ArrowDown') changeDirection('down');
+            if (e.key === 'ArrowLeft') changeDirection('left');
+            if (e.key === 'ArrowRight') changeDirection('right');
+        });
+
+        // 🎯 УГАДАЙКА (ОСТАВЬ КАК БЫЛО)
         function startGuess(difficulty) {
             const maxNum = difficulty === 'easy' ? 100 : 10000;
             const target = Math.floor(Math.random() * maxNum) + 1;
             let attempts = 0;
             let min = 1, max = maxNum;
             
-            canvas = document.getElementById('gameCanvas');
+            const canvas = document.getElementById('gameCanvas');
             canvas.classList.remove('hidden');
-            document.getElementById('controls').classList.remove('hidden');
             
             const guessInput = document.createElement('input');
             guessInput.placeholder = 'Введи число';
-            guessInput.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);padding:10px;z-index:1000;';
+            guessInput.style.cssText = 'position:fixed;top:10px;left:50%;transform:translateX(-50%);padding:10px;z-index:1000;border-radius:10px;background:rgba(0,255,255,0.2);color:#fff;border:2px solid #00ffff;';
             document.body.appendChild(guessInput);
             
             function checkGuess() {
                 const guess = parseInt(guessInput.value);
+                if (isNaN(guess)) return;
                 attempts++;
                 if (guess === target) {
-                    saveScore(`guess_${difficulty}`, maxNum - attempts * 10, difficulty);
-                    alert(`✅ Угадал за ${attempts} попыток! Рекорд: ${maxNum - attempts * 10}`);
+                    const points = maxNum - attempts * 10;
+                    saveScore(`guess_${difficulty}`, points, difficulty);
+                    alert(`✅ Угадал за ${attempts} попыток! Рекорд: ${points}`);
                     document.body.removeChild(guessInput);
+                    canvas.classList.add('hidden');
                 } else {
                     if (guess < target) {
                         min = guess;
@@ -376,19 +421,10 @@
                 if (e.key === 'Enter') checkGuess();
             });
             
-            // Кнопка угадать
-            const guessBtn = document.querySelector('.control-btn');
-            guessBtn.textContent = '🎯';
-            guessBtn.onclick = checkGuess;
+            document.getElementById('controls').classList.remove('hidden');
+            document.querySelector('.control-btn:last-child').textContent = '🎯';
+            document.querySelector('.control-btn:last-child').onclick = checkGuess;
         }
-
-        // Клавиатура
-        document.addEventListener('keydown', e => {
-            if (e.key === 'ArrowUp') changeDirection('up');
-            if (e.key === 'ArrowDown') changeDirection('down');
-            if (e.key === 'ArrowLeft') changeDirection('left');
-            if (e.key === 'ArrowRight') changeDirection('right');
-        });
     </script>
 </body>
 </html>
