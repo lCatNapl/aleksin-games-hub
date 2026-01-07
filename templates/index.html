@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 ALEKSIN GAMES HUB v3.6 ✅ ГЛОБАЛЬНЫЕ РЕКОРДЫ</title>
+    <title>🚀 ALEKSIN GAMES HUB v3.7 ✅ МОБАЙЛ ФИКС + ГЛОБАЛ РЕКОРДЫ</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         *{margin:0;padding:0;box-sizing:border-box}
@@ -17,7 +17,7 @@
         .section.active{display:block;animation:fadeIn 0.5s ease}
         @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
         .game-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin:20px 0}
-        canvas{border:3px solid rgba(255,255,255,0.3);border-radius:15px;background:#000;box-shadow:0 0 30px rgba(0,255,255,0.5)}
+        canvas{border:3px solid rgba(255,255,255,0.3);border-radius:15px;background:#000;box-shadow:0 0 30px rgba(0,255,255,0.5);touch-action:none}
         table{width:100%;max-width:400px;margin:15px auto;border-collapse:collapse;background:rgba(255,255,255,0.1);border-radius:15px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
         th,td{padding:12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.2)}
         th{background:linear-gradient(45deg,rgba(255,0,255,0.4),rgba(0,255,255,0.4));font-weight:700;color:#fff}
@@ -50,7 +50,7 @@
             <button class="btn" onclick="login()">🚀 ВОЙТИ</button>
         </div>
 
-        <h1>🚀 ALEKSIN GAMES HUB v3.6 ✅ ГЛОБАЛЬНЫЕ РЕКОРДЫ</h1>
+        <h1>🚀 ALEKSIN GAMES HUB v3.7 ✅ МОБАЙЛ + ГЛОБАЛ РЕКОРДЫ</h1>
         
         <div class="game-grid">
             <button class="btn" onclick="showGame('leaderboards')">🏆 ЛИДЕРБОРДЫ</button>
@@ -82,7 +82,7 @@
         </div>
 
         <div id="snakeSection" class="section">
-            <h2>🐍 ЗМЕЙКА PRO</h2>
+            <h2>🐍 ЗМЕЙКА PRO 📱 МОБАЙЛ ФИКС</h2>
             <div class="game-grid">
                 <button class="btn" onclick="startSnake('easy')">Лёгкая</button>
                 <button class="btn" onclick="startSnake('normal')">Средняя</button>
@@ -91,6 +91,9 @@
             <div style="position:relative;display:inline-block">
                 <canvas id="gameCanvas" width="400" height="400" tabindex="0"></canvas>
                 <div id="snakeScore" style="position:absolute;top:10px;left:10px;font-size:1.5rem;font-weight:700;color:#00ff00">Счёт: 0</div>
+                <div style="position:absolute;bottom:-50px;left:50%;transform:translateX(-50%);font-size:1.2rem">
+                    📱 Свайп ←→↑↓
+                </div>
             </div>
         </div>
     </div>
@@ -134,7 +137,7 @@
             localStorage.setItem('aleksinUser', currentUser);
             localStorage.setItem('aleksinLeaderboards', JSON.stringify(leaderboards));
             localStorage.setItem('aleksinTournaments', JSON.stringify(tournamentScores));
-            console.log('✅ СОХРАНЕНО:', leaderboards, tournamentScores);
+            console.log('✅ СОХРАНЕНО:', {leaderboards, tournamentScores});
         }
 
         function login() {
@@ -159,6 +162,7 @@
             isSnakeActive = false;
             snake = [];
             snakeScore = 0;
+            document.body.style.overflow = 'auto';
             
             currentUser = null;
             document.getElementById('statusBar').textContent = '👋 Гость';
@@ -191,7 +195,6 @@
             }
         }
 
-        // ✅ ГЛОБАЛЬНЫЙ ТОП-10 — ВСЕ ВИДЯТ РЕКОРДЫ ВСЕХ
         function addScore(game, difficulty, score) {
             if (!currentUser) return;
             const key = `${game}_${difficulty}`;
@@ -203,7 +206,6 @@
             console.log(`✅ ${currentUser} +${score} в ${key}`);
         }
 
-        // ✅ ФИКС ЛИДЕРБОРДОВ — РАБОТАЕТ ДЛЯ ВСЕХ ИГРОКОВ
         function updateLeaderboards() {
             let html = '<h2>🏆 ТОП-10 ЛИДЕРБОРДЫ (ГЛОБАЛЬНЫЕ)</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">';
             const games = ['snake', 'guess'];
@@ -227,7 +229,6 @@
             console.log('✅ ЛИДЕРБОРДЫ ОБНОВЛЕНЫ');
         }
 
-        // ✅ ФИКС ТУРНИРОВ — ГЛОБАЛЬНЫЕ 24Ч ТАБЛИЦЫ
         function updateTournament() {
             const now = new Date();
             const mskTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Moscow"}));
@@ -300,6 +301,7 @@
             document.getElementById('guessInput').value = '';
         }
 
+        // ✅ ЗМЕЙКА МОБАЙЛ ФИКС — БЕЗ СКРОЛЛА И ПОВОРОТА
         function startSnake(difficulty) {
             currentGameType = 'snake';
             currentDifficulty = difficulty;
@@ -316,25 +318,45 @@
             gameRunning = true;
             if (snakeInterval) clearInterval(snakeInterval);
             
-            let touchStartX, touchStartY;
-            canvas.addEventListener('touchstart', e => {
+            // ✅ МОБАЙЛ ФИКС: touchend вместо touchmove
+            let touchStartX = 0, touchStartY = 0;
+            
+            const cleanupTouch = () => {
+                canvas.removeEventListener('touchstart', handleTouchStart);
+                canvas.removeEventListener('touchend', handleTouchEnd);
+            };
+            
+            function handleTouchStart(e) {
+                e.preventDefault();
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
-            }, {passive: true});
+            }
             
-            canvas.addEventListener('touchmove', e => {
-                e.stopPropagation();
-                const deltaX = e.touches[0].clientX - touchStartX;
-                const deltaY = e.touches[0].clientY - touchStartY;
+            function handleTouchEnd(e) {
+                e.preventDefault();
+                if (!touchStartX || !touchStartY) return;
+                
+                const deltaX = e.changedTouches[0].clientX - touchStartX;
+                const deltaY = e.changedTouches[0].clientY - touchStartY;
+                
+                // ✅ Короткие свайпы >30px БЕЗ конфликта
                 if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
-                    snakeDirection = deltaX > 0 ? {x:1,y:0} : {x:-1,y:0};
+                    if (deltaX > 0 && snakeDirection.x === 0) snakeDirection = {x:1,y:0};
+                    else if (deltaX < 0 && snakeDirection.x === 0) snakeDirection = {x:-1,y:0};
                 } else if (Math.abs(deltaY) > 30) {
-                    snakeDirection = deltaY > 0 ? {x:0,y:1} : {x:0,y:-1};
+                    if (deltaY > 0 && snakeDirection.y === 0) snakeDirection = {x:0,y:1};
+                    else if (deltaY < 0 && snakeDirection.y === 0) snakeDirection = {x:0,y:-1};
                 }
-            }, {passive: false});
+                touchStartX = 0; touchStartY = 0;
+            }
+            
+            canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+            canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+            
+            // ✅ БЛОКИРОВКА СКРОЛЛА ТОЛЬКО НА CANVAS
+            canvas.style.touchAction = 'none';
             
             canvas.focus();
-            
             const speeds = {easy:200, normal:150, hard:100};
             
             function gameLoop() {
@@ -346,6 +368,7 @@
                     snake.some(s => s.x === head.x && s.y === head.y)) {
                     gameRunning = false;
                     isSnakeActive = false;
+                    cleanupTouch();
                     if (currentUser && snakeScore > 0) {
                         addScore('snake', difficulty, snakeScore);
                         alert(`💀 GAME OVER! ${snakeScore} очков`);
