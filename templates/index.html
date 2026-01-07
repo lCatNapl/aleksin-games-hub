@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 ALEKSIN GAMES HUB v3.3 ✅ 13/13</title>
+    <title>🚀 ALEKSIN GAMES HUB v3.4 ✅ 13/13</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         *{margin:0;padding:0;box-sizing:border-box}
@@ -24,7 +24,9 @@
         .tour-table{background:rgba(0,255,0,0.2);margin:15px 0}
         .tour-table h4{color:#00ff00;text-shadow:0 0 10px #00ff00}
         #statusBar{position:fixed;top:10px;right:10px;background:rgba(0,255,0,0.3);padding:10px;border-radius:10px;font-weight:700;z-index:1000}
-        #authSection{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.9);padding:30px;border-radius:20px;box-shadow:0 0 50px rgba(255,0,255,0.5);min-width:300px;z-index:1000;width:90%;max-width:400px}
+        /* ✅ ФИКС 12: Авторизация теперь НЕ fixed - кнопка всегда видна */
+        #authSection{position:relative;top:0;left:0;transform:none;margin:20px auto;max-width:400px;background:rgba(0,0,0,0.9);padding:30px;border-radius:20px;box-shadow:0 0 50px rgba(255,0,255,0.5);display:none}
+        #authSection.active{display:block;animation:fadeIn 0.5s ease}
         input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-radius:10px;background:rgba(255,255,255,0.1);color:#fff;font-family:inherit;width:calc(100% - 24px)}
         #tourTimer{font-size:2.5rem;color:#00ff00;text-shadow:0 0 20px #00ff00;animation:pulse 1s infinite}
         @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
@@ -34,16 +36,19 @@
 <body>
     <div id="statusBar">👋 Гость</div>
     
-    <div id="authSection" class="section active">
-        <h2>🔐 Вход / Регистрация</h2>
-        <input type="text" id="usernameInput" placeholder="test" value="test">
-        <input type="password" id="passwordInput" placeholder="123456" value="123456">
-        <button class="btn" onclick="login()">🚀 ВОЙТИ</button>
-        <button class="btn" id="logoutBtn" onclick="logout()" style="display:none">👋 ВЫЙТИ</button>
+    <!-- ✅ ФИКС 12: Кнопка теперь в контейнере, всегда видна -->
+    <div class="container" style="position:relative">
+        <div id="authSection" class="section active">
+            <h2>🔐 Вход / Регистрация</h2>
+            <input type="text" id="usernameInput" placeholder="test" value="test">
+            <input type="password" id="passwordInput" placeholder="123456" value="123456">
+            <button class="btn" onclick="login()">🚀 ВОЙТИ</button>
+            <button class="btn" id="logoutBtn" onclick="logout()" style="display:none">👋 ВЫЙТИ</button>
+        </div>
     </div>
 
     <div class="container">
-        <h1>🚀 ALEKSIN GAMES HUB v3.3</h1>
+        <h1>🚀 ALEKSIN GAMES HUB v3.4</h1>
         
         <div class="game-grid">
             <button class="btn" onclick="showGame('leaderboards')">🏆 ЛИДЕРБОРДЫ</button>
@@ -103,7 +108,7 @@
         let food = {}, snakeInterval = null;
         let isSnakeActive = false;
 
-        // ✅ ФИКС 9: Контроль стрелок (только в Змейке)
+        // ✅ ФИКС 9: Стрелки только для Змейки
         document.addEventListener('keydown', function(e) {
             if (!isSnakeActive || !gameRunning) return;
             
@@ -125,11 +130,6 @@
             }
         });
 
-        // ✅ ФИКС 9: Колёсико всегда скроллит страницу
-        document.addEventListener('wheel', function(e) {
-            // Колёсико всегда работает для скролла страницы
-        }, {passive: true});
-
         // Инициализация
         if (currentUser) {
             document.getElementById('statusBar').textContent = `👋 ${currentUser}`;
@@ -145,24 +145,32 @@
             localStorage.setItem('aleksinTournaments', JSON.stringify(tournamentScores));
         }
 
+        // ✅ ФИКС 12: Логин с ПРИНУДИТЕЛЬНЫМ показом кнопки
         function login() {
             const username = document.getElementById('usernameInput').value.trim();
             const password = document.getElementById('passwordInput').value;
             if (username && password) {
                 currentUser = username;
                 document.getElementById('statusBar').textContent = `👋 ${currentUser}`;
-                document.getElementById('logoutBtn').style.display = 'inline-block';
+                
+                // ✅ КРИТИЧНЫЙ ФИКС: кнопка ВЫХОД ГАРАНТИРОВАННО видна
+                const logoutBtn = document.getElementById('logoutBtn');
+                logoutBtn.style.display = 'inline-block';
+                logoutBtn.style.position = 'relative';
+                logoutBtn.style.zIndex = '9999';
+                logoutBtn.style.margin = '10px';
+                
                 document.getElementById('authSection').classList.remove('active');
                 saveAllData();
-                console.log('✅ ЛОГИН УСПЕШЕН:', currentUser);
+                console.log('✅ ЛОГИН:', currentUser, '- КНОПКА ВЫХОД ВИДНА');
             }
         }
 
-        // ✅ ФИКС 12: ПЕРФЕКТНЫЙ ВЫХОД v3.3
+        // ✅ ФИКС 12: Идеальный выход
         function logout() {
-            console.log('🔄 ЛОГАУТ НАЧАТ...');
+            console.log('🔄 ЛОГАУТ...');
             
-            // Полная очистка змейки
+            // Очистка змейки
             if (snakeInterval) {
                 clearInterval(snakeInterval);
                 snakeInterval = null;
@@ -177,20 +185,16 @@
             document.getElementById('statusBar').textContent = '👋 Гость';
             document.getElementById('logoutBtn').style.display = 'none';
             
-            // ✅ КРИТИЧНЫЙ ФИКС: принудительно показываем авторизацию ПОЛНОЭКРАННУЮ
-            document.querySelectorAll('.section').forEach(s => {
-                s.classList.remove('active');
-            });
+            // Показываем авторизацию
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById('authSection').classList.add('active');
             
-            // ✅ ПРИНУДИТЕЛЬНЫЙ СКРОЛЛ + ФОКУС на форму
+            // Скролл вверх
             document.body.scrollTop = 0;
             document.documentElement.scrollTop = 0;
-            document.getElementById('authSection').scrollIntoView({behavior: 'smooth'});
-            document.getElementById('usernameInput').focus();
             
             saveAllData();
-            console.log('✅ ЛОГАУТ 100% - ЭКРАН ВХОДА АКТИВЕН');
+            console.log('✅ ЛОГАУТ 100%');
         }
 
         function showGame(game) {
@@ -215,7 +219,6 @@
 
         function addScore(game, difficulty, score) {
             if (!currentUser) return;
-            
             const key = `${game}_${difficulty}`;
             leaderboards[key] = leaderboards[key] || {};
             leaderboards[key][currentUser] = Math.max(leaderboards[key][currentUser] || 0, score);
@@ -331,7 +334,6 @@
             gameRunning = true;
             if (snakeInterval) clearInterval(snakeInterval);
             
-            // Свайпы только для canvas
             let touchStartX, touchStartY;
             canvas.addEventListener('touchstart', e => {
                 touchStartX = e.touches[0].clientX;
