@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 ALEKSIN GAMES HUB v5.0 | Космические Бои</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(-45deg, #0f0f23, #1a1a3e, #16213e, #0f3460);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite, starField 20s linear infinite;
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Космические звёзды */
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent);
+            pointer-events: none;
+            z-index: 0;
+            animation: starField 50s linear infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        @keyframes starField { 0% { transform: translateY(0px); } 100% { transform: translateY(-100px); } }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
+
+        /* RGB Glow эффект */
+        .glow { 
+            animation: rgbGlow 3s linear infinite, pulse 2s ease-in-out infinite alternate;
+            text-shadow: 0 0 20px currentColor;
+        }
+        @keyframes rgbGlow { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
+        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
+
+        /* Заголовок */
+        h1 { 
+            font-size: clamp(2rem, 5vw, 4rem); 
+            text-align: center; 
+            margin: 20px 0; 
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff00ff); 
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbow 2s linear infinite;
+            filter: drop-shadow(0 0 30px rgba(255,255,255,0.5));
+        }
+        @keyframes rainbow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Авторизация */
+        .auth { 
+            max-width: 400px; margin: 0 auto 30px; 
+            background: rgba(0,0,0,0.8); 
+            padding: 30px; 
+            border-radius: 20px; 
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .auth.hidden { display: none; }
+        .auth input { 
+            width: 100%; padding: 15px; margin: 10px 0; 
+            background: rgba(255,255,255,0.1); 
+            border: 2px solid rgba(0,255,255,0.5); 
+            border-radius: 10px; 
+            color: #fff; 
+            font-family: inherit; 
+            font-size: 16px;
+        }
+        .auth input::placeholder { color: rgba(255,255,255,0.7); }
+        .btn { 
+            width: 100%; padding: 15px; margin: 10px 0; 
+            background: linear-gradient(45deg, #ff00ff, #00ffff); 
+            border: none; 
+            border-radius: 10px; 
+            color: #000; 
+            font-family: inherit; 
+            font-size: 18px; 
+            font-weight: 700; 
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(0,255,255,0.5); }
+        #userInfo { text-align: center; font-weight: 700; color: #00ff88; }
+
+        /* Игровые секции */
+        .section { 
+            background: rgba(0,0,0,0.7); 
+            padding: 30px; 
+            margin: 20px 0; 
+            border-radius: 20px; 
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .section h2 { font-size: 2rem; text-align: center; margin-bottom: 20px; color: #00ffff; }
+
+        /* Управление для мобильных */
+        .controls { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 10px; 
+            max-width: 300px; 
+            margin: 20px auto; 
+            display: none;
+        }
+        .control-btn { 
+            height: 60px; 
+            background: rgba(255,255,255,0.2); 
+            border: 2px solid #00ffff; 
+            border-radius: 15px; 
+            color: #fff; 
+            font-size: 24px; 
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .control-btn:active { background: #00ffff; color: #000; transform: scale(0.95); }
+
+        /* Игровые поля */
+        #gameCanvas { 
+            display: block; 
+            margin: 20px auto; 
+            border: 3px solid #00ffff; 
+            border-radius: 15px; 
+            background: #000;
+            box-shadow: 0 0 30px rgba(0,255,255,0.5);
+        }
+
+        /* Лидерборды и турниры */
+        .leaderboard, .tournament { 
+            max-height: 300px; 
+            overflow-y: auto; 
+            background: rgba(0,0,0,0.5); 
+            padding: 15px; 
+            border-radius: 10px;
+        }
+        .leaderboard h3, .tournament h3 { color: #ffaa00; margin-bottom: 10px; }
+        .score { padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .score.highlight { background: rgba(0,255,136,0.2); }
+
+        /* Турнирный таймер */
+        #tournamentTimer { 
+            font-size: 1.5rem; 
+            font-weight: 900; 
+            text-align: center; 
+            color: #ff4444; 
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        /* Anti-iPhone */
+        @media only screen and (max-device-width: 812px) and (-webkit-min-device-pixel-ratio: 3) {
+            body::after {
+                content: "🚫 iPhone НЕ ПОДДЕРЖИВАЕТСЯ 💀\n\nТолько Android/PC!"; 
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                background: rgba(0,0,0,0.95); color: #ff4444; 
+                font-size: 24px; text-align: center; padding: 50px;
+                border: 3px solid #ff4444; border-radius: 20px;
+                z-index: 9999; display: flex; flex-direction: column; gap: 20px;
+            }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .controls { display: grid; }
+            .container { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="glow">🚀 ALEKSIN GAMES HUB v5.0</h1>
+        
+        <!-- АВТОРИЗАЦИЯ -->
+        <div class="auth" id="auth">
+            <input type="text" id="username" placeholder="👤 Никнейм (test)" maxlength="20">
+            <input type="password" id="password" placeholder="🔑 Пароль (123456)">
+            <button class="btn glow" onclick="login()">🚀 ВОЙТИ</button>
+            <button class="btn glow" onclick="register()">➕ РЕГИСТРАЦИЯ</button>
+        </div>
+        <div id="userInfo"></div>
+
+        <!-- ЗМЕЙКА -->
+        <div class="section">
+            <h2>🐍 КОСМИЧЕСКАЯ ЗМЕЙКА</h2>
+            <select id="snakeDifficulty">
+                <option value="easy">🌟 Лёгкая</option>
+                <option value="medium">⭐ Средняя</option>
+                <option value="hard">⭐⭐⭐ Тяжёлая</option>
+            </select>
+            <canvas id="snakeCanvas" width="400" height="400"></canvas>
+            <div class="controls" id="snakeControls">
+                <div></div>
+                <button class="control-btn" onclick="changeSnakeDir('up')">↑</button>
+                <div></div>
+                <button class="control-btn" onclick="changeSnakeDir('left')">←</button>
+                <div></div>
+                <button class="control-btn" onclick="changeSnakeDir('right')">→</button>
+                <div></div>
+            </div>
+        </div>
+
+        <!-- УГАДАЙ ЧИСЛО -->
+        <div class="section">
+            <h2>🎯 УГАДАЙ ЧИСЛО</h2>
+            <select id="guessDifficulty">
+                <option value="easy">🌟 Лёгкая (1-20)</option>
+                <option value="medium">⭐ Средняя (1-50)</option>
+                <option value="hard">⭐⭐⭐ Тяжёлая (1-100)</option>
+            </select>
+            <p>Число от <span id="guessMin">1</span> до <span id="guessMax">20</span></p>
+            <input type="number" id="guessInput" placeholder="Твоё число" min="1">
+            <button class="btn glow" onclick="makeGuess()" id="guessBtn">🎯 УГАДАТЬ</button>
+            <p id="guessFeedback"></p>
+            <button class="btn glow" onclick="newGuessGame()">🔄 НОВАЯ ИГРА</button>
+        </div>
+
+        <!-- ЛИДЕРБОРДЫ -->
+        <div class="section">
+            <h2>🏆 ГЛОБАЛЬНЫЕ ЛИДЕРБОРДЫ</h2>
+            <div id="leaderboards" class="leaderboard"></div>
+        </div>
+
+        <!-- ТУРНИРЫ -->
+        <div class="section">
+            <h2>⚔️ ЕЖЕДНЕВНЫЙ ТУРНИР</h2>
+            <div id="tournamentTimer"></div>
+            <div id="tournamentTable" class="tournament"></div>
+        </div>
+    </div>
+
+    <script>
+        // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+        let currentUser = localStorage.getItem('currentUser') || null;
+        let gameScores = JSON.parse(localStorage.getItem('gameScores') || '{}');
+        let tournamentScores = JSON.parse(localStorage.getItem('tournamentScores') || '{}');
+        
+        // Инициализация
+        if (currentUser) {
+            document.getElementById('auth').classList.add('hidden');
+            document.getElementById('userInfo').textContent = `👋 ${currentUser}`;
+            updateLeaderboards();
+            updateTournament();
+            startTournamentTimer();
+        }
+
+        // АВТОРИЗАЦИЯ
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (username && password) {
+                currentUser = username;
+                localStorage.setItem('currentUser', currentUser);
+                document.getElementById('auth').classList.add('hidden');
+                document.getElementById('userInfo').textContent = `👋 ${currentUser}`;
+                updateLeaderboards();
+                updateTournament();
+                playSound('login');
+            }
+        }
+
+        function register() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (username && password && !localStorage.getItem(`user_${username}`)) {
+                localStorage.setItem(`user_${username}`, password);
+                login();
+            } else {
+                alert('❌ Никнейм занят или поля пустые!');
+            }
+        }
+
+        // ЗВУКИ (Web Audio API)
+        function playSound(type) {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            if (type === 'eat') {
+                oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            } else if (type === 'gameover') {
+                oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            } else if (type === 'login') {
+                oscillator.frequency.setValueAtTime(1000, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            }
+            
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.3);
+        }
+
+        // ЗМЕЙКА
+        let snakeGame = {
+            canvas: null, ctx: null, grid: 20, tileCountX: 20, tileCountY: 20,
+            snake: [{x: 10, y: 10}], dx: 0, dy: 0, foodX: 0, foodY: 0, score: 0,
+            gameLoop: null
+        };
+
+        function initSnake() {
+            snakeGame.canvas = document.getElementById('snakeCanvas');
+            snakeGame.ctx = snakeGame.canvas.getContext('2d');
+            snakeGame.canvas.focus();
+            
+            document.addEventListener('keydown', (e) => {
+                if (!currentUser) return;
+                if (e.key === 'ArrowUp' && snakeGame.dy === 0) { snakeGame.dx = 0; snakeGame.dy = -1; }
+                if (e.key === 'ArrowDown' && snakeGame.dy === 0) { snakeGame.dx = 0; snakeGame.dy = 1; }
+                if (e.key === 'ArrowLeft' && snakeGame.dx === 0) { snakeGame.dx = -1; snakeGame.dy = 0; }
+                if (e.key === 'ArrowRight' && snakeGame.dx === 0) { snakeGame.dx = 1; snakeGame.dy = 0; }
+            });
+            
+            newSnakeGame();
+        }
+
+        function newSnakeGame() {
+            const diff = document.getElementById('snakeDifficulty').value;
+            snakeGame.grid = diff === 'easy' ? 20 : diff === 'medium' ? 15 : 10;
+            snakeGame.tileCountX = Math.floor(400 / snakeGame.grid);
+            snakeGame.tileCountY = Math.floor(400 / snakeGame.grid);
+            snakeGame.snake = [{x: 10, y: 10}];
+            snakeGame.dx = 0; snakeGame.dy = 0;
+            snakeGame.score = 0;
+            snakeGame.foodX = Math.floor(Math.random() * snakeGame.tileCountX);
+            snakeGame.foodY = Math.floor(Math.random() * snakeGame.tileCountY);
+            if (snakeGame.gameLoop) cancelAnimationFrame(snakeGame.gameLoop);
+            snakeGameLoop();
+        }
+
+        function snakeGameLoop() {
+            snakeGame.ctx.fillStyle = 'black';
+            snakeGame.ctx.fillRect(0, 0, snakeGame.canvas.width, snakeGame.canvas.height);
+            
+            // Движение змейки
+            let head = {x: snakeGame.snake[0].x + snakeGame.dx, y: snakeGame.snake[0].y + snakeGame.dy};
+            snakeGame.snake.unshift(head);
+            
+            // Еда
+            if (head.x === snakeGame.foodX && head.y === snakeGame.foodY) {
+                snakeGame.score += 10;
+                playSound('eat');
+                snakeGame.foodX = Math.floor(Math.random() * snakeGame.tileCountX);
+                snakeGame.foodY = Math.floor(Math.random() * snakeGame.tileCountY);
+            } else {
+                snakeGame.snake.pop();
+            }
+            
+            // Отрисовка змейки
+            snakeGame.ctx.fillStyle = '#00ff00';
+            snakeGame.snake.forEach(part => {
+                snakeGame.ctx.fillRect(part.x * snakeGame.grid, part.y * snakeGame.grid, snakeGame.grid - 2, snakeGame.grid - 2);
+            });
+            
+            // Отрисовка еды
+            snakeGame.ctx.fillStyle = '#ff0000';
+            snakeGame.ctx.fillRect(snakeGame.foodX * snakeGame.grid, snakeGame.foodY * snakeGame.grid, snakeGame.grid - 2, snakeGame.grid - 2);
+            
+            // Столкновения
+            if (head.x < 0 || head.x >= snakeGame.tileCountX || head.y < 0 || head.y >= snakeGame.tileCountY || 
+                snakeGame.snake.slice(1).some(part => part.x === head.x && part.y === head.y)) {
+                gameOver('snake', document.getElementById('snakeDifficulty').value, snakeGame.score);
+                return;
+            }
+            
+            // Счёт
+            snakeGame.ctx.fillStyle = '#fff';
+            snakeGame.ctx.font = 'bold 24px Orbitron';
+            snakeGame.ctx.fillText(`Очки: ${snakeGame.score}`, 10, 30);
+            
+            snakeGame.gameLoop = requestAnimationFrame(snakeGameLoop);
+        }
+
+        // УГАДАЙ ЧИСЛО
+        let guessGame = { target: 0, min: 1, max: 20, attempts: 0 };
+
+        function newGuessGame() {
+            const diff = document.getElementById('guessDifficulty').value;
+            const ranges = { easy: [1, 20], medium: [1, 50], hard: [1, 100] };
+            guessGame = { target: Math.floor(Math.random() * (ranges[diff][1] - ranges[diff][0] + 1)) + ranges[diff][0], 
+                         min: ranges[diff][0], max: ranges[diff][1], attempts: 0 };
+            document.getElementById('guessMin').textContent = guessGame.min;
+            document.getElementById('guessMax').textContent = guessGame.max;
+            document.getElementById('guessInput').value = '';
+            document.getElementById('guessFeedback').textContent = '🎯 Загадали число! Угадай!';
+            updateGuessRanges();
+        }
+
+        function makeGuess() {
+            if (!currentUser) return;
+            const guess = parseInt(document.getElementById('guessInput').value);
+            guessGame.attempts++;
+            
+            if (guess === guessGame.target) {
+                const diff = document.getElementById('guessDifficulty').value;
+                gameOver('guess', diff, guessGame.attempts);
+            } else if (guess < guessGame.target) {
+                guessGame.min = guess + 1;
+                document.getElementById('guessFeedback').textContent = `📈 Больше! Попыток: ${guessGame.attempts}`;
+            } else {
+                guessGame.max = guess - 1;
+                document.getElementById('guessFeedback').textContent = `📉 Меньше! Попыток: ${guessGame.attempts}`;
+            }
+            updateGuessRanges();
+            document.getElementById('guessInput').value = '';
+        }
+
+        function updateGuessRanges() {
+            document.getElementById('guessMin').textContent = guessGame.min;
+            document.getElementById('guessMax').textContent = guessGame.max;
+        }
+
+        // GAME OVER + СОХРАНЕНИЕ РЕЗУЛЬТАТОВ
+        function gameOver(gameType, difficulty, score) {
+            if (!currentUser) return;
+            
+            const key = `${gameType}_${difficulty}`;
+            gameScores[key] = gameScores[key] || [];
+            gameScores[key].push({ user: currentUser, score, date: new Date().toLocaleString('ru-RU') });
+            gameScores[key].sort((a, b) => b.score - a.score);
+            gameScores[key] = gameScores[key].slice(0, 100);
+            
+            // Турнирные очки (score * multiplier)
+            const tournamentKey = `${gameType}_${difficulty}_tournament`;
+            tournamentScores[tournamentKey] = tournamentScores[tournamentKey] || [];
+            const multiplier = { easy: 1, medium: 2, hard: 3 };
+            tournamentScores[tournamentKey].push({ 
+                user: currentUser, 
+                score: score * multiplier[difficulty], 
+                date: getTournamentDate()
+            });
+            tournamentScores[tournamentKey].sort((a, b) => b.score - a.score);
+            tournamentScores[tournamentKey] = tournamentScores[tournamentKey].slice(0, 100);
+            
+            localStorage.setItem('gameScores', JSON.stringify(gameScores));
+            localStorage.setItem('tournamentScores', JSON.stringify(tournamentScores));
+            
+            playSound('gameover');
+            alert(`🎉 ${currentUser}! ${score} очков в ${gameType} (${difficulty})!`);
+            
+            if (gameType === 'snake') newSnakeGame();
+            else newGuessGame();
+            
+            updateLeaderboards();
+            updateTournament();
+        }
+
+        // ЛИДЕРБОРДЫ
+        function updateLeaderboards() {
+            const container = document.getElementById('leaderboards');
+            container.innerHTML = '';
+            
+            Object.keys(gameScores).forEach(key => {
+                const [game, diff] = key.split('_');
+                const gameName = game === 'snake' ? '🐍 Змейка' : '🎯 Угадай';
+                const diffName = { easy: '🌟 Лёгкая', medium: '⭐ Средняя', hard: '⭐⭐⭐ Тяжёлая' }[diff];
+                
+                const top10 = gameScores[key].slice(0, 10);
+                const section = document.createElement('div');
+                section.innerHTML = `
+                    <h3>${gameName} ${diffName}</h3>
+                    ${top10.map((entry, i) => 
+                        `<div class="score ${entry.user === currentUser ? 'highlight' : ''}">
+                            #${i+1} ${entry.user}: ${entry.score} (${entry.date})
+                        </div>`
+                    ).join('')}
+                `;
+                container.appendChild(section);
+            });
+        }
+
+        // ТУРНИРЫ (24ч, строка 00:00 МСК)
+        function getTournamentDate() {
+            const now = new Date();
+            const msk = new Date(now.getTime() + (3 * 60 * 60 * 1000)); // MSK +3
+            return msk.toISOString().split('T')[0];
+        }
+
+        function startTournamentTimer() {
+            setInterval(updateTournament, 1000);
+        }
+
+        function updateTournament() {
+            const today = getTournamentDate();
+            const container = document.getElementById('tournamentTimer');
+            const table = document.getElementById('tournamentTable');
+            
+            // Таймер до полуночи МСК
+            const now = new Date();
+            const msk = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+            const midnight = new Date(msk);
+            midnight.setHours(24, 0, 0, 0);
+            const timeLeft = Math.floor((midnight - msk) / 1000);
+            const hours = Math.floor(timeLeft / 3600);
+            const minutes = Math.floor((timeLeft % 3600) / 60);
+            
+            container.textContent = `⏰ До конца турнира: ${hours}:${minutes.toString().padStart(2, '0')}`;
+            
+            // Топ-100 сегодняшнего турнира
+            table.innerHTML = '<h3>🏆 ТОП-100 СЕГОДНЯ</h3>';
+            const allTournamentScores = [];
+            Object.keys(tournamentScores).forEach(key => {
+                if (key.includes(today)) {
+                    allTournamentScores.push(...tournamentScores[key]);
+                }
+            });
+            
+            allTournamentScores.sort((a, b) => b.score - a.score);
+            const top100 = allTournamentScores.slice(0, 100);
+            
+            top100.slice(0, 5).forEach((entry, i) => {
+                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
+                table.innerHTML += `<div class="score highlight">🎖️ ${medal} ${entry.user}: ${entry.score}</div>`;
+            });
+            
+            if (top100.length > 5) {
+                table.innerHTML += `<div style="margin-top: 10px; font-size: 12px; opacity: 0.7;">
+                    ... и ещё ${top100.length - 5} игроков
+                </div>`;
+            }
+        }
+
+        // МОБИЛЬНЫЕ КОНТРОЛЛЕРЫ
+        function changeSnakeDir(dir) {
+            if (!currentUser) return;
+            if (dir === 'up' && snakeGame.dy === 0) { snakeGame.dx = 0; snakeGame.dy = -1; }
+            if (dir === 'down' && snakeGame.dy === 0) { snakeGame.dx = 0; snakeGame.dy = 1; }
+            if (dir === 'left' && snakeGame.dx === 0) { snakeGame.dx = -1; snakeGame.dy = 0; }
+            if (dir === 'right' && snakeGame.dx === 0) { snakeGame.dx = 1; snakeGame.dy = 0; }
+        }
+
+        // Автообновление лидербордов каждые 5 сек
+        setInterval(() => {
+            if (currentUser) {
+                updateLeaderboards();
+                updateTournament();
+            }
+        }, 5000);
+
+        // Инициализация при загрузке
+        window.addEventListener('load', () => {
+            initSnake();
+            newGuessGame();
+            if (window.innerWidth <= 768) {
+                document.getElementById('snakeControls').style.display = 'grid';
+            }
+        });
+
+        // Смена сложности
+        document.getElementById('snakeDifficulty').addEventListener('change', newSnakeGame);
+        document.getElementById('guessDifficulty').addEventListener('change', newGuessGame);
+    </script>
+</body>
+</html>
