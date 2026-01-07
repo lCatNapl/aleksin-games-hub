@@ -24,20 +24,25 @@ class Score(db.Model):
     points = db.Column(db.Integer, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-# ИНИЦИАЛИЗАЦИЯ БАЗЫ + ТЕСТОВЫЙ АККАУНТ
+# ✅ ИНИЦИАЛИЗАЦИЯ БАЗЫ + ГАРАНТИРОВАННЫЙ ТЕСТ АККАУНТ
 with app.app_context():
     db.create_all()
-    if not User.query.filter_by(username='test').first():
+    
+    # ПРОВЕРКА + ПРИНУДИТЕЛЬНОЕ СОЗДАНИЕ test:123456
+    test_user = User.query.filter_by(username='test').first()
+    if not test_user:
         test_user = User(username='test', password='123456')
         db.session.add(test_user)
         db.session.commit()
-        print("✅ Test account 'test:123456' created")
+        print("✅ Test account 'test:123456' CREATED!")
+    else:
+        print("✅ Test account 'test:123456' EXISTS!")
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# ЛОГИН
+# ✅ ЛОГИН
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
@@ -47,12 +52,25 @@ def login():
         return jsonify({'success': True})
     return jsonify({'success': False, 'error': 'Неверный логин/пароль'}), 401
 
+# ✅ РЕГИСТРАЦИЯ
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.json
+    if User.query.filter_by(username=data['username']).first():
+        return jsonify({'success': False, 'error': 'Логин занят'}), 400
+    
+    new_user = User(username=data['username'], password=data['password'])
+    db.session.add(new_user)
+    db.session.commit()
+    session['username'] = data['username']
+    return jsonify({'success': True})
+
 @app.route('/logout')
 def logout():
     session.pop('username', None)
     return jsonify({'success': True})
 
-# СОХРАНЕНИЕ РЕКОРДА
+# ✅ СОХРАНЕНИЕ РЕКОРДА
 @app.route('/api/scores', methods=['POST'])
 def save_score():
     if 'username' not in session:
@@ -69,7 +87,7 @@ def save_score():
     db.session.commit()
     return jsonify({'success': True})
 
-# ГЛОБАЛЬНЫЙ ТОП-10 ПО ИГРЕ
+# ✅ ГЛОБАЛЬНЫЙ ТОП-10
 @app.route('/api/leaderboard/<game>')
 def leaderboard(game):
     if 'username' not in session:
@@ -82,11 +100,10 @@ def leaderboard(game):
     return jsonify([{
         'user': s.username,
         'points': s.points,
-        'difficulty': s.difficulty,
-        'timestamp': s.timestamp.isoformat()
+        'difficulty': s.difficulty
     } for s in top10])
 
-# ТУРНИР СЕГОДНЯ (ТОП-100)
+# ✅ ТУРНИР ТОП-100
 @app.route('/api/tournament')
 def tournament():
     if 'username' not in session:
@@ -104,7 +121,7 @@ def tournament():
         'rank': i+1
     } for i, s in enumerate(daily_scores)])
 
-# ✅ РЕНДЕР: BIND TO 0.0.0.0:$PORT
+# ✅ RENDER PORT BINDING
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port, debug=False)
