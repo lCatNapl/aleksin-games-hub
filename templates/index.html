@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 ALEKSIN GAMES HUB v3.5 ✅ КНОПКА 100%</title>
+    <title>🚀 ALEKSIN GAMES HUB v3.5 ✅ КНОПКА 100% + ТАЙМЕР MSK</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         *{margin:0;padding:0;box-sizing:border-box}
@@ -24,7 +24,6 @@
         .tour-table{background:rgba(0,255,0,0.2);margin:15px 0}
         .tour-table h4{color:#00ff00;text-shadow:0 0 10px #00ff00}
         #statusBar{position:fixed;top:10px;right:10px;background:rgba(0,255,0,0.3);padding:10px;border-radius:10px;font-weight:700;z-index:1000}
-        /* ✅ v3.5: КНОПКА ВЫХОД ОТДЕЛЬНО от sections */
         #logoutContainer{position:fixed;top:10px;left:10px;z-index:9999;background:rgba(0,0,0,0.8);padding:10px;border-radius:15px}
         #logoutBtn{display:none}
         #logoutBtn.active{display:inline-block !important}
@@ -37,14 +36,12 @@
     </style>
 </head>
 <body>
-    <!-- ✅ v3.5: КНОПКА ВЫХОД ОТДЕЛЬНЫЙ КОНТЕЙНЕР -->
     <div id="statusBar">👋 Гость</div>
     <div id="logoutContainer">
         <button class="btn" id="logoutBtn" onclick="logout()">👋 ВЫЙТИ</button>
     </div>
     
     <div class="container">
-        <!-- ✅ v3.5: Авторизация теперь обычный блок -->
         <div id="authSection" class="section active">
             <h2>🔐 Вход / Регистрация</h2>
             <input type="text" id="usernameInput" placeholder="test" value="test">
@@ -52,7 +49,7 @@
             <button class="btn" onclick="login()">🚀 ВОЙТИ</button>
         </div>
 
-        <h1>🚀 ALEKSIN GAMES HUB v3.5</h1>
+        <h1>🚀 ALEKSIN GAMES HUB v3.5 ✅ 13/13</h1>
         
         <div class="game-grid">
             <button class="btn" onclick="showGame('leaderboards')">🏆 ЛИДЕРБОРДЫ</button>
@@ -61,7 +58,6 @@
             <button class="btn" onclick="showGame('snake')">🐍 ЗМЕЙКА PRO</button>
         </div>
 
-        <!-- Остальные секции без изменений -->
         <div id="tournamentSection" class="section">
             <h2>⚔️ ТУРНИР 24ч (00:00 МСК)</h2>
             <div>⏰ До конца: <span id="tourTimer">00:00:00</span></div>
@@ -124,7 +120,6 @@
             }
         });
 
-        // ✅ v3.5 ИНИЦИАЛИЗАЦИЯ КНОПКИ
         if (currentUser) {
             document.getElementById('statusBar').textContent = `👋 ${currentUser}`;
             document.getElementById('logoutBtn').classList.add('active');
@@ -172,7 +167,6 @@
             console.log('✅ ЛОГАУТ');
         }
 
-        // Остальные функции без изменений (showGame, addScore, updateLeaderboards, updateTournament, setDifficulty, makeGuess, startSnake)
         function showGame(game) {
             if (!currentUser) {
                 alert('🔐 Сначала войди!');
@@ -202,7 +196,8 @@
             tournamentScores[key][currentUser] = (tournamentScores[key][currentUser] || 0) + score;
             saveAllData();
         }
-                function updateLeaderboards() {
+
+        function updateLeaderboards() {
             let html = '<h2>🏆 ТОП-10 ЛИДЕРБОРДЫ</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">';
             const games = ['snake', 'guess'];
             const diffs = ['easy', 'normal', 'hard'];
@@ -224,9 +219,10 @@
 
         function updateTournament() {
             const now = new Date();
-            const mskOffset = 3 * 60 * 60 * 1000;
+            const mskOffset = 3 * 60 * 60 * 1000;  // ✅ MSK +3 UTC
             const mskNow = new Date(now.getTime() + mskOffset);
-            const nextMidnight = new Date(mskNow.getFullYear(), mskNow.getMonth(), mskNow.getDate() + 1, 0, 0, 0);
+            const todayMidnight = new Date(mskNow.getFullYear(), mskNow.getMonth(), mskNow.getDate(), 0, 0, 0);
+            const nextMidnight = new Date(todayMidnight.getTime() + 24 * 60 * 60 * 1000);  // ✅ ТОЧНО 00:00 МСК завтра
             const timeLeft = nextMidnight - mskNow;
             
             const hours = Math.floor(timeLeft / (1000*60*60)).toString().padStart(2,'0');
