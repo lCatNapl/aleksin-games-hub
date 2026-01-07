@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 ALEKSIN GAMES HUB v2.4 ✅</title>
+    <title>🚀 ALEKSIN GAMES HUB v2.5 ✅</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         *{margin:0;padding:0;box-sizing:border-box}
@@ -28,16 +28,18 @@
         #statusBar{position:fixed;top:20px;right:20px;background:rgba(0,255,0,0.3);padding:15px;border-radius:15px;font-weight:700;display:none}
         #loginForm,#registerForm{display:none;background:rgba(0,0,0,0.8);padding:25px;border-radius:20px;margin:20px 0}
         input{width:100%;padding:12px;margin:10px 0;border-radius:10px;border:1px solid #00ffff;background:rgba(255,255,255,0.1);color:#fff;font-family:'Orbitron',monospace}
-        #tournamentTimer{font-size:1.8rem;color:#ff00ff;font-weight:900;text-align:center;margin:15px 0}
+        #tournamentTimer{font-size:2rem;color:#ff00ff;font-weight:900;text-align:center;margin:15px 0;animation:pulse 1s infinite}
+        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
         .difficulty-btns{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0}
         .difficulty-btns .btn{flex:1;min-width:120px;font-size:1rem;padding:10px}
+        .tournament-content{padding:20px;background:rgba(255,0,0,0.1);border-radius:15px;margin:15px 0;border:1px solid #ff0000}
         @media(max-width:768px){.container{grid-template-columns:1fr;gap:15px}.sidebar{order:2}}
     </style>
 </head>
 <body>
     <div class="container">
         <div class="games">
-            <h1>🚀 ALEKSIN GAMES HUB v2.4</h1>
+            <h1>🚀 ALEKSIN GAMES HUB v2.5</h1>
             
             <!-- АВТОРИЗАЦИЯ -->
             <div id="authSection">
@@ -105,10 +107,14 @@
         <div class="sidebar" id="sidebar">
             <div id="userStatus" style="text-align:center;font-size:1.2rem;margin-bottom:20px;color:#00ffff">👋 Гость</div>
             
-            <div id="tournamentTimer" style="font-size:1.8rem">⏰ Загрузка...</div>
+            <div id="tournamentTimer">⏰ Загрузка...</div>
             
             <div id="leaderboardTables" style="display:none">
                 <!-- ТОПЫ ПОЯВЯТСЯ ЗДЕСЬ -->
+            </div>
+            
+            <div id="tournamentContent" style="display:none">
+                <!-- ТУРНИРНЫЙ КОНТЕНТ -->
             </div>
         </div>
     </div>
@@ -134,11 +140,7 @@
         // УГАДАЙКА
         let guessNumber = 0, guessAttempts = 0, guessMax = 1000;
         
-        // ГЛОБАЛЬНЫЕ СВАЙПЫ БЕЗ СКРОЛЛА
-        document.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
-        document.addEventListener('touchstart', e => e.preventDefault(), {passive: false});
-        
-        // ИНИЦИАЛИЗАЦИЯ ✅ ФИКС КНОПОК
+        // ✅ ИНИЦИАЛИЗАЦИЯ
         document.addEventListener('DOMContentLoaded', function() {
             loadData();
             if(currentUser) {
@@ -149,7 +151,7 @@
             }
             updateLeaderboards();
             updateTournament();
-            setInterval(updateTournament, 1000);
+            setInterval(updateTournament, 1000); // ✅ КАЖДУЮ СЕКУНДУ
         });
         
         // СОХРАНЕНИЕ
@@ -168,19 +170,19 @@
         
         // ✅ ФИКСИРОВАННАЯ НАВИГАЦИЯ
         function showGame(game) {
-            // СКРЫВАЕМ ВСЕ ИГРОВЫЕ СЕКЦИИ
             document.querySelectorAll('.game-section').forEach(section => {
                 section.classList.remove('active');
                 section.style.display = 'none';
             });
             document.getElementById('leaderboardTables').style.display = 'none';
+            document.getElementById('tournamentContent').style.display = 'none';
             
-            // ПОКАЗЫВАЕМ НУЖНУЮ
             if(game === 'leaderboards') {
                 document.getElementById('leaderboardTables').style.display = 'block';
                 updateLeaderboards();
             } else if(game === 'tournament') {
-                updateTournament();
+                document.getElementById('tournamentContent').style.display = 'block';
+                updateTournamentDisplay();
             } else {
                 const gameSection = document.getElementById(game + 'Game');
                 gameSection.style.display = 'block';
@@ -188,6 +190,59 @@
             }
             
             currentGame = game;
+        }
+        
+        // ✅ ТУРНИР С СЕКУНДАМИ - ОБНОВЛЕНИЕ КАЖДУЮ СЕКУНДУ
+        function updateTournament() {
+            const now = new Date();
+            const mskOffset = 3 * 60; // MSK +3 UTC
+            const utcHours = now.getUTCHours();
+            const mskHours = (utcHours + 3) % 24;
+            const secondsSinceMidnight = mskHours * 3600 + now.getUTCMinutes() * 60 + now.getUTCSeconds();
+            const secondsLeft = 86400 - secondsSinceMidnight;
+            
+            const hours = Math.floor(secondsLeft / 3600);
+            const minutes = Math.floor((secondsLeft % 3600) / 60);
+            const seconds = secondsLeft % 60;
+            
+            document.getElementById('tournamentTimer').textContent = 
+                `⏰ ${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+        }
+        
+        function updateTournamentDisplay() {
+            const now = new Date();
+            const mskOffset = 3 * 60;
+            const utcHours = now.getUTCHours();
+            const mskHours = (utcHours + 3) % 24;
+            const secondsSinceMidnight = mskHours * 3600 + now.getUTCMinutes() * 60 + now.getUTCSeconds();
+            const secondsLeft = 86400 - secondsSinceMidnight;
+            
+            const hours = Math.floor(secondsLeft / 3600);
+            const minutes = Math.floor((secondsLeft % 3600) / 60);
+            const seconds = secondsLeft % 60;
+            
+            const userTournamentScore = tournamentScores[`${currentGame}_${currentDifficulty}`] || 0;
+            
+            document.getElementById('tournamentContent').innerHTML = `
+                <div class="tournament-content">
+                    <h3 style="color:#ff0000;margin-bottom:15px">⚔️ ТУРНИР 24ч (00:00 MSK)</h3>
+                    <div style="font-size:1.8rem;text-align:center;margin-bottom:20px">
+                        ⏰ До конца: <strong>${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}</strong>
+                    </div>
+                    <div style="text-align:center">
+                        <div style="font-size:1.5rem;margin-bottom:10px">
+                            🥇 ТОП-5 = ПРИЗЫ! (1000₽ Steam + Nitro)
+                        </div>
+                        ${currentUser ? `
+                            <div style="font-size:1.3rem;color:#00ff00">
+                                Твои очки: <strong>${userTournamentScore}</strong>
+                            </div>
+                        ` : `
+                            <div style="color:#ffaa00">🔐 ВОЙДИ, чтобы участвовать!</div>
+                        `}
+                    </div>
+                </div>
+            `;
         }
         
         // АВТОРИЗАЦИЯ
@@ -238,12 +293,12 @@
             saveData();
         }
         
-        // ЗМЕЙКА ✅ ГРАНИЦЫ + СКОРОСТИ
+        // ЗМЕЙКА
         function startSnake(difficulty) {
             currentDifficulty = difficulty;
             snakeScore = 0;
             snakeGameRunning = true;
-            snake = [{x:10,y:10, dir: {x:0,y:-1}}];
+            snake = [{x:10,y:10}];
             snakeDirection = {x:0, y:-1};
             generateFood();
             document.getElementById('snakeScore').textContent = 'Счёт: 0';
@@ -251,9 +306,6 @@
             if(snakeInterval) clearInterval(snakeInterval);
             const speeds = {easy:200, normal:120, hard:80};
             snakeInterval = setInterval(updateSnake, speeds[difficulty]);
-            
-            const canvas = document.getElementById('snakeCanvas');
-            canvas.focus();
         }
         
         function updateSnake() {
@@ -263,7 +315,6 @@
             head.x += snakeDirection.x;
             head.y += snakeDirection.y;
             
-            // ✅ ГРАНИЦЫ РАБОТАЮТ
             if(head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
                 gameOver('snake');
                 return;
@@ -303,11 +354,9 @@
             });
         }
         
-        // СТАРЫЕ КНОПКИ ЗМЕЙКИ
         document.addEventListener('keydown', function(e) {
             if(!snakeGameRunning) return;
             
-            const head = snake[0];
             switch(e.key) {
                 case 'ArrowUp': if(snakeDirection.y !== 1) snakeDirection = {x:0,y:-1}; break;
                 case 'ArrowDown': if(snakeDirection.y !== -1) snakeDirection = {x:0,y:1}; break;
@@ -337,7 +386,7 @@
             
             if(guess === guessNumber) {
                 feedback = `🎉 УГАДАЛ ЗА ${guessAttempts} ПОПЫТОК!`;
-                const score = Math.max(10000 - attempts * 200, 100);
+                const score = Math.max(10000 - guessAttempts * 200, 100);
                 gameOver('guess', score);
             } else if(guess < guessNumber) {
                 feedback = `📈 Больше (${Math.abs(guessNumber-guess)} разница)`;
@@ -350,7 +399,7 @@
             document.getElementById('guessInput').value = '';
         }
         
-        // ✅ GAME OVER + ТУРНИРНЫЕ ОЧКИ
+        // GAME OVER
         function gameOver(game, score = snakeScore) {
             if(game === 'snake') {
                 snakeGameRunning = false;
@@ -358,7 +407,6 @@
             }
             
             if(currentUser) {
-                // ОСНОВНОЙ ТОП
                 const lbKey = `${game}_${currentDifficulty}`;
                 const highScore = leaderboards[lbKey][0]?.score || 0;
                 
@@ -371,7 +419,6 @@
                     leaderboards[lbKey] = leaderboards[lbKey].slice(0,10);
                 }
                 
-                // ✅ ТУРНИРНЫЕ ОЧКИ НАКОПЛЯЮТСЯ
                 const tourKey = `${game}_${currentDifficulty}`;
                 tournamentScores[tourKey] = (tournamentScores[tourKey] || 0) + score;
                 
@@ -381,7 +428,7 @@
             }
         }
         
-        // 6 ОТДЕЛЬНЫХ ЛИДЕРБОРДОВ
+        // ЛИДЕРБОРДЫ
         function updateLeaderboards() {
             let html = '<h3 class="leaderboard-title">🏆 ТОП-10 ПО ИГРАМ</h3>';
             
@@ -406,20 +453,6 @@
             });
             
             document.getElementById('leaderboardTables').innerHTML = html;
-        }
-        
-        // ✅ ТУРНИР 00:00 MSK
-        function updateTournament() {
-            const now = new Date();
-            const mskOffset = 3 * 60;
-            const utcHours = now.getUTCHours();
-            const mskHours = (utcHours + 3) % 24;
-            const secondsSinceMidnight = mskHours * 3600 + now.getUTCMinutes() * 60 + now.getUTCSeconds();
-            const secondsLeft = 86400 - secondsSinceMidnight;
-            
-            const hours = Math.floor(secondsLeft / 3600);
-            const minutes = Math.floor((secondsLeft % 3600) / 60);
-            document.getElementById('tournamentTimer').textContent = `⏰ ${hours}ч ${minutes.toString().padStart(2,'0')}м`;
         }
         
         window.onbeforeunload = saveData;
