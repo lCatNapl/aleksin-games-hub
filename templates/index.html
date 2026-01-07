@@ -1,4 +1,209 @@
-        function updateLeaderboards() {
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 ALEKSIN GAMES HUB v3.5 ✅ КНОПКА 100%</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Orbitron',monospace;background:linear-gradient(135deg,#0a0a23 0%,#1a0a3a 50%,#0f0f4f 100%);color:#fff;min-height:100vh;overflow-y:auto}
+        .container{max-width:1200px;margin:0 auto;padding:20px}
+        h1{font-size:clamp(2rem,5vw,4rem);text-align:center;background:linear-gradient(45deg,#ff00ff,#00ffff,#ffff00);background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gradient 3s ease infinite}
+        @keyframes gradient{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+        .btn{display:inline-block;padding:15px 30px;background:linear-gradient(45deg,rgba(255,0,255,0.3),rgba(0,255,255,0.3));border:2px solid rgba(255,255,255,0.3);border-radius:20px;font-size:1.2rem;font-weight:700;cursor:pointer;transition:all 0.3s ease;margin:10px;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+        .btn:hover{background:linear-gradient(45deg,rgba(255,0,255,0.6),rgba(0,255,255,0.6));transform:translateY(-5px);box-shadow:0 15px 40px rgba(255,0,255,0.4)}
+        .section{display:none;text-align:center}
+        .section.active{display:block;animation:fadeIn 0.5s ease}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        .game-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin:20px 0}
+        canvas{border:3px solid rgba(255,255,255,0.3);border-radius:15px;background:#000;box-shadow:0 0 30px rgba(0,255,255,0.5)}
+        table{width:100%;max-width:400px;margin:15px auto;border-collapse:collapse;background:rgba(255,255,255,0.1);border-radius:15px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+        th,td{padding:12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.2)}
+        th{background:linear-gradient(45deg,rgba(255,0,255,0.4),rgba(0,255,255,0.4));font-weight:700}
+        .tour-table{background:rgba(0,255,0,0.2);margin:15px 0}
+        .tour-table h4{color:#00ff00;text-shadow:0 0 10px #00ff00}
+        #statusBar{position:fixed;top:10px;right:10px;background:rgba(0,255,0,0.3);padding:10px;border-radius:10px;font-weight:700;z-index:1000}
+        /* ✅ v3.5: КНОПКА ВЫХОД ОТДЕЛЬНО от sections */
+        #logoutContainer{position:fixed;top:10px;left:10px;z-index:9999;background:rgba(0,0,0,0.8);padding:10px;border-radius:15px}
+        #logoutBtn{display:none}
+        #logoutBtn.active{display:inline-block !important}
+        #authSection{position:relative;margin:40px auto;max-width:400px;background:rgba(0,0,0,0.9);padding:30px;border-radius:20px;box-shadow:0 0 50px rgba(255,0,255,0.5);display:none}
+        #authSection.active{display:block}
+        input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-radius:10px;background:rgba(255,255,255,0.1);color:#fff;font-family:inherit;width:calc(100% - 24px)}
+        #tourTimer{font-size:2.5rem;color:#00ff00;text-shadow:0 0 20px #00ff00;animation:pulse 1s infinite}
+        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+        @media (max-width:768px){.container{padding:10px}.btn{padding:12px 20px;font-size:1rem}}
+    </style>
+</head>
+<body>
+    <!-- ✅ v3.5: КНОПКА ВЫХОД ОТДЕЛЬНЫЙ КОНТЕЙНЕР -->
+    <div id="statusBar">👋 Гость</div>
+    <div id="logoutContainer">
+        <button class="btn" id="logoutBtn" onclick="logout()">👋 ВЫЙТИ</button>
+    </div>
+    
+    <div class="container">
+        <!-- ✅ v3.5: Авторизация теперь обычный блок -->
+        <div id="authSection" class="section active">
+            <h2>🔐 Вход / Регистрация</h2>
+            <input type="text" id="usernameInput" placeholder="test" value="test">
+            <input type="password" id="passwordInput" placeholder="123456" value="123456">
+            <button class="btn" onclick="login()">🚀 ВОЙТИ</button>
+        </div>
+
+        <h1>🚀 ALEKSIN GAMES HUB v3.5</h1>
+        
+        <div class="game-grid">
+            <button class="btn" onclick="showGame('leaderboards')">🏆 ЛИДЕРБОРДЫ</button>
+            <button class="btn" onclick="showGame('tournament')">⚔️ ТУРНИР</button>
+            <button class="btn" onclick="showGame('guess')">🎯 УГАДАЙ ЧИСЛО</button>
+            <button class="btn" onclick="showGame('snake')">🐍 ЗМЕЙКА PRO</button>
+        </div>
+
+        <!-- Остальные секции без изменений -->
+        <div id="tournamentSection" class="section">
+            <h2>⚔️ ТУРНИР 24ч (00:00 МСК)</h2>
+            <div>⏰ До конца: <span id="tourTimer">00:00:00</span></div>
+            <div id="tournamentTables" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px"></div>
+        </div>
+
+        <div id="leaderboardTables" class="section"></div>
+
+        <div id="guessSection" class="section">
+            <h2>🎯 УГАДАЙ ЧИСЛО</h2>
+            <div class="game-grid">
+                <button class="btn" onclick="setDifficulty('guess','easy')">Лёгкая (1-1K)</button>
+                <button class="btn" onclick="setDifficulty('guess','normal')">Средняя (1-10K)</button>
+                <button class="btn" onclick="setDifficulty('guess','hard')">Сложная (1-100K)</button>
+            </div>
+            <div style="font-size:2rem;margin:20px">Число от <span id="rangeMin">1</span> до <span id="rangeMax">1000</span></div>
+            <input type="number" id="guessInput" placeholder="Твоё число" style="font-size:1.5rem;padding:20px;width:200px">
+            <button class="btn" onclick="makeGuess()" style="font-size:1.5rem;padding:20px 40px">УГАДАТЬ</button>
+            <div id="guessResult"></div>
+            <div id="guessAttempts">Попыток: 0</div>
+        </div>
+
+        <div id="snakeSection" class="section">
+            <h2>🐍 ЗМЕЙКА PRO</h2>
+            <div class="game-grid">
+                <button class="btn" onclick="startSnake('easy')">Лёгкая</button>
+                <button class="btn" onclick="startSnake('normal')">Средняя</button>
+                <button class="btn" onclick="startSnake('hard')">Сложная</button>
+            </div>
+            <div style="position:relative;display:inline-block">
+                <canvas id="gameCanvas" width="400" height="400" tabindex="0"></canvas>
+                <div id="snakeScore" style="position:absolute;top:10px;left:10px;font-size:1.5rem;font-weight:700;color:#00ff00">Счёт: 0</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = localStorage.getItem('aleksinUser') || null;
+        let leaderboards = JSON.parse(localStorage.getItem('aleksinLeaderboards')) || {};
+        let tournamentScores = JSON.parse(localStorage.getItem('aleksinTournaments')) || {};
+        let currentGameType = '', currentDifficulty = '';
+        let secretNumber, guessCount = 0;
+        let snake = [], snakeDirection = {x:1,y:0}, snakeScore = 0, gameRunning = false;
+        let food = {}, snakeInterval = null;
+        let isSnakeActive = false;
+
+        document.addEventListener('keydown', function(e) {
+            if (!isSnakeActive || !gameRunning) return;
+            if (e.key === 'ArrowUp' && snakeDirection.y === 0) {
+                e.preventDefault(); snakeDirection = {x:0,y:-1};
+            }
+            if (e.key === 'ArrowDown' && snakeDirection.y === 0) {
+                e.preventDefault(); snakeDirection = {x:0,y:1};
+            }
+            if (e.key === 'ArrowLeft' && snakeDirection.x === 0) {
+                e.preventDefault(); snakeDirection = {x:-1,y:0};
+            }
+            if (e.key === 'ArrowRight' && snakeDirection.x === 0) {
+                e.preventDefault(); snakeDirection = {x:1,y:0};
+            }
+        });
+
+        // ✅ v3.5 ИНИЦИАЛИЗАЦИЯ КНОПКИ
+        if (currentUser) {
+            document.getElementById('statusBar').textContent = `👋 ${currentUser}`;
+            document.getElementById('logoutBtn').classList.add('active');
+        }
+        setInterval(updateTournament, 1000);
+        window.onbeforeunload = saveAllData;
+
+        function saveAllData() {
+            localStorage.setItem('aleksinUser', currentUser);
+            localStorage.setItem('aleksinLeaderboards', JSON.stringify(leaderboards));
+            localStorage.setItem('aleksinTournaments', JSON.stringify(tournamentScores));
+        }
+
+        function login() {
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            if (username && password) {
+                currentUser = username;
+                document.getElementById('statusBar').textContent = `👋 ${currentUser}`;
+                document.getElementById('logoutBtn').classList.add('active');
+                document.getElementById('authSection').classList.remove('active');
+                saveAllData();
+                console.log('✅ ЛОГИН: КНОПКА ВЫХОД В ЛЕВОМ УГЛУ');
+            }
+        }
+
+        function logout() {
+            if (snakeInterval) {
+                clearInterval(snakeInterval);
+                snakeInterval = null;
+            }
+            gameRunning = false;
+            isSnakeActive = false;
+            snake = [];
+            snakeScore = 0;
+            
+            currentUser = null;
+            document.getElementById('statusBar').textContent = '👋 Гость';
+            document.getElementById('logoutBtn').classList.remove('active');
+            
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('authSection').classList.add('active');
+            
+            saveAllData();
+            console.log('✅ ЛОГАУТ');
+        }
+
+        // Остальные функции без изменений (showGame, addScore, updateLeaderboards, updateTournament, setDifficulty, makeGuess, startSnake)
+        function showGame(game) {
+            if (!currentUser) {
+                alert('🔐 Сначала войди!');
+                document.getElementById('authSection').classList.add('active');
+                return;
+            }
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            isSnakeActive = false;
+            
+            if (game === 'leaderboards') {
+                document.getElementById('leaderboardTables').classList.add('active');
+                updateLeaderboards();
+            } else if (game === 'tournament') {
+                document.getElementById('tournamentSection').classList.add('active');
+                updateTournament();
+            } else {
+                document.getElementById(game + 'Section').classList.add('active');
+            }
+        }
+
+        function addScore(game, difficulty, score) {
+            if (!currentUser) return;
+            const key = `${game}_${difficulty}`;
+            leaderboards[key] = leaderboards[key] || {};
+            leaderboards[key][currentUser] = Math.max(leaderboards[key][currentUser] || 0, score);
+            tournamentScores[key] = tournamentScores[key] || {};
+            tournamentScores[key][currentUser] = (tournamentScores[key][currentUser] || 0) + score;
+            saveAllData();
+        }
+
+                function updateLeaderboards() {
             let html = '<h2>🏆 ТОП-10 ЛИДЕРБОРДЫ</h2><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">';
             const games = ['snake', 'guess'];
             const diffs = ['easy', 'normal', 'hard'];
