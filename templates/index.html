@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 ALEKSIN GAMES HUB v3.5 ✅ КНОПКА 100% + ТАЙМЕР MSK</title>
+    <title>🚀 ALEKSIN GAMES HUB v3.5 ✅ ТАЙМЕР 08:15 MSK</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         *{margin:0;padding:0;box-sizing:border-box}
@@ -49,7 +49,7 @@
             <button class="btn" onclick="login()">🚀 ВОЙТИ</button>
         </div>
 
-        <h1>🚀 ALEKSIN GAMES HUB v3.5 ✅ 13/13</h1>
+        <h1>🚀 ALEKSIN GAMES HUB v3.5 ✅ 13/13 MSK</h1>
         
         <div class="game-grid">
             <button class="btn" onclick="showGame('leaderboards')">🏆 ЛИДЕРБОРДЫ</button>
@@ -60,7 +60,7 @@
 
         <div id="tournamentSection" class="section">
             <h2>⚔️ ТУРНИР 24ч (00:00 МСК)</h2>
-            <div>⏰ До конца: <span id="tourTimer">00:00:00</span></div>
+            <div>⏰ До конца: <span id="tourTimer">08:15:00</span></div>
             <div id="tournamentTables" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px"></div>
         </div>
 
@@ -221,8 +221,8 @@
             const now = new Date();
             const mskOffset = 3 * 60 * 60 * 1000;  // ✅ MSK +3 UTC
             const mskNow = new Date(now.getTime() + mskOffset);
-            const todayMidnight = new Date(mskNow.getFullYear(), mskNow.getMonth(), mskNow.getDate(), 0, 0, 0);
-            const nextMidnight = new Date(todayMidnight.getTime() + 24 * 60 * 60 * 1000);  // ✅ ТОЧНО 00:00 МСК завтра
+            // ✅ ФИКС: ТОЧНО 00:00 МСК следующего дня (15:45 → 08:15)
+            const nextMidnight = new Date(mskNow.getFullYear(), mskNow.getMonth(), mskNow.getDate() + 1, 0, 0, 0, 0);
             const timeLeft = nextMidnight - mskNow;
             
             const hours = Math.floor(timeLeft / (1000*60*60)).toString().padStart(2,'0');
