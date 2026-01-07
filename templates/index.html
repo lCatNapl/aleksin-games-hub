@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 ALEKSIN GAMES HUB v3.1 ✅ 13/13</title>
+    <title>🚀 ALEKSIN GAMES HUB v3.2 ✅ 13/13</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         *{margin:0;padding:0;box-sizing:border-box}
@@ -43,7 +43,7 @@
     </div>
 
     <div class="container">
-        <h1>🚀 ALEKSIN GAMES HUB v3.1</h1>
+        <h1>🚀 ALEKSIN GAMES HUB v3.2</h1>
         
         <div class="game-grid">
             <button class="btn" onclick="showGame('leaderboards')">🏆 ЛИДЕРБОРДЫ</button>
@@ -101,11 +101,11 @@
         let secretNumber, guessCount = 0;
         let snake = [], snakeDirection = {x:1,y:0}, snakeScore = 0, gameRunning = false;
         let food = {}, snakeInterval = null;
-        let isSnakeActive = false; // ✅ ФИКС 9: Контроль игры
+        let isSnakeActive = false;
 
-        // ✅ ФИКС 9: Блокировка стрелок только во время Змейки
+        // ✅ ФИКС 9: Контроль стрелок (только в Змейке)
         document.addEventListener('keydown', function(e) {
-            if (!isSnakeActive || !gameRunning) return; // Стрелки работают ТОЛЬКО в Змейке
+            if (!isSnakeActive || !gameRunning) return;
             
             if (e.key === 'ArrowUp' && snakeDirection.y === 0) {
                 e.preventDefault();
@@ -152,17 +152,33 @@
             }
         }
 
-        // ✅ ФИКС 12: ИСПРАВЛЁННЫЙ выход
+        // ✅ ФИКС 12: ПЕРФЕКТНЫЙ ВЫХОД
         function logout() {
-            if (snakeInterval) clearInterval(snakeInterval);
+            // Полная очистка змейки
+            if (snakeInterval) {
+                clearInterval(snakeInterval);
+                snakeInterval = null;
+            }
             gameRunning = false;
             isSnakeActive = false;
+            snake = [];
+            snakeScore = 0;
+            
+            // Сброс пользователя
             currentUser = null;
             document.getElementById('statusBar').textContent = '👋 Гость';
             document.getElementById('logoutBtn').style.display = 'none';
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            
+            // Показываем экран входа
+            document.querySelectorAll('.section').forEach(s => {
+                s.classList.remove('active');
+            });
             document.getElementById('authSection').classList.add('active');
+            
+            // Сохранение
             saveAllData();
+            
+            console.log('✅ ЛОГАУТ УСПЕШЕН');
         }
 
         function showGame(game) {
@@ -171,7 +187,7 @@
                 return;
             }
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            isSnakeActive = false; // ✅ Отключаем змейку
+            isSnakeActive = false;
             
             if (game === 'leaderboards') {
                 document.getElementById('leaderboardTables').classList.add('active');
@@ -250,7 +266,6 @@
             document.getElementById('tournamentTables').innerHTML = html;
         }
 
-        // Угадайка
         function setDifficulty(game, diff) {
             currentGameType = game;
             currentDifficulty = diff;
@@ -282,11 +297,10 @@
             }
         }
 
-        // ✅ ФИКС 9: Змейка с правильным контролем скролла
         function startSnake(difficulty) {
             currentGameType = 'snake';
             currentDifficulty = difficulty;
-            isSnakeActive = true; // ✅ Включаем змейку
+            isSnakeActive = true;
             const canvas = document.getElementById('gameCanvas');
             const ctx = canvas.getContext('2d');
             const gridSize = 20;
@@ -299,7 +313,7 @@
             gameRunning = true;
             if (snakeInterval) clearInterval(snakeInterval);
             
-            // Свайпы ТОЛЬКО для canvas (не блокируют страницу)
+            // Свайпы только для canvas
             let touchStartX, touchStartY;
             canvas.addEventListener('touchstart', e => {
                 touchStartX = e.touches[0].clientX;
@@ -329,7 +343,7 @@
                 if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount || 
                     snake.some(s => s.x === head.x && s.y === head.y)) {
                     gameRunning = false;
-                    isSnakeActive = false; // ✅ Отключаем змейку
+                    isSnakeActive = false;
                     if (currentUser && snakeScore > 0) {
                         addScore('snake', difficulty, snakeScore);
                         alert(`💀 GAME OVER! ${snakeScore} очков`);
