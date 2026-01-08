@@ -9,7 +9,7 @@ app.secret_key = 'aleksin-games-hub-admin-2026'
 CORS(app)
 
 DATA_FILE = 'games_data.json'
-
+//Вот так
 def load_data():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, 'r') as f:
