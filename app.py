@@ -1,19 +1,24 @@
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import json
 import os
 from datetime import datetime
+from functools import wraps
 
 app = Flask(__name__)
 app.secret_key = 'aleksin-games-hub-admin-2026'
-CORS(app)
+CORS(app, supports_credentials=True)
 
 DATA_FILE = 'games_data.json'
-//Вот так
+current_sessions = {}
+
 def load_data():
     if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r') as f:
-            return json.load(f)
+        try:
+            with open(DATA_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            pass
     return {
         'users': {'test': {'password': '123456', 'total': 0}},
         'leaderboards': {'snake': {'easy':{}, 'normal':{}, 'hard':{}}, 'guess': {'easy':{}, 'normal':{}, 'hard':{}}},
@@ -26,6 +31,15 @@ def save_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f)
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.headers.get('Authorization')
+        if not token or token not in current_sessions:
+            return jsonify({'success': False, 'error': 'Не авторизован'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route('/')
 def index():
     return open('index.html').read()
@@ -33,27 +47,36 @@ def index():
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.json
-    users = load_data()['users']
-    if data['username'] in users and users[data['username']]['password'] == data['password']:
-        session['user'] = data['username']
-        return jsonify({'success': True, 'user': data['username']})
-    return jsonify({'success': False})
+    if data.get('username') == 'test' and data.get('password') == '123456':
+        token = f"aleksin_{data['username']}_{int(datetime.now().timestamp())}"
+        current_sessions[token] = data['username']
+        return jsonify({'success': True, 'user': data['username'], 'token': token})
+    return jsonify({'success': False, 'error': 'Неверный логин/пароль'})
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    token = request.headers.get('Authorization')
+    if token in current_sessions:
+        del current_sessions[token]
+    return jsonify({'success': True})
 
 @app.route('/api/scores', methods=['POST'])
+@login_required
 def save_score():
-    if 'user' not in session: return jsonify({'success': False})
     data = request.json
     all_data = load_data()
     game = data['game']
     diff = data['difficulty']
     score = data['score']
-    user = session['user']
+    user = current_sessions[request.headers.get('Authorization')]
     
     if game not in all_data['leaderboards']:
         all_data['leaderboards'][game] = {}
     if diff not in all_data['leaderboards'][game]:
         all_data['leaderboards'][game][diff] = {}
-    all_data['leaderboards'][game][diff][user] = max(all_data['leaderboards'][game][diff].get(user, 0), score)
+    all_data['leaderboards'][game][diff][user] = max(
+        all_data['leaderboards'][game][diff].get(user, 0), score
+    )
     save_data(all_data)
     return jsonify({'success': True})
 
@@ -66,8 +89,10 @@ def get_leaderboard(game, difficulty):
 def tournament():
     all_data = load_data()
     if request.method == 'POST':
-        if 'user' not in session: return jsonify({'success': False})
-        user = session['user']
+        token = request.headers.get('Authorization')
+        if not token or token not in current_sessions:
+            return jsonify({'success': False}), 401
+        user = current_sessions[token]
         score = request.json['score']
         all_data['tournament'][user] = all_data['tournament'].get(user, 0) + score
         save_data(all_data)
@@ -78,9 +103,11 @@ def tournament():
 def chat():
     all_data = load_data()
     if request.method == 'POST':
-        if 'user' not in session: return jsonify({'success': False})
+        token = request.headers.get('Authorization')
+        if not token or token not in current_sessions:
+            return jsonify({'success': False}), 401
         msg = {
-            'user': session['user'],
+            'user': current_sessions[token],
             'message': request.json['message'],
             'time': datetime.now().strftime('%H:%M:%S')
         }
@@ -91,6 +118,7 @@ def chat():
     return jsonify(all_data['chat'][-50:])
 
 @app.route('/api/tournament/reset', methods=['POST'])
+@login_required
 def reset_tournament():
     all_data = load_data()
     all_data['tournament'] = {}
