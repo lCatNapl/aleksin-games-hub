@@ -184,12 +184,18 @@ async function api(endpoint, options = {}) {
     }
 }
 
-    try {
+        try {
         const res = await fetch('/api' + endpoint, config);
         if (!res.ok && res.status === 503) {
             showError('🔄 Render просыпается... Подожди 30 сек');
             return {error: 'server_waking_up'};
         }
+        return await res.json();
+    } catch(e) {
+        showError('🌐 Сервис временно недоступен. Подождите 30 сек...');
+        return {error: 'network_error'};
+    }
+
         return await res.json();
     } catch(e) {
         showError('🌐 Сервис временно недоступен. Подождите 30 сек...');
