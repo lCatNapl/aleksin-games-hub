@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🔐 ALEKSIN GAMES v5.6 - ДАННЫЕ НАВСЕГДА</title>
+<title>🔐 ALEKSIN GAMES v5.6.2 - ДАННЫЕ НАВСЕГДА</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -42,7 +42,7 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 </div>
 
 <div id="authSection" class="section active">
-<h2>🔐 ALEKSIN GAMES v5.6</h2>
+<h2>🔐 ALEKSIN GAMES v5.6.2</h2>
 <p style="margin:20px 0">📝 Регистрация / Логин (минимум 3/4 символа)</p>
 <input type="text" id="usernameInput" placeholder="Логин (≥3 символа)" value="test">
 <input type="password" id="passwordInput" placeholder="Пароль (≥4 символа)" value="123456">
@@ -53,7 +53,7 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 </div>
 
 <div class="container" style="display:none" id="mainContent">
-<h1>🚀 ALEKSIN GAMES v5.6 ✅ ДАННЫЕ НАВСЕГДА</h1>
+<h1>🚀 ALEKSIN GAMES v5.6.2 ✅ ДАННЫЕ НАВСЕГДА</h1>
 
 <div class="game-grid">
 <button class="btn" onclick="showGame('leaderboards')">🏆 ЛИДЕРБОРДЫ</button>
@@ -137,7 +137,7 @@ let currentSnakeDiff = 'easy', speeds = {easy:200, normal:150, hard:100};
 let secretNumber, guessCount = 0, currentGuessDiff = 'easy';
 const ranges = {easy:1000, normal:10000, hard:100000};
 
-// ✅ НОВАЯ api() функция v5.6.1 — ЗАМЕНИ в своём index.html
+// ✅ v5.6.2 ФИКС: X-Auth-Token вместо Authorization (кириллица в именах!)
 async function api(endpoint, options = {}) {
     const config = {
         method: options.method || 'GET',
@@ -145,9 +145,9 @@ async function api(endpoint, options = {}) {
         body: options.body
     };
     
-    // Токен только ЕСЛИ есть
+    // ✅ ФИКС: X-Auth-Token = ASCII safe, работает с РУССКИМИ именами!
     if (authToken) {
-        config.headers.Authorization = authToken;
+        config.headers['X-Auth-Token'] = authToken;
     }
     
     try {
@@ -164,7 +164,7 @@ async function api(endpoint, options = {}) {
         if (!res.ok) {
             const error = await res.text();
             if (res.status === 503 && !authToken) {
-                return { success: true, user: 'test', token: 'temp_' + Date.now() }; // Render будится
+                return { success: true, user: 'test', token: 'temp_' + Date.now() };
             }
             throw new Error(`HTTP ${res.status}`);
         }
@@ -175,7 +175,6 @@ async function api(endpoint, options = {}) {
             showError('⏰ Render спит. Жди 30 сек...');
             return { error: 'timeout' };
         }
-        // Тихо пропускаем ошибки при логине/реге
         if (!authToken && (endpoint.includes('/login') || endpoint.includes('/register'))) {
             return { success: true, user: 'test', token: 'temp_' + Date.now() };
         }
@@ -183,7 +182,8 @@ async function api(endpoint, options = {}) {
         return { error: e.message };
     }
 }
-// 🔐 АВТОРИЗАЦИЯ
+
+// 🔐 АВТОРИЗАЦИЯ (без изменений)
 async function register() {
     const username = document.getElementById('usernameInput').value.trim();
     const password = document.getElementById('passwordInput').value;
@@ -222,7 +222,7 @@ async function login() {
 }
 
 function enterGame() {
-    document.getElementById('statusBar').textContent = `👋 ${currentUser} ✅ v5.6`;
+    document.getElementById('statusBar').textContent = `👋 ${currentUser} ✅ v5.6.2`;
     document.getElementById('logoutBtn').classList.add('active');
     document.getElementById('authSection').classList.remove('active');
     document.getElementById('mainContent').style.display = 'block';
@@ -261,28 +261,36 @@ async function updateLeaderboards() {
     ];
     
     for (let [id, game, diff] of tables) {
-        const data = await api(`/leaderboards/${game}/${diff}`);
-        const tbody = document.getElementById(id);
-        if (!data || Object.keys(data).length === 0) {
-            tbody.innerHTML = '<tr><td>👑 Будь первым!</td></tr>';
-        } else {
-            const sorted = Object.entries(data).sort(([,a],[,b])=>b-a).slice(0,10);
-            tbody.innerHTML = sorted.map(([user,score],i)=>`<tr><td>${i+1}. ${user}: ${score}</td></tr>`).join('');
+        try {
+            const data = await api(`/leaderboards/${game}/${diff}`);
+            const tbody = document.getElementById(id);
+            if (!data || Object.keys(data).length === 0) {
+                tbody.innerHTML = '<tr><td>👑 Будь первым!</td></tr>';
+            } else {
+                const sorted = Object.entries(data).sort(([,a],[,b])=>b-a).slice(0,10);
+                tbody.innerHTML = sorted.map(([user,score],i)=>`<tr><td>${i+1}. ${user}: ${score}</td></tr>`).join('');
+            }
+        } catch(e) {
+            document.getElementById(id).innerHTML = '<tr><td>🔄 Загрузка...</td></tr>';
         }
     }
 }
 
 async function updateTournamentTable() {
-    const data = await api('/tournament');
-    const tbody = document.getElementById('tournamentLB');
-    if (!data || Object.keys(data).length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3">⚔️ Турнир пуст!</td></tr>';
-    } else {
-        const sorted = Object.entries(data).sort(([,a],[,b])=>b-a).slice(0,20);
-        tbody.innerHTML = sorted.map(([user,score],i)=>{
-            const medal = i<3 ? ['🥇','🥈','🥉'][i] : `${i+1}`;
-            return `<tr><td>${medal}</td><td>${user}</td><td>${score}</td></tr>`;
-        }).join('');
+    try {
+        const data = await api('/tournament');
+        const tbody = document.getElementById('tournamentLB');
+        if (!data || Object.keys(data).length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3">⚔️ Турнир пуст!</td></tr>';
+        } else {
+            const sorted = Object.entries(data).sort(([,a],[,b])=>b-a).slice(0,20);
+            tbody.innerHTML = sorted.map(([user,score],i)=>{
+                const medal = i<3 ? ['🥇','🥈','🥉'][i] : `${i+1}`;
+                return `<tr><td>${medal}</td><td>${user}</td><td>${score}</td></tr>`;
+            }).join('');
+        }
+    } catch(e) {
+        document.getElementById('tournamentLB').innerHTML = '<tr><td colspan="3">🔄 Загрузка...</td></tr>';
     }
 }
 
@@ -298,13 +306,17 @@ async function sendMessage() {
 }
 
 async function updateChat() {
-    const data = await api('/chat');
-    const chat = document.getElementById('chatMessages');
-    chat.innerHTML = (data || []).map(m => 
-        `<div><strong style="color:#00ff00">${m.user}</strong> 
-         <span style="float:right;color:#aaa;font-size:0.8rem">${m.time}</span><br>${m.message}</div>`
-    ).join('');
-    chat.scrollTop = chat.scrollHeight;
+    try {
+        const data = await api('/chat');
+        const chat = document.getElementById('chatMessages');
+        chat.innerHTML = (data || []).map(m => 
+            `<div><strong style="color:#00ff00">${m.user}</strong> 
+             <span style="float:right;color:#aaa;font-size:0.8rem">${m.time}</span><br>${m.message}</div>`
+        ).join('');
+        chat.scrollTop = chat.scrollHeight;
+    } catch(e) {
+        document.getElementById('chatMessages').innerHTML = '<div>🔄 Чат загружается...</div>';
+    }
 }
 
 async function resetTournament() {
@@ -330,7 +342,7 @@ async function updateAll() {
     await Promise.all([updateLeaderboards(), updateTournamentTable(), updateChat()]);
 }
 
-// 🐍 ЗМЕЙКА
+// 🐍 ЗМЕЙКА (без изменений)
 async function startSnake(diff) {
     if (!currentUser) return showError('🔐 Войди!');
     if (snakeRunning) return;
@@ -362,7 +374,6 @@ async function startSnake(diff) {
             snake.pop();
         }
         
-        // Отрисовка
         snake.forEach((s,i) => {
             ctx.fillStyle = i === 0 ? '#ff00ff' : '#00ff00';
             ctx.fillRect(s.x*grid, s.y*grid, grid-2, grid-2);
@@ -409,7 +420,7 @@ async function gameOver() {
     alert(`🎮 ${snakeScore} очков! Рекорд сохранён!`);
 }
 
-// 🎯 УГАДАЙКА
+// 🎯 УГАДАЙКА (без изменений)
 function setDifficulty(diff) {
     currentGuessDiff = diff;
     secretNumber = Math.floor(Math.random() * ranges[diff]) + 1;
