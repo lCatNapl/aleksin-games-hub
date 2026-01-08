@@ -2,256 +2,226 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import atexit
-import traceback
+from werkzeug.utils import secure_filename
 
-app = Flask(__name__, static_folder=None)
+app = Flask(__name__)
 CORS(app)
+app.secret_key = 'aleksin-games-v5-super-secret-key-2026'
+
 DATA_FILE = 'games_data.json'
 USERS_FILE = 'users.json'
 SESSIONS_FILE = 'sessions.json'
 
 def load_json(filename, default=None):
-    """Автосоздание JSON файлов"""
+    """Загрузка JSON с fallback"""
     try:
         if os.path.exists(filename):
             with open(filename, 'r', encoding='utf-8') as f:
                 return json.load(f)
+        return default or {}
     except:
-        pass
-    if default is None:
-        default = {}
-    save_json(filename, default)
-    return default
+        return default or {}
 
 def save_json(filename, data):
-    """Надёжное сохранение"""
+    """Сохранение JSON атомарно"""
     try:
-        with open(filename, 'w', encoding='utf-8') as f:
+        tmp = filename + '.tmp'
+        with open(tmp, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, filename)
+        return True
     except:
-        pass
+        return False
 
-# Инициализация
-games_data = load_json(DATA_FILE, {
-    'leaderboards': {'snake': {'easy':{}, 'normal':{}, 'hard':{}}, 'guess': {'easy':{}, 'normal':{}, 'hard':{}}},
-    'tournament': {},
-    'chat': []
-})
-users_data = load_json(USERS_FILE, {'test': {'password': '123456'}})
-sessions_data = load_json(SESSIONS_FILE, {})
+# Инициализация данных
+games_data = load_json(DATA_FILE, {})
+users = load_json(USERS_FILE, {})
+sessions = load_json(SESSIONS_FILE, {})
 
-def get_user():
-    token = request.headers.get('Authorization') or request.args.get('token')
-    return sessions_data.get(token, {}).get('user') if token else None
+def save_all():
+    """Сохранение всех данных при завершении"""
+    save_json(DATA_FILE, games_data)
+    save_json(USERS_FILE, users)
+    save_json(SESSIONS_FILE, sessions)
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def catch_all(path):
-    """ВСЕ запросы → index.html + защита от "Сервер недоступен" """
-    try:
-        if os.path.exists('index.html'):
-            return send_file('index.html', mimetype='text/html')
-    except:
-        pass
+atexit.register(save_all)
+
+# ✅ v5.6.2 ФИКС: X-Auth-Token вместо Authorization!
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    data = request.get_json() or {}
+    username = data.get('username', '').strip()
+    password = data.get('password', '')
     
-    # Fallback HTML — НИКОГДА не покажет "Сервер недоступен"
-    return '''
-<!DOCTYPE html>
-<html>
-<head>
-    <title>🚀 ALEKSIN GAMES v5.6 ✅ РАБОТАЕТ!</title>
-    <meta charset="UTF-8">
-    <style>
-        body { 
-            margin: 0; padding: 50px; 
-            background: #000; color: #0f0; 
-            font-family: monospace; text-align: center;
-            background: linear-gradient(45deg, #0a0a23, #1a0a3a);
-        }
-        .container { max-width: 800px; margin: 0 auto; }
-        .status { background: rgba(0,255,0,0.1); padding: 20px; border-radius: 15px; margin: 20px 0; }
-        input { padding: 12px; margin: 10px; border: 2px solid #0f0; border-radius: 10px; background: #111; color: #0f0; font-family: monospace; width: 250px; }
-        button { padding: 12px 24px; background: #0f0; color: #000; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 10px; }
-        button:hover { background: #0a0; transform: scale(1.05); }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1 style="font-size: 3rem; background: linear-gradient(45deg, #ff00ff, #00ffff); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            🚀 ALEKSIN GAMES v5.6
-        </h1>
-        <div class="status">
-            <h2>✅ СЕРВЕР РАБОТАЕТ! ДАННЫЕ НАВСЕГДА!</h2>
-            <p><strong>📁 Файлы созданы:</strong></p>
-            <p>• games_data.json → лидерборды, турнир, чат</p>
-            <p>• users.json → test/123456</p>
-            <p>• sessions.json → твои сессии</p>
-        </div>
-        
-        <div style="background: rgba(0,0,0,0.5); padding: 30px; border-radius: 20px;">
-            <h3>🎮 БЫСТРЫЙ ВХОД:</h3>
-            <input type="text" id="username" placeholder="test" value="test">
-            <input type="password" id="password" placeholder="123456" value="123456">
-            <br>
-            <button onclick="login()">🚀 ВОЙТИ В ИГРЫ</button>
-            <button onclick="testAPI()">🧪 ТЕСТ API</button>
-        </div>
-        
-        <div id="status"></div>
-    </div>
-
-    <script>
-        async function login() {
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            try {
-                const res = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({username: user, password: pass})
-                });
-                const data = await res.json();
-                document.getElementById('status').innerHTML = 
-                    data.success ? 
-                    '<div style="color:#0f0;font-size:1.5rem">✅ ВХОД УСПЕШЕН! Перезагрузи страницу!</div>' :
-                    `<div style="color:#f00">❌ ${data.error}</div>`;
-            } catch(e) {
-                document.getElementById('status').innerHTML = '<div style="color:#f00">❌ Ошибка сети</div>';
-            }
-        }
-        
-        async function testAPI() {
-            try {
-                const res = await fetch('/api/test');
-                const data = await res.json();
-                document.getElementById('status').innerHTML = 
-                    `<div style="color:#0f0;font-size:1.2rem">✅ API РАБОТАЕТ! ${JSON.stringify(data)}</div>`;
-            } catch(e) {
-                document.getElementById('status').innerHTML = '<div style="color:#f00">❌ API недоступен</div>';
-            }
-        }
-        
-        // Автотест при загрузке
-        testAPI();
-    </script>
-</body>
-</html>
-    ''', 200
-
-@app.route('/api/test')
-def test():
-    return jsonify({
-        'status': '✅ v5.6 РАБОТАЕТ!',
-        'time': str(datetime.now()),
-        'files': [f for f in [DATA_FILE, USERS_FILE, SESSIONS_FILE] if os.path.exists(f)],
-        'users': len(users_data),
-        'tournament': len(games_data['tournament'])
-    })
+    if username == 'test' and password == '123456':
+        token = 'admin_' + str(int(datetime.now().timestamp()))
+        sessions[token] = {'user': username, 'exp': datetime.now().timestamp() + 3600}
+        save_json(SESSIONS_FILE, sessions)
+        return jsonify({'success': True, 'user': username, 'token': token})
+    
+    if username in users and users[username] == password:
+        token = username + '_' + str(int(datetime.now().timestamp()))
+        sessions[token] = {'user': username, 'exp': datetime.now().timestamp() + 3600}
+        save_json(SESSIONS_FILE, sessions)
+        return jsonify({'success': True, 'user': username, 'token': token})
+    
+    return jsonify({'success': False, 'error': 'Неверный логин/пароль'}), 401
 
 @app.route('/api/register', methods=['POST'])
-def register():
+def api_register():
     data = request.get_json() or {}
     username = data.get('username', '').strip()
     password = data.get('password', '')
     
     if len(username) < 3 or len(password) < 4:
-        return jsonify({'success': False, 'error': 'Логин ≥3, пароль ≥4 символа'})
-    if username in users_data:
-        return jsonify({'success': False, 'error': 'Пользователь существует'})
+        return jsonify({'success': False, 'error': 'Логин ≥3, пароль ≥4 символа'}), 400
     
-    users_data[username] = {'password': password}
-    save_json(USERS_FILE, users_data)
+    if username in users:
+        return jsonify({'success': False, 'error': 'Логин занят'}), 400
     
-    token = f"token_{username}_{int(datetime.now().timestamp())}"
-    sessions_data[token] = {'user': username, 'time': datetime.now().timestamp()}
-    save_json(SESSIONS_FILE, sessions_data)
+    users[username] = password
+    save_json(USERS_FILE, users)
+    
+    token = username + '_' + str(int(datetime.now().timestamp()))
+    sessions[token] = {'user': username, 'exp': datetime.now().timestamp() + 3600}
+    save_json(SESSIONS_FILE, sessions)
     
     return jsonify({'success': True, 'user': username, 'token': token})
 
-@app.route('/api/login', methods=['POST'])
-def login():
-    data = request.get_json() or {}
-    username = data.get('username', '').strip()
-    password = data.get('password', '')
+def get_current_user():
+    """Получить текущего пользователя по токену"""
+    # ✅ v5.6.2 ФИКС: X-Auth-Token!
+    token = request.headers.get('X-Auth-Token')
+    if not token or token not in sessions:
+        return None
     
-    if username in users_data and users_data[username]['password'] == password:
-        token = f"token_{username}_{int(datetime.now().timestamp())}"
-        sessions_data[token] = {'user': username, 'time': datetime.now().timestamp()}
-        save_json(SESSIONS_FILE, sessions_data)
-        return jsonify({'success': True, 'user': username, 'token': token})
+    session = sessions[token]
+    if datetime.now().timestamp() > session['exp']:
+        del sessions[token]
+        save_json(SESSIONS_FILE, sessions)
+        return None
     
-    return jsonify({'success': False, 'error': 'Неверный логин/пароль'})
+    return session['user']
 
 @app.route('/api/leaderboards/<game>/<difficulty>')
-def get_leaderboard(game, difficulty):
-    return jsonify(games_data['leaderboards'].get(game, {}).get(difficulty, {}))
+def api_leaderboards(game, difficulty):
+    user = get_current_user()
+    if not user:
+        return jsonify({})
+    
+    key = f"{game}_{difficulty}"
+    return jsonify(games_data.get(key, {}))
 
 @app.route('/api/scores', methods=['POST'])
-def save_score():
-    user = get_user()
+def api_scores():
+    user = get_current_user()
     if not user:
-        return jsonify({'success': False, 'error': '🔐 Войди!'}), 401
+        return jsonify({'success': False, 'error': 'Не авторизован'}), 401
     
-    data = request.get_json()
+    data = request.get_json() or {}
     game = data.get('game', 'unknown')
-    diff = data.get('difficulty', 'easy')
-    score = int(data.get('score', 0))
+    difficulty = data.get('difficulty', 'easy')
+    score = data.get('score', 0)
     
-    if game not in games_data['leaderboards']:
-        games_data['leaderboards'][game] = {}
-    if diff not in games_data['leaderboards'][game]:
-        games_data['leaderboards'][game][diff] = {}
+    if score <= 0:
+        return jsonify({'success': False, 'error': 'Некорректный счёт'}), 400
     
-    games_data['leaderboards'][game][diff][user] = max(
-        games_data['leaderboards'][game][diff].get(user, 0), score
-    )
+    key = f"{game}_{difficulty}"
+    if key not in games_data:
+        games_data[key] = {}
+    
+    games_data[key][user] = max(games_data[key].get(user, 0), score)
     save_json(DATA_FILE, games_data)
-    return jsonify({'success': True})
+    
+    return jsonify({'success': True, 'score': score})
 
 @app.route('/api/tournament', methods=['GET', 'POST'])
-def tournament():
+def api_tournament():
+    user = get_current_user()
+    if request.method == 'POST' and not user:
+        return jsonify({'success': False, 'error': 'Не авторизован'}), 401
+    
     if request.method == 'POST':
-        user = get_user()
-        if not user: return jsonify({'success': False}), 401
-        score = int(request.get_json().get('score', 0))
-        games_data['tournament'][user] = games_data['tournament'].get(user, 0) + score
-        save_json(DATA_FILE, games_data)
-        return jsonify({'success': True})
-    return jsonify(games_data['tournament'])
-
-@app.route('/api/chat', methods=['GET', 'POST'])
-def chat():
-    if request.method == 'POST':
-        user = get_user()
-        if not user: return jsonify({'success': False}), 401
-        msg = request.get_json().get('message', '').strip()[:100]
-        if msg:
-            games_data['chat'].append({
-                'user': user, 'message': msg, 
-                'time': datetime.now().strftime('%H:%M')
-            })
-            games_data['chat'] = games_data['chat'][-50:]
+        data = request.get_json() or {}
+        score = data.get('score', 0)
+        if score > 0:
+            if 'tournament' not in games_data:
+                games_data['tournament'] = {}
+            games_data['tournament'][user] = games_data['tournament'].get(user, 0) + score
             save_json(DATA_FILE, games_data)
         return jsonify({'success': True})
-    return jsonify(games_data['chat'])
+    
+    return jsonify(games_data.get('tournament', {}))
 
 @app.route('/api/tournament/reset', methods=['POST'])
-def reset_tournament():
-    if get_user() not in ['test', 'admin']:
-        return jsonify({'success': False, 'error': '🔐 Админ!'}), 403
-    games_data['tournament'] = {}
-    save_json(DATA_FILE, games_data)
+def api_tournament_reset():
+    user = get_current_user()
+    if not user or user != 'test':
+        return jsonify({'success': False, 'error': 'Только для админа'}), 403
+    
+    if 'tournament' in games_data:
+        del games_data['tournament']
+        save_json(DATA_FILE, games_data)
+    
     return jsonify({'success': True})
 
-def save_all():
-    save_json(DATA_FILE, games_data)
-    save_json(USERS_FILE, users_data)
-    save_json(SESSIONS_FILE, sessions_data)
+@app.route('/api/chat', methods=['GET', 'POST'])
+def api_chat():
+    user = get_current_user()
+    if request.method == 'POST' and not user:
+        return jsonify({'success': False, 'error': 'Не авторизован'}), 401
+    
+    if request.method == 'POST':
+        data = request.get_json() or {}
+        message = data.get('message', '').strip()[:100]
+        if not message:
+            return jsonify({'success': False, 'error': 'Пустое сообщение'}), 400
+        
+        if 'chat' not in games_data:
+            games_data['chat'] = []
+        
+        games_data['chat'].append({
+            'user': user,
+            'message': message,
+            'time': datetime.now().strftime('%H:%M:%S')
+        })
+        
+        # Оставляем только последние 100 сообщений
+        games_data['chat'] = games_data['chat'][-100:]
+        save_json(DATA_FILE, games_data)
+        return jsonify({'success': True})
+    
+    return jsonify(games_data.get('chat', []))
 
-atexit.register(save_all)
+@app.route('/api/admin/stats')
+def api_admin_stats():
+    user = get_current_user()
+    if user != 'test':
+        return jsonify({'error': 'Только для админа'}), 403
+    
+    return jsonify({
+        'users': len(users),
+        'sessions': len(sessions),
+        'games': len([k for k in games_data if not k.startswith('chat') and k != 'tournament']),
+        'total_scores': sum(len(v) for v in games_data.values() if isinstance(v, dict))
+    })
+
+@app.route('/', defaults={'path': 'index.html'})
+@app.route('/<path:path>')
+def serve_static(path):
+    if path != 'index.html' and os.path.exists(path):
+        return send_file(path)
+    
+    # Возвращаем index.html для всех маршрутов SPA
+    return send_file('index.html')
+
+@app.route('/api/health')
+def health_check():
+    return jsonify({'status': 'ok', 'version': 'v5.6.2'})
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    # ✅ Render использует PORT=10000 автоматически!
+    port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port, debug=False)
