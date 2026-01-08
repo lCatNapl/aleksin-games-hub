@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>🚀 ALEKSIN GAMES HUB v4.3 ✅ ТУРНИРЫ+ЧАТ+АЧИВКИ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🚀 ALEKSIN GAMES v5.0 ✅ СИНХРОН ВСЕХ УСТРОЙСТВ</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -27,7 +27,6 @@ th{background:linear-gradient(45deg,rgba(255,0,255,0.4),rgba(0,255,255,0.4));fon
 #logoutContainer{position:fixed;top:10px;left:10px;z-index:9999;background:rgba(0,0,0,0.8);padding:10px;border-radius:15px}
 #logoutBtn{display:none}#logoutBtn.active{display:inline-block !important}
 #authSection{position:relative;margin:40px auto;max-width:400px;background:rgba(0,0,0,0.9);padding:30px;border-radius:20px;box-shadow:0 0 50px rgba(255,0,255,0.5)}
-#authSection.active{display:block}
 input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-radius:10px;background:rgba(255,255,255,0.1);color:#fff;font-family:inherit;width:calc(100% - 24px);font-size:16px}
 #tourTimer{font-size:2.5rem;color:#00ff00;text-shadow:0 0 20px #00ff00;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
@@ -53,7 +52,7 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 <button class="btn" onclick="login()">🚀 ВОЙТИ</button>
 </div>
 
-<h1>🚀 ALEKSIN GAMES HUB v4.3 ✅ ТУРНИРЫ+ЧАТ+АЧИВКИ</h1>
+<h1>🚀 ALEKSIN GAMES v5.0 ✅ СИНХРОН ВСЕХ УСТРОЙСТВ</h1>
 
 <div class="game-grid">
 <button class="btn" onclick="showGame('leaderboards')">🏆 ЛИДЕРБОРДЫ</button>
@@ -77,7 +76,7 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 </div>
 </div>
 
-<!-- ТУРНИР ✅ ФИКС -->
+<!-- ТУРНИР -->
 <div id="tournamentSection" class="section">
 <h2>⚔️ ТУРНИР 24ч (00:00 МСК)</h2>
 <div style="font-size:1.5rem;margin:20px">⏰ До конца: <span id="tourTimer">--:--:--</span></div>
@@ -91,9 +90,9 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 <button class="btn" onclick="resetTournament()" style="margin:20px">🔄 СБРОСИТЬ ТУРНИР (Админ)</button>
 </div>
 
-<!-- ЧАТ ✅ ФИКС -->
+<!-- ЧАТ -->
 <div id="chatSection" class="section">
-<h2>💬 ГЛОБАЛЬНЫЙ ЧАТ (все видят всех)</h2>
+<h2>💬 ГЛОБАЛЬНЫЙ ЧАТ</h2>
 <div id="chatMessages"></div>
 <div style="margin:20px">
 <input id="chatInput" placeholder="Напиши сообщение... (Enter)" style="width:60%;font-size:16px">
@@ -102,7 +101,7 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 </div>
 </div>
 
-<!-- ПРОФИЛЬ ✅ АЧИВКИ -->
+<!-- ПРОФИЛЬ -->
 <div id="profileSection" class="section">
 <h2>👤 ПРОФИЛЬ <span id="profileUsername"></span></h2>
 <div style="background:rgba(0,255,0,0.2);padding:20px;border-radius:15px;margin:20px auto;max-width:500px">
@@ -149,45 +148,19 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 <div id="achievementPopup" class="achievement"></div>
 
 <script>
-// ✅ ФИКС ДАННЫХ - ПРЯМО СЕЙЧАС!
-function initData() {
-    if (!localStorage.getItem('aleksinLeaderboards')) localStorage.setItem('aleksinLeaderboards', '{}');
-    if (!localStorage.getItem('aleksinTournament')) localStorage.setItem('aleksinTournament', '{}');
-    if (!localStorage.getItem('aleksinChat')) localStorage.setItem('aleksinChat', '[]');
-    if (!localStorage.getItem('aleksinStats')) localStorage.setItem('aleksinStats', '{}');
-    if (!localStorage.getItem('aleksinAchievements')) localStorage.setItem('aleksinAchievements', '{}');
-}
-
-// ✅ ГЛОБАЛЬНЫЕ
-let currentUser = localStorage.getItem('aleksinUser') || null;
-let leaderboards = JSON.parse(localStorage.getItem('aleksinLeaderboards') || '{}');
-let tournamentScores = JSON.parse(localStorage.getItem('aleksinTournament') || '{}');
-let chatMessages = JSON.parse(localStorage.getItem('aleksinChat') || '[]');
-let achievements = JSON.parse(localStorage.getItem('aleksinAchievements') || '{}');
-let stats = JSON.parse(localStorage.getItem('aleksinStats') || '{}');
-
-// ЗМЕЙКА
+let currentUser = null;
 let snake = [{x:10,y:10}], snakeDir = {x:1,y:0}, snakeScore = 0, snakeRunning = false, snakeInterval;
 let currentSnakeDiff = 'easy', speeds = {easy:200, normal:150, hard:100};
-let food = {x:5,y:5};
-
-// УГАДАЙКА
 let secretNumber, guessCount = 0, currentGuessDiff = 'easy';
 const ranges = {easy:1000, normal:10000, hard:100000};
+const API_BASE = '/api';
 
-// ✅ СТАРТ
-initData();
-if (currentUser) {
-    document.getElementById('statusBar').textContent = `👋 ${currentUser}`;
-    document.getElementById('logoutBtn').classList.add('active');
+async function apiCall(endpoint, options = {}) {
+    const response = await fetch(API_BASE + endpoint, options);
+    return response.json();
 }
-setInterval(updateTournament, 1000);
-updateChat();
-loadProfile();
-updateLeaderboards();
-updateTournamentTable();
 
-// ✅ НАВИГАЦИЯ
+// НАВИГАЦИЯ
 function showGame(game) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     const sectionMap = {
@@ -198,55 +171,42 @@ function showGame(game) {
         'snake': 'snakeSection',
         'guess': 'guessSection'
     };
-    const sectionId = sectionMap[game] || game + 'Section';
-    document.getElementById(sectionId).classList.add('active');
-    
+    document.getElementById(sectionMap[game]).classList.add('active');
     if (game === 'leaderboards') updateLeaderboards();
     if (game === 'tournament') updateTournamentTable();
     if (game === 'chat') updateChat();
-    if (game === 'profile') loadProfile();
 }
 
-// ✅ ЛОГИН
-function login() {
+// ЛОГИН
+async function login() {
     const username = document.getElementById('usernameInput').value.trim();
     const password = document.getElementById('passwordInput').value;
-    if (username && password) {
-        currentUser = username;
-        stats[currentUser] = stats[currentUser] || {wins:0, losses:0, total:0};
+    const result = await apiCall('/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username, password})
+    });
+    if (result.success) {
+        currentUser = result.user;
         document.getElementById('statusBar').textContent = `👋 ${currentUser}`;
         document.getElementById('logoutBtn').classList.add('active');
         document.getElementById('authSection').classList.remove('active');
-        localStorage.setItem('aleksinUser', currentUser);
-        saveAllData();
         loadProfile();
-        showAchievement('firstLogin');
         alert(`✅ Добро пожаловать, Админ ${currentUser}!`);
+    } else {
+        alert('❌ Неверный логин/пароль');
     }
 }
 
 function logout() {
-    if (snakeInterval) clearInterval(snakeInterval);
-    snakeRunning = false;
     currentUser = null;
     document.getElementById('statusBar').textContent = '👋 Гость';
     document.getElementById('logoutBtn').classList.remove('active');
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.getElementById('authSection').classList.add('active');
-    localStorage.removeItem('aleksinUser');
-    saveAllData();
 }
 
-// ✅ СОХРАНЕНИЕ
-function saveAllData() {
-    localStorage.setItem('aleksinLeaderboards', JSON.stringify(leaderboards));
-    localStorage.setItem('aleksinTournament', JSON.stringify(tournamentScores));
-    localStorage.setItem('aleksinChat', JSON.stringify(chatMessages));
-    localStorage.setItem('aleksinStats', JSON.stringify(stats));
-    localStorage.setItem('aleksinAchievements', JSON.stringify(achievements));
-}
-
-// ✅ ЗМЕЙКА (ОСТАЕТСЯ КАК В v4.2)
+// ЗМЕЙКА
 function startSnake(diff) {
     if (!currentUser) { alert('🔐 Админ, войди!'); return; }
     currentSnakeDiff = diff;
@@ -262,9 +222,7 @@ function startSnake(diff) {
     snakeScore = 0;
     snakeRunning = true;
     
-    function generateFood() {
-        food = {x:Math.floor(Math.random()*19), y:Math.floor(Math.random()*19)};
-    }
+    let food = {x:Math.floor(Math.random()*19), y:Math.floor(Math.random()*19)};
     
     function gameLoop() {
         if (!snakeRunning) return;
@@ -284,8 +242,7 @@ function startSnake(diff) {
         
         if (head.x === food.x && head.y === food.y) {
             snakeScore += 100;
-            generateFood();
-            if (snakeScore >= 1000) showAchievement('snakeMaster');
+            food = {x:Math.floor(Math.random()*19), y:Math.floor(Math.random()*19)};
         } else {
             snake.pop();
         }
@@ -304,7 +261,6 @@ function startSnake(diff) {
     gameLoop();
     snakeInterval = setInterval(gameLoop, speeds[diff]);
     
-    // Управление
     let touchStart = {x:0,y:0};
     canvas.addEventListener('touchstart', e => {
         e.preventDefault();
@@ -324,14 +280,6 @@ function startSnake(diff) {
                       dy < 0 && snakeDir.y !== -1 ? {x:0,y:1} : snakeDir;
         }
     });
-    
-    document.addEventListener('keydown', e => {
-        e.preventDefault();
-        if (e.key === 'ArrowUp' && snakeDir.y !== 1) snakeDir = {x:0,y:-1};
-        if (e.key === 'ArrowDown' && snakeDir.y !== -1) snakeDir = {x:0,y:1};
-        if (e.key === 'ArrowLeft' && snakeDir.x !== 1) snakeDir = {x:-1,y:0};
-        if (e.key === 'ArrowRight' && snakeDir.x !== -1) snakeDir = {x:1,y:0};
-    });
 }
 
 function stopSnake() {
@@ -339,25 +287,28 @@ function stopSnake() {
     if (snakeInterval) clearInterval(snakeInterval);
 }
 
-function gameOver() {
+async function gameOver() {
     snakeRunning = false;
     if (snakeInterval) clearInterval(snakeInterval);
     
     if (currentUser && snakeScore > 0) {
-        leaderboards.snake = leaderboards.snake || {};
-        leaderboards.snake[currentSnakeDiff] = leaderboards.snake[currentSnakeDiff] || {};
-        leaderboards.snake[currentSnakeDiff][currentUser] = Math.max(
-            leaderboards.snake[currentSnakeDiff][currentUser] || 0, snakeScore
-        );
-        tournamentScores[currentUser] = (tournamentScores[currentUser] || 0) + snakeScore;
-        saveAllData();
+        await apiCall('/scores', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({game: 'snake', difficulty: currentSnakeDiff, score: snakeScore})
+        });
+        await apiCall('/tournament', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({score: snakeScore})
+        });
         updateLeaderboards();
         updateTournamentTable();
     }
     alert(`Game Over, Админ! Счёт: ${snakeScore}`);
 }
 
-// ✅ УГАДАЙКА
+// УГАДАЙКА
 function setDifficulty(diff) {
     currentGuessDiff = diff;
     secretNumber = Math.floor(Math.random() * ranges[diff]) + 1;
@@ -368,7 +319,7 @@ function setDifficulty(diff) {
     document.getElementById('guessAttempts').textContent = 'Попыток: 0';
 }
 
-function makeGuess() {
+async function makeGuess() {
     if (!currentUser) { alert('🔐 Админ, войди!'); return; }
     const guess = parseInt(document.getElementById('guessInput').value);
     if (!guess || guess < 1) { alert('Введи число!'); return; }
@@ -377,179 +328,121 @@ function makeGuess() {
     if (guess === secretNumber) {
         const score = Math.max(1000 - guessCount * 100, 100);
         document.getElementById('guessResult').innerHTML = `✅ Угадал за ${guessCount} попыток! (+${score})`;
-        stats[currentUser].wins = (stats[currentUser].wins || 0) + 1;
         
-        leaderboards.guess = leaderboards.guess || {};
-        leaderboards.guess[currentGuessDiff] = leaderboards.guess[currentGuessDiff] || {};
-        leaderboards.guess[currentGuessDiff][currentUser] = Math.max(
-            leaderboards.guess[currentGuessDiff][currentUser] || 0, score
-        );
-        tournamentScores[currentUser] = (tournamentScores[currentUser] || 0) + score;
+        await apiCall('/scores', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({game: 'guess', difficulty: currentGuessDiff, score: score})
+        });
+        await apiCall('/tournament', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({score: score})
+        });
         
-        if (guessCount <= 5) showAchievement('guessPro');
-        saveAllData();
         updateLeaderboards();
         updateTournamentTable();
+        setDifficulty(currentGuessDiff);
     } else {
         const diff = Math.abs(guess - secretNumber);
         let hint = guess < secretNumber ? '📈 Больше' : '📉 Меньше';
         if (diff <= 10) hint += ' (ОЧЕНЬ близко!)';
         else if (diff <= 50) hint += ' (близко)';
         document.getElementById('guessResult').textContent = hint;
-        stats[currentUser].losses = (stats[currentUser].losses || 0) + 1;
     }
     document.getElementById('guessAttempts').textContent = `Попыток: ${guessCount}`;
     document.getElementById('guessInput').value = '';
-    saveAllData();
 }
 
-// ✅ ЛИДЕРБОРДЫ
-function updateLeaderboards() {
+// ЛИДЕРБОРДЫ
+async function updateLeaderboards() {
     const tables = {
-        snakeEasyLB: leaderboards.snake?.easy || {},
-        snakeNormalLB: leaderboards.snake?.normal || {},
-        snakeHardLB: leaderboards.snake?.hard || {},
-        guessEasyLB: leaderboards.guess?.easy || {},
-        guessNormalLB: leaderboards.guess?.normal || {},
-        guessHardLB: leaderboards.guess?.hard || {}
+        snakeEasyLB: ['snake', 'easy'],
+        snakeNormalLB: ['snake', 'normal'],
+        snakeHardLB: ['snake', 'hard'],
+        guessEasyLB: ['guess', 'easy'],
+        guessNormalLB: ['guess', 'normal'],
+        guessHardLB: ['guess', 'hard']
     };
     
-    Object.entries(tables).forEach(([id, data]) => {
+    for (let [id, [game, diff]] of Object.entries(tables)) {
+        const data = await apiCall(`/leaderboards/${game}/${diff}`);
         const table = document.getElementById(id);
-        if (!data || Object.keys(data).length === 0) {
-            table.innerHTML = '<tr><td colspan="1">👑 БУДЬ ПЕРВЫМ!</td></tr>';
+        if (Object.keys(data).length === 0) {
+            table.innerHTML = '<tr><td>👑 БУДЬ ПЕРВЫМ!</td></tr>';
         } else {
             const sorted = Object.entries(data).sort(([,a],[,b]) => b-a).slice(0,10);
             table.innerHTML = sorted.map(([user,score],i) => 
-                `<tr><td>${i+1}🏆 ${user}<br><small>${score} очков</small></td></tr>`
+                `<tr><td>${i+1}🏆 ${user}<br><small>${score}</small></td></tr>`
             ).join('');
         }
-    });
-}
-
-// ✅ ТУРНИР ✅ ФИКС ВИДНОСТИ
-function updateTournamentTable() {
-    const table = document.getElementById('tournamentLB');
-    if (!tournamentScores || Object.keys(tournamentScores).length === 0) {
-        table.innerHTML = '<tr><td colspan="3">⚔️ Турнир пуст! Играй и займи 1 место!</td></tr>';
-        return;
     }
-    
-    const sorted = Object.entries(tournamentScores).sort(([,a],[,b]) => b-a).slice(0,100);
-    table.innerHTML = sorted.map(([user,score],i) => {
-        const medal = i < 5 ? ['🥇','🥈','🥉','🎖️','🎖️'][i] : `${i+1}`;
-        return `<tr><td>${medal}</td><td>${user}</td><td>${score}</td></tr>`;
-    }).join('');
 }
 
-// ✅ ЧАТ ✅ ФИКС ВИДНОСТИ
-function sendMessage() {
+// ТУРНИР
+async function updateTournamentTable() {
+    const data = await apiCall('/tournament');
+    const table = document.getElementById('tournamentLB');
+    if (Object.keys(data).length === 0) {
+        table.innerHTML = '<tr><td colspan="3">⚔️ Турнир пуст!</td></tr>';
+    } else {
+        const sorted = Object.entries(data).sort(([,a],[,b]) => b-a).slice(0,100);
+        table.innerHTML = sorted.map(([user,score],i) => {
+            const medal = i < 5 ? ['🥇','🥈','🥉','🎖️','🎖️'][i] : `${i+1}`;
+            return `<tr><td>${medal}</td><td>${user}</td><td>${score}</td></tr>`;
+        }).join('');
+    }
+}
+
+// ЧАТ
+async function sendMessage() {
     const msg = document.getElementById('chatInput').value.trim();
     if (msg && currentUser) {
-        chatMessages.push({
-            user: currentUser, 
-            msg: msg, 
-            time: new Date().toLocaleTimeString('ru-RU', {timeZone: 'Europe/Moscow'}),
-            id: Date.now()
+        await apiCall('/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: msg})
         });
         document.getElementById('chatInput').value = '';
-        saveAllData();
         updateChat();
     }
 }
 
-function updateChat() {
+async function updateChat() {
+    const messages = await apiCall('/chat');
     const chat = document.getElementById('chatMessages');
-    chat.innerHTML = chatMessages.slice(-50).reverse().map(m =>
+    chat.innerHTML = messages.map(m =>
         `<div style="margin:5px 0"><strong style="color:#00ff00">${m.user}</strong> 
         <span style="color:#888;float:right;font-size:0.8rem">${m.time}</span><br>${m.msg}</div>`
     ).join('');
     chat.scrollTop = 0;
 }
 
-function clearChat() {
-    chatMessages = [];
-    saveAllData();
-    updateChat();
-}
-
-// ✅ ТУРНИР MSK
-function updateTournament() {
-    const now = new Date();
-    const msk = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Moscow"}));
-    const nextMidnight = new Date(msk.getFullYear(), msk.getMonth(), msk.getDate() + 1, 0, 0, 0);
-    const timeLeft = nextMidnight - msk;
-    
-    const h = Math.floor(timeLeft/3600000).toString().padStart(2,'0');
-    const m = Math.floor((timeLeft%3600000)/60000).toString().padStart(2,'0');
-    const s = Math.floor((timeLeft%60000)/1000).toString().padStart(2,'0');
-    document.getElementById('tourTimer').textContent = `${h}:${m}:${s}`;
-}
-
-// ✅ ПРОФИЛЬ + АЧИВКИ ✅ ФИКС
-function loadProfile() {
-    if (!currentUser) return;
-    
-    document.getElementById('profileUsername').textContent = currentUser;
-    const userStats = stats[currentUser] || {wins:0, losses:0};
-    
-    document.getElementById('totalWins').textContent = userStats.wins || 0;
-    document.getElementById('totalLosses').textContent = userStats.losses || 0;
-    const winrate = userStats.wins ? Math.round(userStats.wins/(userStats.wins+userStats.losses)*100) : 0;
-    document.getElementById('winrate').textContent = winrate + '%';
-    
-    const total = Object.values(leaderboards).flatMap(lb => Object.values(lb))
-        .reduce((sum, lb) => sum + (lb[currentUser] || 0), 0) + (tournamentScores[currentUser] || 0);
-    document.getElementById('totalScore').textContent = total;
-    
-    const league = total > 10000 ? 'gold' : total > 1000 ? 'silver' : 'bronze';
-    document.getElementById('leagueBadge').textContent = league.toUpperCase();
-    document.getElementById('leagueBadge').className = `league-badge ${league}`;
-    
-    updateAchievements();
-}
-
-function updateAchievements() {
-    const achList = document.getElementById('achievements');
-    const achDefs = {
-        firstLogin: '🎉 Первый вход',
-        snakeMaster: '🐍 Мастер Змейки (1000+ очков)',
-        guessPro: '🎯 Профи Угадайки (5 попыток)'
-    };
-    
-    if (!achievements[currentUser]) achievements[currentUser] = {};
-    
-    achList.innerHTML = Object.entries(achDefs).map(([id, name]) => {
-        const unlocked = achievements[currentUser][id] || false;
-        return `<div style="background:${unlocked ? 'rgba(0,255,0,0.3)' : 'rgba(255,255,255,0.1)'};padding:15px;border-radius:10px;text-align:center">
-            ${unlocked ? '✅' : '🔒'} ${name}
-        </div>`;
-    }).join('');
-}
-
-function showAchievement(id) {
-    if (!currentUser || achievements[currentUser][id]) return;
-    achievements[currentUser] = achievements[currentUser] || {};
-    achievements[currentUser][id] = true;
-    saveAllData();
-    updateAchievements();
-    
-    // Popup
-    const popup = document.getElementById('achievementPopup');
-    popup.textContent = `🏆 Достижение: ${id.toUpperCase().replace(/([A-Z])/g, ' $1').trim()}!`;
-    popup.style.display = 'block';
-    setTimeout(() => popup.style.display = 'none', 3000);
-}
-
-// ✅ АДМИН
-function resetTournament() {
-    if (confirm('🔄 Админ, сбросить турнир?')) {
-        tournamentScores = {};
-        saveAllData();
+async function resetTournament() {
+    if (confirm('🔄 Сбросить турнир?')) {
+        await apiCall('/tournament/reset', {method: 'POST'});
         updateTournamentTable();
-        alert('✅ Турнир сброшен!');
     }
 }
+
+async function loadProfile() {
+    if (!currentUser) return;
+    document.getElementById('profileUsername').textContent = currentUser;
+    // Загружаем статистику из лидербордов
+    updateLeaderboards();
+    updateTournamentTable();
+}
+
+// Инициализация
+setInterval(() => {
+    document.getElementById('tourTimer').textContent = new Date().toLocaleTimeString('ru-RU', { 
+        timeZone: 'Europe/Moscow', hour12: false 
+    });
+}, 1000);
+
+document.getElementById('chatInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') sendMessage();
+});
 </script>
 </body>
 </html>
