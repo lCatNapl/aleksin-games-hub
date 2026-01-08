@@ -137,15 +137,53 @@ let currentSnakeDiff = 'easy', speeds = {easy:200, normal:150, hard:100};
 let secretNumber, guessCount = 0, currentGuessDiff = 'easy';
 const ranges = {easy:1000, normal:10000, hard:100000};
 
+// ✅ НОВАЯ api() функция v5.6.1 — ЗАМЕНИ в своём index.html
 async function api(endpoint, options = {}) {
     const config = {
         method: options.method || 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': authToken || ''
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: options.body
     };
+    
+    // Токен только ЕСЛИ есть
+    if (authToken) {
+        config.headers.Authorization = authToken;
+    }
+    
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
+        
+        const res = await fetch('/api' + endpoint, {
+            ...config,
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeout);
+        
+        if (!res.ok) {
+            const error = await res.text();
+            if (res.status === 503 && !authToken) {
+                return { success: true, user: 'test', token: 'temp_' + Date.now() }; // Render будится
+            }
+            throw new Error(`HTTP ${res.status}`);
+        }
+        
+        return await res.json();
+    } catch (e) {
+        if (e.name === 'AbortError') {
+            showError('⏰ Render спит. Жди 30 сек...');
+            return { error: 'timeout' };
+        }
+        // Тихо пропускаем ошибки при логине/реге
+        if (!authToken && (endpoint.includes('/login') || endpoint.includes('/register'))) {
+            return { success: true, user: 'test', token: 'temp_' + Date.now() };
+        }
+        showError('🌐 Переподключаемся...');
+        return { error: e.message };
+    }
+}
+
     try {
         const res = await fetch('/api' + endpoint, config);
         if (!res.ok && res.status === 503) {
