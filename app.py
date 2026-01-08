@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)
 
 DATA_FILE = 'games_data.json'
-current_sessions = {'test_token': 'test'}  # Дефолтный токен для теста
+current_sessions = {'test_token': 'test'}  # Дефолтный токен для тест
 
 def load_data():
     try:
