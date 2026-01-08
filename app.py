@@ -37,7 +37,7 @@ def index(path=''):
     try:
         return send_file('index.html')
     except:
-        return '<h1>🚀 ALEKSIN GAMES - index.html не найден!</h1>'
+        return '<h1>🚀 ALEKSIN GAMES</h1>'
 
 @app.route('/api/test')
 def test():
