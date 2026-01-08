@@ -3,11 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🔐 ALEKSIN GAMES v5.6.2 - ДАННЫЕ НАВСЕГДА</title>
+<title>🔐 ALEKSIN GAMES v5.6.3 - СКРОЛЛ + ANTI-APPLE</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Orbitron',monospace;background:linear-gradient(135deg,#0a0a23 0%,#1a0a3a 50%,#0f0f4f 100%);color:#fff;min-height:100vh;overflow-y:auto}
+body{font-family:'Orbitron',monospace;background:linear-gradient(135deg,#0a0a23 0%,#1a0a3a 50%,#0f0f4f 100%);color:#fff;min-height:100vh}
+
+/* 🔥 ПК: колёсико РАБОТАЕТ, стрелки БЛОКИРУЕТСЯ */
+@media (hover: hover) {
+    body { 
+        scroll-behavior: smooth; 
+        overflow-y: auto; 
+    }
+}
+
+/* 📱 МОБАЙЛ: скролл ТОЛЬКО когда НЕ играешь */
+@media (hover: none) {
+    body { 
+        touch-action: pan-y; 
+        overscroll-behavior: contain;
+    }
+    body.playing { 
+        overflow: hidden !important; 
+        height: 100vh !important; 
+        touch-action: none !important; 
+        overscroll-behavior: none !important;
+        position: fixed !important;
+        width: 100% !important;
+    }
+}
+
+/* 💀 APPLE БЛОК - iPhone/iPad НЕ ПОДДЕРЖИВАЮТСЯ */
+@supports (-webkit-touch-callout: none) {
+    body::before {
+        content: "💀 iPhone/iPad НЕ ПОДДЕРЖИВАЕТСЯ! Используй Android/PC 🌐";
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(45deg, #000 0%, #ff0000 50%, #000 100%);
+        color: #ff4444; z-index: 999999; display: flex;
+        align-items: center; justify-content: center; font-size: 2rem;
+        text-align: center; animation: applePulse 2s infinite;
+        font-weight: 900; text-shadow: 0 0 20px #ff0000;
+    }
+    @keyframes applePulse {
+        0%,100%{transform:scale(1);opacity:1}
+        50%{transform:scale(1.05);opacity:0.9}
+    }
+    body * { display: none !important; }
+}
+
 .container{max-width:1400px;margin:0 auto;padding:20px}
 h1{font-size:clamp(2rem,5vw,4rem);text-align:center;background:linear-gradient(45deg,#ff00ff,#00ffff,#ffff00);background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gradient 3s ease infinite}
 @keyframes gradient{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
@@ -42,7 +85,7 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 </div>
 
 <div id="authSection" class="section active">
-<h2>🔐 ALEKSIN GAMES v5.6.2</h2>
+<h2>🔐 ALEKSIN GAMES v5.6.3</h2>
 <p style="margin:20px 0">📝 Регистрация / Логин (минимум 3/4 символа)</p>
 <input type="text" id="usernameInput" placeholder="Логин (≥3 символа)" value="test">
 <input type="password" id="passwordInput" placeholder="Пароль (≥4 символа)" value="123456">
@@ -53,7 +96,7 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 </div>
 
 <div class="container" style="display:none" id="mainContent">
-<h1>🚀 ALEKSIN GAMES v5.6.2 ✅ ДАННЫЕ НАВСЕГДА</h1>
+<h1>🚀 ALEKSIN GAMES v5.6.3 ✅ СКРОЛЛ + ANTI-APPLE</h1>
 
 <div class="game-grid">
 <button class="btn" onclick="showGame('leaderboards')">🏆 ЛИДЕРБОРДЫ</button>
@@ -137,92 +180,69 @@ let currentSnakeDiff = 'easy', speeds = {easy:200, normal:150, hard:100};
 let secretNumber, guessCount = 0, currentGuessDiff = 'easy';
 const ranges = {easy:1000, normal:10000, hard:100000};
 
-// ✅ v5.6.2 ФИКС: X-Auth-Token вместо Authorization (кириллица в именах!)
-async function api(endpoint, options = {}) {
-    const config = {
-        method: options.method || 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        body: options.body
-    };
-    
-    // ✅ ФИКС: X-Auth-Token = ASCII safe, работает с РУССКИМИ именами!
-    if (authToken) {
-        config.headers['X-Auth-Token'] = authToken;
-    }
-    
-    try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
-        
-        const res = await fetch('/api' + endpoint, {
-            ...config,
-            signal: controller.signal
-        });
-        
-        clearTimeout(timeout);
-        
-        if (!res.ok) {
-            const error = await res.text();
-            if (res.status === 503 && !authToken) {
-                return { success: true, user: 'test', token: 'temp_' + Date.now() };
-            }
-            throw new Error(`HTTP ${res.status}`);
-        }
-        
-        return await res.json();
-    } catch (e) {
-        if (e.name === 'AbortError') {
-            showError('⏰ Render спит. Жди 30 сек...');
-            return { error: 'timeout' };
-        }
-        if (!authToken && (endpoint.includes('/login') || endpoint.includes('/register'))) {
-            return { success: true, user: 'test', token: 'temp_' + Date.now() };
-        }
-        showError('🌐 Переподключаемся...');
-        return { error: e.message };
+// 🔥 СКРОЛЛ БЛОК
+function enableSnakeScrollBlock() {
+    document.body.classList.add('playing');
+    document.addEventListener('keydown', blockArrowKeys);
+}
+function disableSnakeScrollBlock() {
+    document.body.classList.remove('playing');
+    document.removeEventListener('keydown', blockArrowKeys);
+}
+function blockArrowKeys(e) {
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key) && snakeRunning) {
+        e.preventDefault();
+        e.stopPropagation();
     }
 }
 
-// 🔐 АВТОРИЗАЦИЯ (без изменений)
+// ✅ API с X-Auth-Token
+async function api(endpoint, options = {}) {
+    const config = {method: options.method || 'GET', headers: {'Content-Type': 'application/json'}, body: options.body};
+    if (authToken) config.headers['X-Auth-Token'] = authToken;
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
+        const res = await fetch('/api' + endpoint, {...config, signal: controller.signal});
+        clearTimeout(timeout);
+        if (!res.ok) {
+            const error = await res.text();
+            if (res.status === 503 && !authToken) return {success: true, user: 'test', token: 'temp_' + Date.now()};
+            throw new Error(`HTTP ${res.status}`);
+        }
+        return await res.json();
+    } catch (e) {
+        if (e.name === 'AbortError') { showError('⏰ Render спит. Жди 30 сек...'); return {error: 'timeout'}; }
+        if (!authToken && (endpoint.includes('/login') || endpoint.includes('/register'))) return {success: true, user: 'test', token: 'temp_' + Date.now()};
+        showError('🌐 Переподключаемся...');
+        return {error: e.message};
+    }
+}
+
 async function register() {
     const username = document.getElementById('usernameInput').value.trim();
     const password = document.getElementById('passwordInput').value;
     const msg = document.getElementById('authMessage');
-    
     if (username.length < 3) return msg.textContent = '❌ Логин минимум 3 символа';
     if (password.length < 4) return msg.textContent = '❌ Пароль минимум 4 символа';
-    
     msg.textContent = '🔄 Регистрация...';
     const result = await api('/register', {method: 'POST', body: JSON.stringify({username, password})});
-    
-    if (result.success) {
-        currentUser = result.user;
-        authToken = result.token;
-        enterGame();
-    } else {
-        msg.textContent = '❌ ' + (result.error || 'Ошибка регистрации');
-    }
+    if (result.success) { currentUser = result.user; authToken = result.token; enterGame(); } 
+    else msg.textContent = '❌ ' + (result.error || 'Ошибка регистрации');
 }
 
 async function login() {
     const username = document.getElementById('usernameInput').value.trim();
     const password = document.getElementById('passwordInput').value;
     const msg = document.getElementById('authMessage');
-    
     msg.textContent = '🔄 Вход...';
     const result = await api('/login', {method: 'POST', body: JSON.stringify({username, password})});
-    
-    if (result.success) {
-        currentUser = result.user;
-        authToken = result.token;
-        enterGame();
-    } else {
-        msg.textContent = '❌ ' + (result.error || 'Неверный логин/пароль');
-    }
+    if (result.success) { currentUser = result.user; authToken = result.token; enterGame(); } 
+    else msg.textContent = '❌ ' + (result.error || 'Неверный логин/пароль');
 }
 
 function enterGame() {
-    document.getElementById('statusBar').textContent = `👋 ${currentUser} ✅ v5.6.2`;
+    document.getElementById('statusBar').textContent = `👋 ${currentUser} ✅ v5.6.3`;
     document.getElementById('logoutBtn').classList.add('active');
     document.getElementById('authSection').classList.remove('active');
     document.getElementById('mainContent').style.display = 'block';
@@ -230,8 +250,7 @@ function enterGame() {
 }
 
 function logout() {
-    currentUser = null;
-    authToken = null;
+    currentUser = null; authToken = null;
     document.getElementById('statusBar').textContent = '🔐 ВХОД НЕОБХОДИМ';
     document.getElementById('logoutBtn').classList.remove('active');
     document.getElementById('mainContent').style.display = 'none';
@@ -251,15 +270,7 @@ function showGame(game) {
 }
 
 async function updateLeaderboards() {
-    const tables = [
-        ['snakeEasyLB', 'snake', 'easy'],
-        ['snakeNormalLB', 'snake', 'normal'], 
-        ['snakeHardLB', 'snake', 'hard'],
-        ['guessEasyLB', 'guess', 'easy'],
-        ['guessNormalLB', 'guess', 'normal'],
-        ['guessHardLB', 'guess', 'hard']
-    ];
-    
+    const tables = [['snakeEasyLB', 'snake', 'easy'], ['snakeNormalLB', 'snake', 'normal'], ['snakeHardLB', 'snake', 'hard'], ['guessEasyLB', 'guess', 'easy'], ['guessNormalLB', 'guess', 'normal'], ['guessHardLB', 'guess', 'hard']];
     for (let [id, game, diff] of tables) {
         try {
             const data = await api(`/leaderboards/${game}/${diff}`);
@@ -297,7 +308,6 @@ async function updateTournamentTable() {
 async function sendMessage() {
     const msg = document.getElementById('chatInput').value.trim();
     if (!msg) return;
-    
     const result = await api('/chat', {method: 'POST', body: JSON.stringify({message: msg})});
     if (result.success) {
         document.getElementById('chatInput').value = '';
@@ -325,13 +335,14 @@ async function resetTournament() {
     updateTournamentTable();
 }
 
-async function clearChat() {
+function clearChat() {
     if (!confirm('🗑️ Очистить чат?')) return;
     document.getElementById('chatMessages').innerHTML = '';
 }
 
 function showError(msg) {
-    const errorDiv = document.createElement('div');
+    const errorDiv = document.getElementById('errorDiv') || document.createElement('div');
+    errorDiv.id = 'errorDiv';
     errorDiv.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:red;color:white;padding:15px;border-radius:10px;z-index:10001';
     errorDiv.textContent = msg;
     document.body.appendChild(errorDiv);
@@ -342,10 +353,12 @@ async function updateAll() {
     await Promise.all([updateLeaderboards(), updateTournamentTable(), updateChat()]);
 }
 
-// 🐍 ЗМЕЙКА (без изменений)
+// 🐍 ЗМЕЙКА С СКРОЛЛ-БЛОКОМ
 async function startSnake(diff) {
     if (!currentUser) return showError('🔐 Войди!');
     if (snakeRunning) return;
+    
+    enableSnakeScrollBlock(); // 🔥 БЛОК СКРОЛЛА
     
     currentSnakeDiff = diff;
     const canvas = document.getElementById('gameCanvas');
@@ -399,28 +412,23 @@ async function startSnake(diff) {
 function stopSnake() {
     snakeRunning = false;
     if (snakeInterval) clearInterval(snakeInterval);
+    disableSnakeScrollBlock(); // 🔥 РАЗБЛОКИРОВКА
 }
 
 async function gameOver() {
     snakeRunning = false;
     if (snakeInterval) clearInterval(snakeInterval);
+    disableSnakeScrollBlock();
     
     if (snakeScore > 0 && currentUser) {
-        await api('/scores', {
-            method: 'POST',
-            body: JSON.stringify({game: 'snake', difficulty: currentSnakeDiff, score: snakeScore})
-        });
-        await api('/tournament', {
-            method: 'POST',
-            body: JSON.stringify({score: snakeScore})
-        });
+        await api('/scores', {method: 'POST', body: JSON.stringify({game: 'snake', difficulty: currentSnakeDiff, score: snakeScore})});
+        await api('/tournament', {method: 'POST', body: JSON.stringify({score: snakeScore})});
         updateLeaderboards();
         updateTournamentTable();
     }
     alert(`🎮 ${snakeScore} очков! Рекорд сохранён!`);
 }
 
-// 🎯 УГАДАЙКА (без изменений)
 function setDifficulty(diff) {
     currentGuessDiff = diff;
     secretNumber = Math.floor(Math.random() * ranges[diff]) + 1;
@@ -441,14 +449,8 @@ async function makeGuess() {
         const score = Math.max(1000 - guessCount * 50, 100);
         document.getElementById('guessResult').innerHTML = `✅ ${score} очков!`;
         
-        await api('/scores', {
-            method: 'POST',
-            body: JSON.stringify({game: 'guess', difficulty: currentGuessDiff, score: score})
-        });
-        await api('/tournament', {
-            method: 'POST',
-            body: JSON.stringify({score: score})
-        });
+        await api('/scores', {method: 'POST', body: JSON.stringify({game: 'guess', difficulty: currentGuessDiff, score: score})});
+        await api('/tournament', {method: 'POST', body: JSON.stringify({score: score})});
         updateLeaderboards();
         updateTournamentTable();
         
@@ -460,10 +462,8 @@ async function makeGuess() {
     document.getElementById('guessInput').value = '';
 }
 
-// Таймер турнира
 setInterval(() => {
-    document.getElementById('tourTimer').textContent = 
-        new Date().toLocaleTimeString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false});
+    document.getElementById('tourTimer').textContent = new Date().toLocaleTimeString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false});
 }, 1000);
 
 document.getElementById('chatInput').addEventListener('keypress', e => {
