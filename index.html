@@ -1,481 +1,555 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🌌 ALEKSIN GAMES v6.5 ✅ МОБАЙЛ!</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        @import url('https://fonts.cdnfonts.com/css/neon-glow');
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Orbitron', monospace; 
-            background: linear-gradient(45deg, #0a0a23, #1a0033, #0a0a23); 
-            background-size: 400% 400%; animation: gradientShift 15s ease infinite;
-            color: #00ff88; overflow-x: hidden; touch-action: none; /* ✅ МОБАЙЛ */
-        }
-        @keyframes gradientShift { 0%,100%{background-position:0%50%} 50%{background-position:100%50%} }
-        
-        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
-        .header {
-            text-align: center; background: rgba(0,255,136,0.1); backdrop-filter: blur(20px);
-            border: 2px solid #00ff88; border-radius: 25px; padding: 30px; margin-bottom: 30px;
-            box-shadow: 0 0 50px #00ff88; animation: neonPulse 2s ease-in-out infinite alternate;
-        }
-        @keyframes neonPulse { from{box-shadow:0 0 20px #00ff88} to{box-shadow:0 0 50px #00ff88,0 0 100px #00ff88} }
-        
-        .section { 
-            background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border-radius: 20px;
-            padding: 25px; margin-bottom: 25px; border: 1px solid rgba(0,255,136,0.3);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-        button { 
-            background: linear-gradient(45deg,#00ff88,#00cc6a); color: #0a0a23; 
-            border: none; padding: 12px 24px; border-radius: 12px; font-family: 'Orbitron',monospace;
-            font-weight: 700; cursor: pointer; margin: 5px; transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0,255,136,0.4); touch-action: manipulation;
-        }
-        button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,255,136,0.6); }
-        button:active { transform: translateY(0); }
-        input, select { 
-            width: 100%; padding: 15px; border: 2px solid rgba(0,255,136,0.3); 
-            border-radius: 12px; background: rgba(0,255,136,0.1); color: #00ff88;
-            font-family: 'Orbitron', monospace; margin-bottom: 10px;
-        }
-        .game-canvas { border: 3px solid #00ff88; border-radius: 15px; background: #000; 
-            display: none; margin: 15px auto; box-shadow: 0 0 30px #00ff88; touch-action: none; }
-        
-        /* ✅ МОБИЛЬНЫЙ ДЖОЙСТИК */
-        #mobileControls {
-            position: fixed; bottom: 20px; left: 20px; display: none; z-index: 1000;
-            background: rgba(0,255,136,0.1); padding: 20px; border-radius: 20px;
-            border: 2px solid #00ff88; backdrop-filter: blur(10px);
-        }
-        .joystick-btn {
-            width: 70px; height: 70px; border-radius: 50%; border: none; 
-            margin: 5px; font-size: 24px; color: #00ff88; background: rgba(255,255,255,0.2);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        .joystick-btn:active { background: rgba(0,255,136,0.5); transform: scale(0.95); }
-        
-        #tournamentTimer { 
-            font-size: 2.5rem; font-weight: 900; text-align: center; margin: 20px 0;
-            text-shadow: 0 0 30px #ff4444; animation: pulseRed 1s infinite;
-        }
-        @keyframes pulseRed { 0%,100%{text-shadow:0 0 20px #ff4444} 50%{text-shadow:0 0 40px #ff4444,0 0 60px #ff4444} }
-        .leaderboard-table { width: 100%; border-collapse: collapse; background: rgba(0,0,0,0.5); 
-            border-radius: 12px; overflow: hidden; margin-top: 10px; }
-        .leaderboard-table th, .leaderboard-table td { padding: 10px; text-align: center; 
-            border-bottom: 1px solid rgba(0,255,136,0.2); }
-        .leaderboard-table th { background: rgba(0,255,136,0.2); }
-        .rank-1 { background: linear-gradient(45deg,#ffd700,#ffed4e); color: #000; }
-        .rank-2 { background: linear-gradient(45deg,#c0c0c0,#e5e5e5); color: #000; }
-        .rank-3 { background: linear-gradient(45deg,#cd7f32,#deb887); color: #000; }
-        .hidden { display: none !important; }
-        #chatMessages { height: 250px; overflow-y: auto; background: rgba(0,0,0,0.7); 
-            border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(0,255,136,0.3); }
-        
-        @media (max-width: 768px) {
-            #mobileControls { display: block; }
-            .container { padding: 10px; }
-            .game-canvas { max-width: 95vw; max-height: 50vh; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>🚀 ALEKSIN GAMES HUB v4.1 ✅ МОБАЙЛ 100% | Админ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html, body {
+    height: 100%;
+    overflow: hidden;
+    touch-action: none;
+}
+body{font-family:'Orbitron',monospace;background:linear-gradient(135deg,#0a0a23 0%,#1a0a3a 50%,#0f0f4f 100%);color:#fff}
+.container{max-width:1400px;margin:0 auto;padding:20px;height:100vh;overflow:hidden}
+h1{font-size:clamp(2rem,5vw,4rem);text-align:center;background:linear-gradient(45deg,#ff00ff,#00ffff,#ffff00);background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gradient 3s ease infinite}
+@keyframes gradient{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.btn{display:inline-block;padding:12px 24px;background:linear-gradient(45deg,rgba(255,0,255,0.3),rgba(0,255,255,0.3));border:2px solid rgba(255,255,255,0.3);border-radius:15px;font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.3s ease;margin:5px;box-shadow:0 8px 25px rgba(0,0,0,0.5);touch-action:manipulation}
+.btn:hover{background:linear-gradient(45deg,rgba(255,0,255,0.6),rgba(0,255,255,0.6));transform:translateY(-3px);box-shadow:0 12px 35px rgba(255,0,255,0.4)}
+.btn:active{transform:translateY(0)}
+.section{display:none;text-align:center}
+.section.active{display:block;animation:fadeIn 0.5s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.game-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;margin:20px 0}
+canvas{border:3px solid rgba(255,255,255,0.3);border-radius:15px;background:#000;box-shadow:0 0 30px rgba(0,255,255,0.5);touch-action:none}
+table{width:100%;max-width:350px;margin:10px auto;border-collapse:collapse;background:rgba(255,255,255,0.1);border-radius:15px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+th,td{padding:10px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.2)}
+th{background:linear-gradient(45deg,rgba(255,0,255,0.4),rgba(0,255,255,0.4));font-weight:700}
+.tour-table{background:rgba(0,255,0,0.2);margin:10px 0}
+.tour-table h4{color:#00ff00;text-shadow:0 0 10px #00ff00}
+#statusBar{position:fixed;top:10px;right:10px;background:rgba(0,255,0,0.3);padding:10px;border-radius:10px;font-weight:700;z-index:1000}
+#logoutContainer{position:fixed;top:10px;left:10px;z-index:9999;background:rgba(0,0,0,0.8);padding:10px;border-radius:15px}
+#logoutBtn{display:none}#logoutBtn.active{display:inline-block !important}
+#authSection{position:relative;margin:40px auto;max-width:400px;background:rgba(0,0,0,0.9);padding:30px;border-radius:20px;box-shadow:0 0 50px rgba(255,0,255,0.5);display:none}
+#authSection.active{display:block}
+input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-radius:10px;background:rgba(255,255,255,0.1);color:#fff;font-family:inherit;width:calc(100% - 24px)}
+#tourTimer{font-size:2.5rem;color:#00ff00;text-shadow:0 0 20px #00ff00;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+/* ✅ МОБАЙЛ ФИКСЫ */
+@media (max-width: 768px) {
+    .mobile-hide { display: none !important; }
+    .container { padding: 10px; }
+    canvas { width: 95vw !important; height: 50vh !important; max-width: 400px; max-height: 400px; }
+    #statusBar, #logoutContainer { font-size: 0.8rem; padding: 5px; }
+    .btn { padding: 10px 18px; font-size: 0.9rem; }
+}
+/* ✅ ЗМЕЙКА: ДИНАМИЧЕСКИЙ СКРОЛЛ */
+body.snake-playing { overflow: hidden !important; touch-action: none !important; }
+body.snake-stopped { overflow: auto !important; touch-action: auto !important; }
+</style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🌌 ALEKSIN GAMES v6.5 ✅ ПК+МОБАЙЛ!</h1>
-            <p>Тула-гейминг | test/123456 | 13/13</p>
-            <div>Турнир до: <span id="tournamentTimer">--:--:--</span></div>
-        </div>
-        
-        <!-- АВТОРИЗАЦИЯ -->
-        <div id="authSection" class="section">
-            <h2>🔐 Вход</h2>
-            <input type="text" id="username" placeholder="test" value="test">
-            <input type="password" id="password" placeholder="123456" value="123456">
-            <button onclick="login()">🚀 ВОЙТИ</button>
-            <div id="authStatus">Гость</div>
-        </div>
-        
-        <!-- ИГРЫ -->
-        <div id="gamesSection" class="section hidden">
-            <h3>🐍 ЗМЕЙКА Pro</h3>
-            <select id="snakeDifficulty">
-                <option value="easy">Лёгкая</option>
-                <option value="medium">Средняя</option>
-                <option value="hard">Сложная</option>
-            </select>
-            <button onclick="startSnake()">▶️ СТАРТ</button>
-            <button onclick="stopSnake()" id="stopSnakeBtn" class="hidden">⏹️ СТОП</button>
-            <canvas id="snakeCanvas" class="game-canvas" width="600" height="450"></canvas>
-            <div>Очки: <span id="snakeScore">0</span></div>
-            
-            <h3>🎯 УГАДАЙ ЧИСЛО</h3>
-            <select id="guessDifficulty">
-                <option value="1000">1-1,000</option>
-                <option value="10000">1-10,000</option>
-                <option value="100000">1-100,000</option>
-            </select>
-            <input type="number" id="guessInput" placeholder="Угадай число">
-            <button onclick="makeGuess()">🔍 УГАДАТЬ</button>
-            <div id="guessFeedback">Начни!</div>
-            <div id="guessStats">Попыток: 0</div>
-        </div>
-        
-        <!-- ТУРНИР -->
-        <div id="tournamentSection" class="section hidden">
-            <h2>⚔️ ТУРНИР ТОП-100</h2>
-            <button id="tournamentBtn" onclick="toggleTournament()">⚡ УЧАСТВОВАТЬ</button>
-            <div id="tournamentTable"></div>
-            <div id="tournamentStatus"></div>
-        </div>
-        
-        <!-- ТОПЫ -->
-        <div id="leaderboardsSection" class="section hidden">
-            <h2>🏆 ТОП-10</h2>
-            <button onclick="updateLeaderboards()">🔄 ОБНОВИТЬ</button>
-            <div id="leaderboards"></div>
-        </div>
-        
-        <!-- ЧАТ -->
-        <div id="chatSection" class="section hidden">
-            <h2>💬 ЧАТ</h2>
-            <div id="chatMessages"></div>
-            <input type="text" id="chatInput" placeholder="Пиши..." onkeypress="if(event.key==='Enter')sendChat()">
-            <button onclick="sendChat()">📤</button>
-        </div>
-    </div>
-    
-    <!-- ✅ МОБИЛЬНЫЙ ДЖОЙСТИК -->
-    <div id="mobileControls">
-        <button class="joystick-btn" onclick="mobileMove('up')">↑</button><br>
-        <button class="joystick-btn" onclick="mobileMove('left')">←</button>
-        <button class="joystick-btn" onclick="mobileMove('right')">→</button><br>
-        <button class="joystick-btn" onclick="mobileMove('down')">↓</button>
-        <button class="joystick-btn" onclick="mobilePause()">⏸️</button>
-    </div>
+<body class="snake-stopped">
+<div id="statusBar">👋 Гость</div>
+<div id="logoutContainer">
+<button class="btn mobile-hide" id="logoutBtn" onclick="logout()">👋 ВЫЙТИ</button>
+</div>
 
-    <script>
-        let currentUser = null, isInTournament = false, snakeGame = null;
-        let tournamentEndTime = 0, lastScoreTime = 0, touchStart = {x:0,y:0};
-        const SCORE_COOLDOWN = 10000;
+<div class="container">
+<div id="authSection" class="section active">
+<h2>🔐 Админ, Вход / Регистрация</h2>
+<input type="text" id="usernameInput" placeholder="test" value="test">
+<input type="password" id="passwordInput" placeholder="123456" value="123456">
+<button class="btn" onclick="login()">🚀 ВОЙТИ</button>
+<div class="daily-bonus" id="dailyBonus" style="display:none">
+🎁 <span id="dailyBonusText">ЕЖЕДНЕВНЫЙ БОНУС: +50% очков!</span>
+</div>
+</div>
+
+<h1>🚀 ALEKSIN GAMES HUB v4.1 ✅ МОБАЙЛ 100% | Админ</h1>
+
+<div class="game-grid">
+<button class="btn" onclick="showGame('leaderboards')">🏆 ЛИДЕРБОРДЫ</button>
+<button class="btn" onclick="showGame('tournament')">⚔️ ТУРНИР</button>
+<button class="btn" onclick="showGame('chat')">💬 ЧАТ</button>
+<button class="btn" onclick="showGame('profile')">👤 ПРОФИЛЬ</button>
+<button class="btn" onclick="showGame('snake')">🐍 ЗМЕЙКА</button>
+<button class="btn" onclick="showGame('guess')">🎯 УГАДАЙ</button>
+</div>
+
+<!-- ЛИДЕРБОРДЫ -->
+<div id="leaderboardTables" class="section">
+<h2>🏆 ГЛОБАЛЬНЫЕ ЛИДЕРБОРДЫ</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
+<table><thead><tr><th>🐍 Змейка Лёгкая</th></tr></thead><tbody id="snakeEasyLB"></tbody></table>
+<table><thead><tr><th>🐍 Змейка Средняя</th></tr></thead><tbody id="snakeNormalLB"></tbody></table>
+<table><thead><tr><th>🐍 Змейка Сложная</th></tr></thead><tbody id="snakeHardLB"></tbody></table>
+<table><thead><tr><th>🎯 Угадайка Лёгкая</th></tr></thead><tbody id="guessEasyLB"></tbody></table>
+</div>
+</div>
+
+<!-- ТУРНИР -->
+<div id="tournamentSection" class="section">
+<h2>⚔️ ТУРНИР 24ч (00:00 МСК)</h2>
+<div>⏰ До конца: <span id="tourTimer">07:36:00</span></div>
+<div id="tournamentTables" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
+<table class="tour-table"><thead><tr><th>⚔️ ТОП-100 ТУРНИР</th></tr></thead><tbody id="tournamentLB"></tbody></table>
+</div>
+</div>
+
+<!-- ЧАТ -->
+<div id="chatSection" class="section">
+<h2>💬 ГЛОБАЛЬНЫЙ ЧАТ</h2>
+<div id="chatMessages" style="height:300px;overflow-y:auto;border:2px solid #00ff00;margin:10px auto;padding:15px;background:rgba(0,0,0,0.7);border-radius:15px;max-width:500px;font-size:0.9rem"></div>
+<input id="chatInput" placeholder="Напиши сообщение... (Enter)" style="width:70%;max-width:350px">
+<button class="btn" onclick="sendMessage()">📤 ОТПРАВИТЬ</button>
+<button class="btn" onclick="clearChat()">🗑️ ОЧИСТИТЬ</button>
+</div>
+
+<!-- ПРОФИЛЬ -->
+<div id="profileSection" class="section">
+<h2>👤 ПРОФИЛЬ <span id="profileUsername"></span></h2>
+<div class="profile-stats">
+<div>🏆 Тотал очков: <span id="totalScore">0</span></div>
+<div>⚔️ Лига: <span id="leagueBadge" class="league-badge bronze">БРОНЗА</span></div>
+<div>🎮 Побед: <span id="totalWins">0</span> | 💀 Поражений: <span id="totalLosses">0</span></div>
+<div>📊 Винрейт: <span id="winrate">0%</span></div>
+</div>
+<h3>🏅 ДОСТИЖЕНИЯ</h3>
+<div id="achievements" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px"></div>
+</div>
+
+<!-- ЗМЕЙКА -->
+<div id="snakeSection" class="section">
+<h2>🐍 ЗМЕЙКА PRO</h2>
+<div class="game-grid">
+<button class="btn" onclick="startSnake('easy')">Лёгкая</button>
+<button class="btn" onclick="startSnake('normal')">Средняя</button>
+<button class="btn" onclick="startSnake('hard')">Сложная</button>
+</div>
+<div style="position:relative;display:inline-block">
+<canvas id="gameCanvas" width="400" height="400" tabindex="0"></canvas>
+<div id="snakeScore" style="position:absolute;top:10px;left:10px;font-size:1.5rem;font-weight:700;color:#00ff00">Счёт: 0</div>
+</div>
+<button class="btn mobile-hide" onclick="toggleSnakePause()">⏸️ ПАУЗА</button>
+</div>
+
+<!-- УГАДАЙКА -->
+<div id="guessSection" class="section">
+<h2>🎯 УГАДАЙ ЧИСЛО</h2>
+<div class="game-grid">
+<button class="btn" onclick="setDifficulty('guess','easy')">Лёгкая (1-1K)</button>
+<button class="btn" onclick="setDifficulty('guess','normal')">Средняя (1-10K)</button>
+<button class="btn" onclick="setDifficulty('guess','hard')">Сложная (1-100K)</button>
+</div>
+<div style="font-size:2rem;margin:20px">Число от <span id="rangeMin">1</span> до <span id="rangeMax">1000</span></div>
+<input type="number" id="guessInput" placeholder="Твоё число">
+<button class="btn" onclick="makeGuess()">УГАДАТЬ</button>
+<div id="guessResult"></div>
+<div id="guessAttempts">Попыток: 0</div>
+</div>
+
+<div id="achievementPopup" class="achievement"></div>
+</div>
+
+<script>
+// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+let currentUser = localStorage.getItem('aleksinUser') || null;
+let leaderboards = JSON.parse(localStorage.getItem('aleksinLeaderboards')) || {};
+let tournamentScores = JSON.parse(localStorage.getItem('aleksinTournaments')) || {};
+let chatMessages = JSON.parse(localStorage.getItem('aleksinChat')) || [];
+let achievements = JSON.parse(localStorage.getItem('aleksinAchievements')) || {};
+let stats = JSON.parse(localStorage.getItem('aleksinStats')) || {};
+let dailyBonusClaimed = localStorage.getItem('dailyBonus') === new Date().toDateString();
+
+// ЗМЕЙКА
+let snake = [{x:10,y:10}], snakeDirection = {x:1,y:0}, snakeScore = 0, gameRunning = false, food = {}, snakeInterval = null;
+let currentSnakeDifficulty = 'easy', speeds = {easy:200, normal:150, hard:100};
+let snakeRunning = false;
+
+// УГАДАЙКА
+let currentGameType = '', currentDifficulty = '', secretNumber, guessCount = 0;
+
+// ЗВУКИ
+let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+// ✅ ИНИЦИАЛИЗАЦИЯ
+document.addEventListener('DOMContentLoaded', function() {
+    if (currentUser) {
+        document.getElementById('statusBar').textContent = `👋 ${currentUser}`;
+        document.getElementById('logoutBtn').classList.add('active');
+    }
+    setInterval(updateTournament, 1000);
+    window.addEventListener('beforeunload', saveAllData);
+    updateChat();
+    loadProfile();
+    updateLeaderboards();
+    
+    // ✅ БЛОКИРУЕМ ПРОМАТЫВАНИЕ НА ВСЕХ КНОПКАХ
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+        btn.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+    });
+});
+
+// ✅ ОСНОВНЫЕ ФУНКЦИИ
+function saveAllData() {
+    localStorage.setItem('aleksinUser', currentUser);
+    localStorage.setItem('aleksinLeaderboards', JSON.stringify(leaderboards));
+    localStorage.setItem('aleksinTournaments', JSON.stringify(tournamentScores));
+    localStorage.setItem('aleksinChat', JSON.stringify(chatMessages.slice(-500)));
+    localStorage.setItem('aleksinAchievements', JSON.stringify(achievements));
+    localStorage.setItem('aleksinStats', JSON.stringify(stats));
+}
+
+function login() {
+    const username = document.getElementById('usernameInput').value.trim();
+    const password = document.getElementById('passwordInput').value;
+    if (username && password) {
+        currentUser = username;
+        stats[currentUser] = stats[currentUser] || {wins:0, losses:0, total:0};
+        document.getElementById('statusBar').textContent = `👋 ${currentUser}`;
+        document.getElementById('logoutBtn').classList.add('active');
+        document.getElementById('authSection').classList.remove('active');
+        saveAllData();
+        loadProfile();
+        playSound('login');
+        showAchievement('firstLogin');
+    }
+}
+
+function logout() {
+    if (snakeInterval) clearInterval(snakeInterval);
+    gameRunning = false; snakeRunning = false; snake = []; snakeScore = 0;
+    document.body.classList.remove('snake-playing');
+    document.body.classList.add('snake-stopped');
+    currentUser = null;
+    document.getElementById('statusBar').textContent = '👋 Гость';
+    document.getElementById('logoutBtn').classList.remove('active');
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('authSection').classList.add('active');
+    saveAllData();
+}
+
+// ✅ НАВИГАЦИЯ
+function showGame(game) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    if (game === 'snake') document.getElementById('snakeSection').classList.add('active');
+    else if (game === 'guess') document.getElementById('guessSection').classList.add('active');
+    else if (game === 'chat') document.getElementById('chatSection').classList.add('active');
+    else if (game === 'profile') document.getElementById('profileSection').classList.add('active');
+    else if (game === 'tournament') document.getElementById('tournamentSection').classList.add('active');
+    else if (game === 'leaderboards') {
+        document.getElementById('leaderboardTables').classList.add('active');
+        updateLeaderboards();
+    }
+}
+
+// ✅ ЗМЕЙКА v4.1 МОБАЙЛ
+function startSnake(difficulty) {
+    if (!currentUser) { alert('🔐 Админ, войди сначала!'); return; }
+    
+    currentSnakeDifficulty = difficulty;
+    snakeRunning = true;
+    document.body.classList.remove('snake-stopped');
+    document.body.classList.add('snake-playing');
+    
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = Math.min(400, window.innerWidth * 0.9);
+    canvas.height = canvas.width;
+    const gridSize = canvas.width / 20;
+    
+    snake = [{x:10,y:10}];
+    snakeDirection = {x:1,y:0};
+    snakeScore = 0;
+    gameRunning = true;
+    
+    function generateFood() {
+        food = {
+            x: Math.floor(Math.random() * 20),
+            y: Math.floor(Math.random() * 20)
+        };
+    }
+    generateFood();
+    
+    function gameLoop() {
+        if (!gameRunning) return;
         
-        // ✅ АНТИСКОЛЛ МОБАЙЛ + ПК
-        document.addEventListener('DOMContentLoaded', () => {
-            // БЛОКИРУЕМ СКРОЛЛ НА СТРЕЛКАХ
-            document.addEventListener('keydown', e => {
-                if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) {
-                    e.preventDefault();
-                }
-            }, true);
-            
-            // БЛОКИРУЕМ ЗУМ/СКРОЛЛ НА МОБАЙЛЕ
-            document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
-            document.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
-            
-            tournamentEndTime = getNextMidnightMSK();
-            loadUser();
-            updateUI();
-            setInterval(updateTournamentTimer, 1000);
-            setInterval(updateAll, 3000);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Движение змейки
+        const head = {x: snake[0].x + snakeDirection.x, y: snake[0].y + snakeDirection.y};
+        
+        // Столкновения
+        if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20 || 
+            snake.find(s => s.x === head.x && s.y === head.y)) {
+            gameOver();
+            return;
+        }
+        
+        snake.unshift(head);
+        
+        // Еда
+        if (head.x === food.x && head.y === food.y) {
+            snakeScore += 100;
+            playSound('eat');
+            generateFood();
+            showAchievement('snakeMaster');
+        } else {
+            snake.pop();
+        }
+        
+        // Отрисовка
+        ctx.fillStyle = '#00ff00';
+        snake.forEach((segment, i) => {
+            ctx.fillStyle = i === 0 ? '#ff00ff' : '#00ff00';
+            ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize-2, gridSize-2);
         });
         
-        function getNextMidnightMSK() {
-            const now = new Date();
-            const mskOffset = 3 * 60 * 60 * 1000;
-            const mskNow = new Date(now.getTime() + mskOffset);
-            const tomorrow = new Date(mskNow.getFullYear(), mskNow.getMonth(), mskNow.getDate() + 1, 0, 0, 0);
-            return tomorrow.getTime() - mskOffset;
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize-2, gridSize-2);
+        
+        document.getElementById('snakeScore').textContent = `Счёт: ${snakeScore}`;
+    }
+    
+    gameLoop();
+    snakeInterval = setInterval(gameLoop, speeds[difficulty]);
+    
+    // ✅ КЛАВИАТУРА
+    document.addEventListener('keydown', (e) => {
+        e.preventDefault();
+        if (e.key === 'ArrowUp' && snakeDirection.y !== 1) snakeDirection = {x:0,y:-1};
+        if (e.key === 'ArrowDown' && snakeDirection.y !== -1) snakeDirection = {x:0,y:1};
+        if (e.key === 'ArrowLeft' && snakeDirection.x !== 1) snakeDirection = {x:-1,y:0};
+        if (e.key === 'ArrowRight' && snakeDirection.x !== -1) snakeDirection = {x:1,y:0};
+    });
+    
+    // ✅ СВАЙПЫ МОБАЙЛ
+    let touchStartX, touchStartY;
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    });
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const diffX = touchStartX - touchEndX;
+        const diffY = touchStartY - touchEndY;
+        
+        if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
+            if (diffX > 0 && snakeDirection.x !== 1) snakeDirection = {x:-1,y:0};
+            else if (diffX < 0 && snakeDirection.x !== -1) snakeDirection = {x:1,y:0};
+        } else if (Math.abs(diffY) > 30) {
+            if (diffY > 0 && snakeDirection.y !== 1) snakeDirection = {x:0,y:-1};
+            else if (diffY < 0 && snakeDirection.y !== -1) snakeDirection = {x:0,y:1};
+        }
+    });
+}
+
+function gameOver() {
+    document.body.classList.remove('snake-playing');
+    document.body.classList.add('snake-stopped');
+    snakeRunning = false;
+    clearInterval(snakeInterval);
+    
+    if (snakeScore > 0 && currentUser) {
+        leaderboards.snake = leaderboards.snake || {};
+        leaderboards.snake[currentSnakeDifficulty] = leaderboards.snake[currentSnakeDifficulty] || {};
+        leaderboards.snake[currentSnakeDifficulty][currentUser] = Math.max(
+            leaderboards.snake[currentSnakeDifficulty][currentUser] || 0, snakeScore
+        );
+        saveScore('snake', snakeScore);
+        updateLeaderboards();
+    }
+    
+    alert(`Game Over, Админ! Счёт: ${snakeScore}`);
+}
+
+function toggleSnakePause() {
+    gameRunning = !gameRunning;
+}
+
+// ✅ УГАДАЙКА
+function setDifficulty(game, diff) {
+    currentGameType = game;
+    currentDifficulty = diff;
+    const ranges = {easy:1000, normal:10000, hard:100000};
+    secretNumber = Math.floor(Math.random() * ranges[diff]) + 1;
+    guessCount = 0;
+    document.getElementById('rangeMin').textContent = 1;
+    document.getElementById('rangeMax').textContent = ranges[diff];
+    document.getElementById('guessResult').textContent = '';
+    document.getElementById('guessAttempts').textContent = 'Попыток: 0';
+}
+
+function makeGuess() {
+    if (!currentUser) { alert('🔐 Админ, войди сначала!'); return; }
+    const guess = parseInt(document.getElementById('guessInput').value);
+    guessCount++;
+    
+    if (guess === secretNumber) {
+        const attempts = guessCount <= 5 ? guessCount : 'Много';
+        document.getElementById('guessResult').innerHTML = `✅ Угадал за ${attempts} попыток!`;
+        stats[currentUser].wins = (stats[currentUser].wins || 0) + 1;
+        saveScore('guess', 1000 / guessCount);
+        showAchievement('guessPro');
+    } else {
+        let hint = guess < secretNumber ? '📈 Больше' : '📉 Меньше';
+        const diff = Math.abs(guess - secretNumber);
+        if (diff <= 10) hint += ' (ОЧЕНЬ близко!)';
+        else if (diff <= 50) hint += ' (близко)';
+        document.getElementById('guessResult').textContent = hint;
+        stats[currentUser].losses = (stats[currentUser].losses || 0) + 1;
+    }
+    
+    document.getElementById('guessAttempts').textContent = `Попыток: ${guessCount}`;
+    document.getElementById('guessInput').value = '';
+    saveAllData();
+}
+
+// ✅ ЛИДЕРБОРДЫ
+function updateLeaderboards() {
+    const lbs = ['snakeEasyLB', 'snakeNormalLB', 'snakeHardLB', 'guessEasyLB'];
+    lbs.forEach(id => {
+        const table = document.getElementById(id);
+        const game = id.replace('LB', '');
+        const data = leaderboards.snake?.[game.replace('snake', 'easy')];
+        
+        if (!data || Object.keys(data).length === 0) {
+            table.innerHTML = '<tr><td>👑 БУДЬ ПЕРВЫМ!</td></tr>';
+            return;
         }
         
-        // ✅ МОБАЙЛ СВАЙПЫ
-        document.addEventListener('touchstart', e => {
-            touchStart.x = e.touches[0].clientX;
-            touchStart.y = e.touches[0].clientY;
-        });
-        
-        document.addEventListener('touchend', e => {
-            if(!snakeGame) return;
-            const deltaX = e.changedTouches[0].clientX - touchStart.x;
-            const deltaY = e.changedTouches[0].clientY - touchStart.y;
+        const sorted = Object.entries(data)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 10);
             
-            if(Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 40) {
-                snakeGame.changeDirection(deltaX > 0 ? 'right' : 'left');
-            } else if(Math.abs(deltaY) > 40) {
-                snakeGame.changeDirection(deltaY > 0 ? 'down' : 'up');
-            }
-        });
-        
-        function mobileMove(direction) {
-            if(snakeGame) snakeGame.changeDirection(direction);
-        }
-        
-        function mobilePause() {
-            if(snakeGame) snakeGame.togglePause();
-        }
-        
-        function login() {
-            const name = document.getElementById('username').value.trim();
-            const pass = document.getElementById('password').value;
-            if(name && pass) {
-                currentUser = { name, joined: Date.now() };
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                updateUI();
-            }
-        }
-        
-        function updateUI() {
-            const loggedIn = !!currentUser;
-            ['gamesSection','tournamentSection','leaderboardsSection','chatSection']
-                .forEach(id => document.getElementById(id).classList.toggle('hidden', !loggedIn));
-            document.getElementById('authStatus').textContent = loggedIn ? `👤 ${currentUser.name}` : 'Гость';
-        }
-        
-        // ✅ ЗМЕЙКА С МОБАЙЛ УПРАВЛЕНИЕМ
-        function startSnake() {
-            if(snakeGame) return alert('Сначала СТОП!');
-            const canvas = document.getElementById('snakeCanvas');
-            const ctx = canvas.getContext('2d');
-            const diff = document.getElementById('snakeDifficulty').value;
-            const config = {
-                easy: {tilesX:20,tilesY:15,speed:200},
-                medium: {tilesX:25,tilesY:20,speed:150},
-                hard: {tilesX:30,tilesY:25,speed:100}
-            }[diff];
-            
-            canvas.width = Math.min(config.tilesX * 20, window.innerWidth * 0.9);
-            canvas.height = Math.min(config.tilesY * 20, window.innerHeight * 0.4);
-            canvas.style.display = 'block';
-            document.getElementById('stopSnakeBtn').classList.remove('hidden');
-            
-            snakeGame = new SnakeGame(ctx, config);
-            snakeGame.start();
-        }
-        
-        function stopSnake() {
-            if(snakeGame) {
-                snakeGame.stop();
-                snakeGame = null;
-                document.getElementById('snakeCanvas').style.display = 'none';
-                document.getElementById('stopSnakeBtn').classList.add('hidden');
-            }
-        }
-        
-        class SnakeGame {
-            constructor(ctx, config) {
-                this.ctx = ctx; this.config = config;
-                this.tilesX = config.tilesX; this.tilesY = config.tilesY;
-                this.gridSize = Math.floor(Math.min(ctx.canvas.width / this.tilesX, ctx.canvas.height / this.tilesY));
-                this.speed = config.speed; this.score = 0;
-                this.direction = {x:0,y:-1}; 
-                this.snakeParts = [{x:Math.floor(this.tilesX/2),y:Math.floor(this.tilesY/2)}];
-                this.foodX = Math.floor(Math.random()*this.tilesX);
-                this.foodY = Math.floor(Math.random()*this.tilesY);
-                this.gameLoop = null; this.isPaused = false;
-            }
-            
-            changeDirection(dir) {
-                if(dir === 'up' && this.direction.y === 0) this.direction = {x:0,y:-1};
-                if(dir === 'down' && this.direction.y === 0) this.direction = {x:0,y:1};
-                if(dir === 'left' && this.direction.x === 0) this.direction = {x:-1,y:0};
-                if(dir === 'right' && this.direction.x === 0) this.direction = {x:1,y:0};
-            }
-            
-            togglePause() {
-                this.isPaused = !this.isPaused;
-            }
-            
-            start() {
-                document.getElementById('snakeScore').textContent = this.score;
-                this.gameLoop = setInterval(() => this.update(), this.speed);
-                this.bindControls();
-            }
-            
-            stop() {
-                if(this.gameLoop) clearInterval(this.gameLoop);
-            }
-            
-            bindControls() {
-                // ✅ ПК СТРЕЛКИ БЕЗ СКРОЛЛА
-                document.addEventListener('keydown', e => {
-                    if(!snakeGame) return;
-                    e.preventDefault();
-                    this.changeDirection(e.key.replace('Arrow','').toLowerCase());
-                });
-            }
-            
-            update() {
-                if(this.isPaused) return this.draw();
-                
-                const head = { 
-                    x: this.snakeParts[0].x + this.direction.x, 
-                    y: this.snakeParts[0].y + this.direction.y 
-                };
-                
-                if(head.x < 0 || head.x >= this.tilesX || head.y < 0 || head.y >= this.tilesY || 
-                   this.snakeParts.slice(1).some(p => p.x === head.x && p.y === head.y)) {
-                    if(this.score > 0 && (Date.now() - lastScoreTime) > SCORE_COOLDOWN) {
-                        this.saveScore();
-                    }
-                    alert(`🎉 ${this.score} очков!`);
-                    stopSnake();
-                    return;
-                }
-                
-                this.snakeParts.unshift(head);
-                
-                if(head.x === this.foodX && head.y === this.foodY) {
-                    this.score += 10;
-                    this.foodX = Math.floor(Math.random()*this.tilesX);
-                    this.foodY = Math.floor(Math.random()*this.tilesY);
-                } else {
-                    this.snakeParts.pop();
-                }
-                
-                document.getElementById('snakeScore').textContent = this.score;
-                this.draw();
-            }
-            
-            draw() {
-                this.ctx.fillStyle = '#000'; 
-                this.ctx.fillRect(0,0,this.tilesX*this.gridSize,this.tilesY*this.gridSize);
-                
-                this.ctx.fillStyle = '#00ff88';
-                this.snakeParts.forEach(p => {
-                    this.ctx.fillRect(p.x*this.gridSize, p.y*this.gridSize, this.gridSize-1, this.gridSize-1);
-                });
-                
-                this.ctx.fillStyle = '#ff4444';
-                this.ctx.fillRect(this.foodX*this.gridSize, this.foodY*this.gridSize, this.gridSize-1, this.gridSize-1);
-                
-                this.ctx.fillStyle = '#fff'; this.ctx.font = 'bold 24px Orbitron';
-                this.ctx.fillText(`Очки: ${this.score}`, 10, 30);
-                if(this.isPaused) {
-                    this.ctx.fillStyle = '#ff4444';
-                    this.ctx.font = 'bold 36px Orbitron';
-                    this.ctx.textAlign = 'center';
-                    this.ctx.fillText('⏸️ ПАУЗА', this.tilesX*this.gridSize/2, this.tilesY*this.gridSize/2);
-                    this.ctx.textAlign = 'left';
-                }
-            }
-            
-            saveScore() {
-                const diff = document.getElementById('snakeDifficulty').value;
-                saveScore('snake', diff, this.score, 'max');
-                if(isInTournament) addTournamentScore(this.score * 2);
-                lastScoreTime = Date.now();
-            }
-        }
-        
-        // Остальные функции без изменений (угадайка, турнир, чат)
-        let guessGame = {number:0, attempts:0, max:1000};
-        function makeGuess() {
-            const guess = parseInt(document.getElementById('guessInput').value);
-            const diff = document.getElementById('guessDifficulty').value;
-            guessGame.max = parseInt(diff);
-            
-            if(!guessGame.number) guessGame.number = Math.floor(Math.random() * guessGame.max) + 1;
-            
-            if(guess === guessGame.number) {
-                const score = Math.max(100, Math.floor(10000 / guessGame.attempts));
-                if(score > 0 && (Date.now() - lastScoreTime) > SCORE_COOLDOWN) {
-                    saveScore('guess', diff, score, 'max');
-                    if(isInTournament) addTournamentScore(score * 1.5);
-                    lastScoreTime = Date.now();
-                }
-                document.getElementById('guessFeedback').innerHTML = `🎉 УГДАЛ! ${score} очков!`;
-                guessGame = {number:0, attempts:0, max:guessGame.max};
-            } else {
-                guessGame.attempts++;
-                document.getElementById('guessFeedback').textContent = 
-                    guess < guessGame.number ? '📈 Больше!' : '📉 Меньше!';
-            }
-            document.getElementById('guessStats').textContent = `Попыток: ${guessGame.attempts}`;
-            document.getElementById('guessInput').value = '';
-        }
-        
-        function toggleTournament() {
-            isInTournament = !isInTournament;
-            document.getElementById('tournamentBtn').textContent = isInTournament ? '✅ В ТУРНИРЕ' : '⚡ УЧАСТВОВАТЬ';
-        }
-        
-        function saveScore(game, diff, score, type) {
-            if(score <= 0) return;
-            const key = `${game}_${diff}`;
-            const scores = JSON.parse(localStorage.getItem(key) || '[]');
-            scores.unshift({user: currentUser?.name || 'Гость', score, date: Date.now()});
-            localStorage.setItem(key, JSON.stringify(scores.slice(0,10)));
-            updateLeaderboards();
-        }
-        
-        function updateLeaderboards() {
-            let html = '';
-            const games = [
-                {key:'snake_easy', name:'Змейка Лёгкая'},
-                {key:'snake_medium', name:'Змейка Средняя'},
-                {key:'snake_hard', name:'Змейка Сложная'},
-                {key:'guess_1000', name:'Угадайка 1-1K'},
-                {key:'guess_10000', name:'Угадайка 1-10K'},
-                {key:'guess_100000', name:'Угадайка 1-100K'}
-            ];
-            games.forEach(g => {
-                const scores = JSON.parse(localStorage.getItem(g.key) || '[]');
-                html += `<h4>${g.name}</h4><table class="leaderboard-table">
-                    <tr><th>Место</th><th>Игрок</th><th>Очки</th></tr>`;
-                scores.slice(0,10).forEach((s,i) => {
-                    const cls = i<3 ? `rank-${i+1}` : '';
-                    html += `<tr class="${cls}"><td>${i+1}${i<3?' 🥇🥈🥉'[i]:''}</td><td>${s.user}</td><td>${s.score}</td></tr>`;
-                });
-                html += '</table>';
-            });
-            document.getElementById('leaderboards').innerHTML = html;
-        }
-        
-        function updateTournamentTimer() {
-            const now = Date.now();
-            let timeLeft = tournamentEndTime - now;
-            if(timeLeft <= 0) {
-                tournamentEndTime = getNextMidnightMSK();
-                timeLeft = tournamentEndTime - now;
-                document.getElementById('tournamentStatus').innerHTML = '🏆 ТУРНИР ЗАВЕРШЁН!';
-            }
-            const h = Math.floor(timeLeft/3600000).toString().padStart(2,'0');
-            const m = Math.floor((timeLeft%3600000)/60000).toString().padStart(2,'0');
-            const s = Math.floor((timeLeft%60000)/1000).toString().padStart(2,'0');
-            document.getElementById('tournamentTimer').textContent = `${h}:${m}:${s}`;
-        }
-        
-        function sendChat() {
-            const text = document.getElementById('chatInput').value.trim();
-            if(text && currentUser) {
-                const chat = JSON.parse(localStorage.getItem('chat') || '[]');
-                chat.unshift({user:currentUser.name, message:text, time:new Date().toLocaleTimeString('ru-RU')});
-                localStorage.setItem('chat', JSON.stringify(chat.slice(0,100)));
-                document.getElementById('chatInput').value = '';
-                updateChat();
-            }
-        }
-        
-        function updateChat() {
-            const chat = JSON.parse(localStorage.getItem('chat') || '[]');
-            document.getElementById('chatMessages').innerHTML = 
-                chat.map(c => `<div><strong>${c.user}</strong> (${c.time}): ${c.message}</div>`).join('');
-        }
-        
-        function updateAll() {
-            updateLeaderboards();
-            updateChat();
-        }
-        
-        function loadUser() {
-            try {
-                const saved = localStorage.getItem('currentUser');
-                if(saved) currentUser = JSON.parse(saved);
-                updateUI();
-            } catch(e) {}
-        }
-    </script>
+        table.innerHTML = sorted.map(([user, score], i) =>
+            `<tr><td>${i+1}. ${user}: ${score}</td></tr>`
+        ).join('');
+    });
+}
+
+function saveScore(game, score) {
+    if (!currentUser) return;
+    leaderboards[game] = leaderboards[game] || {};
+    leaderboards[game][currentDifficulty] = leaderboards[game][currentDifficulty] || {};
+    leaderboards[game][currentDifficulty][currentUser] = Math.max(
+        leaderboards[game][currentDifficulty][currentUser] || 0, score
+    );
+    saveAllData();
+    loadProfile();
+}
+
+// ✅ ЧАТ
+function sendMessage() {
+    const msg = document.getElementById('chatInput').value.trim();
+    if (msg && currentUser) {
+        chatMessages.push({user: currentUser, msg: msg, time: new Date().toLocaleTimeString(), id: Date.now()});
+        document.getElementById('chatInput').value = '';
+        updateChat();
+        playSound('chat');
+    }
+}
+
+function updateChat() {
+    const chat = document.getElementById('chatMessages');
+    chat.innerHTML = chatMessages.slice(-50).map(m =>
+        `<div><strong>${m.user}</strong> <small>${m.time}</small><br>${m.msg}</div>`
+    ).join('');
+    chat.scrollTop = chat.scrollHeight;
+    localStorage.setItem('aleksinChat', JSON.stringify(chatMessages));
+}
+
+function clearChat() {
+    chatMessages = [];
+    updateChat();
+}
+
+// ✅ ТУРНИР MSK
+function updateTournament() {
+    const now = new Date();
+    const mskTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Moscow"}));
+    const nextMidnight = new Date(mskTime.getFullYear(), mskTime.getMonth(), mskTime.getDate() + 1, 0, 0, 0);
+    const timeLeft = nextMidnight - mskTime;
+
+    const hours = Math.floor(timeLeft / (1000*60*60)).toString().padStart(2,'0');
+    const minutes = Math.floor((timeLeft % (1000*60*60)) / (1000*60)).toString().padStart(2,'0');
+    const seconds = Math.floor((timeLeft % (1000*60)) / 1000).toString().padStart(2,'0');
+    document.getElementById('tourTimer').textContent = `${hours}:${minutes}:${seconds}`;
+}
+
+// ✅ ПРОФИЛЬ
+function loadProfile() {
+    if (!currentUser) return;
+    const userStats = stats[currentUser] || {wins:0, losses:0, total:0};
+    
+    document.getElementById('profileUsername').textContent = currentUser;
+    document.getElementById('totalWins').textContent = userStats.wins || 0;
+    document.getElementById('totalLosses').textContent = userStats.losses || 0;
+    document.getElementById('winrate').textContent = userStats.wins ? Math.round((userStats.wins/(userStats.wins+userStats.losses))*100) : 0 + '%';
+    
+    const total = Object.values(leaderboards).flatMap(lb => Object.values(lb)).reduce((sum, lb) => 
+        sum + (lb[currentUser] || 0), 0);
+    document.getElementById('totalScore').textContent = total;
+    
+    const league = total > 10000 ? 'gold' : total > 1000 ? 'silver' : 'bronze';
+    document.getElementById('leagueBadge').textContent = league.toUpperCase();
+    document.getElementById('leagueBadge').className = `league-badge ${league}`;
+    
+    updateAchievements();
+}
+
+function updateAchievements() {
+    const achList = document.getElementById('achievements');
+    const achDefs = {
+        firstLogin: '🎉 Первый вход',
+        snakeMaster: '🐍 Мастер Змейки (1000+ очков)',
+        guessPro: '🎯 Профи Угадайки (решение за 5 попыток)',
+        chatty: '💬 Болтун (50+ сообщений)'
+    };
+    achList.innerHTML = Object.entries(achDefs).map(([id, name]) =>
+        `<div style="background:rgba(255,255,255,0.1);padding:10px;border-radius:10px">
+            ${achievements[currentUser]?.[id] ? '✅' : '🔒'} ${name}
+        </div>`
+    ).join('');
+}
+
+function showAchievement(id) {
+    if (!currentUser || achievements[currentUser]?.[id]) return;
+    achievements[currentUser] = achievements[currentUser] || {};
+    achievements[currentUser][id] = true;
+    saveAllData();
+}
+
+// ✅ ЗВУКИ
+function playSound(type) {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        const frequencies = {eat:800, login:523, chat:659};
+        oscillator.frequency.setValueAtTime(frequencies[type] || 440, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+
+        oscillator.start();
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        oscillator.stop(audioCtx.currentTime + 0.2);
+    } catch(e) {}
+}
+
+function toggleFullscreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+}
+</script>
 </body>
 </html>
