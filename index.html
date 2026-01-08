@@ -3,35 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🚀 ALEKSIN GAMES v5.2 ✅ БЕЗ РЕГИСТРАЦИИ</title>
+<title>🔐 ALEKSIN GAMES v5.4 - ТВОИ РЕКОРДЫ ЗАЩИЩЕНЫ</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Orbitron',monospace;background:linear-gradient(135deg,#0a0a23 0%,#1a0a3a 50%,#0f0f4f 100%);color:#fff;min-height:100vh;overflow-y:auto;padding:20px}
-.container{max-width:1400px;margin:0 auto}
+body{font-family:'Orbitron',monospace;background:linear-gradient(135deg,#0a0a23 0%,#1a0a3a 50%,#0f0f4f 100%);color:#fff;min-height:100vh;overflow-y:auto}
+.container{max-width:1400px;margin:0 auto;padding:20px}
 h1{font-size:clamp(2rem,5vw,4rem);text-align:center;background:linear-gradient(45deg,#ff00ff,#00ffff,#ffff00);background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:gradient 3s ease infinite}
 @keyframes gradient{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-.btn{display:inline-block;padding:12px 24px;background:linear-gradient(45deg,rgba(255,0,255,0.3),rgba(0,255,255,0.3));border:2px solid rgba(255,255,255,0.3);border-radius:15px;font-weight:700;cursor:pointer;transition:all 0.3s ease;margin:5px}
-.btn:hover{transform:translateY(-3px);box-shadow:0 12px 35px rgba(255,0,255,0.4)}
+.btn{display:inline-block;padding:12px 24px;background:linear-gradient(45deg,rgba(255,0,255,0.3),rgba(0,255,255,0.3));border:2px solid rgba(255,255,255,0.3);border-radius:15px;font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.3s ease;margin:5px;box-shadow:0 8px 25px rgba(0,0,0,0.5)}
+.btn:hover{background:linear-gradient(45deg,rgba(255,0,255,0.6),rgba(0,255,255,0.6));transform:translateY(-3px);box-shadow:0 12px 35px rgba(255,0,255,0.4)}
+.btn-danger{background:linear-gradient(45deg,#ff4444,#ff6666)}
+.btn-success{background:linear-gradient(45deg,#00ff88,#44ffaa)}
 .section{display:none;text-align:center}
-.section.active{display:block}
+.section.active{display:block;animation:fadeIn 0.5s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .game-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;margin:20px 0}
-canvas{border:3px solid rgba(255,255,255,0.3);border-radius:15px;background:#000;display:block;margin:10px auto;max-width:100%}
-table{width:100%;max-width:400px;margin:10px auto;border-collapse:collapse;background:rgba(255,255,255,0.1);border-radius:15px}
-th,td{padding:12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.2)}
-th{background:linear-gradient(45deg,rgba(255,0,255,0.4),rgba(0,255,255,0.4))}
+canvas{border:3px solid rgba(255,255,255,0.3);border-radius:15px;background:#000;box-shadow:0 0 30px rgba(0,255,255,0.5);max-width:100%;height:auto;display:block;margin:10px auto}
+table{width:100%;max-width:400px;margin:10px auto;border-collapse:collapse;background:rgba(255,255,255,0.1);border-radius:15px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+th,td{padding:12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.2);font-size:0.9rem}
+th{background:linear-gradient(45deg,rgba(255,0,255,0.4),rgba(0,255,255,0.4));font-weight:700}
 .tour-table{background:rgba(0,255,0,0.3)}
-#statusBar{position:fixed;top:10px;right:10px;background:rgba(0,255,0,0.3);padding:10px;border-radius:10px;z-index:1000}
-#chatMessages{height:300px;overflow-y:auto;border:2px solid #00ff00;margin:10px auto;padding:15px;background:rgba(0,0,0,0.7);border-radius:15px;max-width:500px}
-input{padding:12px;border:2px solid rgba(255,255,255,0.3);border-radius:10px;background:rgba(255,255,255,0.1);color:#fff;font-family:inherit;font-size:16px}
+#statusBar{position:fixed;top:10px;right:10px;background:rgba(0,255,0,0.3);padding:10px;border-radius:10px;font-weight:700;z-index:1000}
+#logoutContainer{position:fixed;top:10px;left:10px;z-index:9999;background:rgba(0,0,0,0.8);padding:10px;border-radius:15px}
+#logoutBtn{display:none}#logoutBtn.active{display:inline-block !important}
+#authSection{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.95);padding:40px;border-radius:20px;box-shadow:0 0 50px rgba(255,0,255,0.5);z-index:10000;width:90%;max-width:400px}
+input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-radius:10px;background:rgba(255,255,255,0.1);color:#fff;font-family:inherit;width:calc(100% - 24px);font-size:16px}
+#tourTimer{font-size:2.5rem;color:#00ff00;text-shadow:0 0 20px #00ff00;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+#chatMessages{height:300px;overflow-y:auto;border:2px solid #00ff00;margin:10px auto;padding:15px;background:rgba(0,0,0,0.7);border-radius:15px;max-width:500px;font-size:0.9rem}
 @media (max-width:768px){.container{padding:10px}.btn{padding:10px 18px;font-size:0.9rem}}
 </style>
 </head>
 <body>
-<div id="statusBar">🚀 v5.2 - ИГРАЙ БЕЗ РЕГИСТРАЦИИ!</div>
+<div id="statusBar">🔐 ВХОД НЕОБХОДИМ</div>
+<div id="logoutContainer">
+<button class="btn btn-danger" id="logoutBtn" onclick="logout()">👋 ВЫЙТИ</button>
+</div>
 
-<div class="container">
-<h1>🚀 ALEKSIN GAMES v5.2 ✅ РАБОТАЕТ!</h1>
+<div id="authSection" class="section active">
+<h2>🔐 ALEKSIN GAMES v5.4</h2>
+<p style="margin:20px 0">📝 Регистрация / Логин (минимум 3/4 символа)</p>
+<input type="text" id="usernameInput" placeholder="Логин (≥3 символа)" value="admin">
+<input type="password" id="passwordInput" placeholder="Пароль (≥4 символа)" value="12345admin">
+<button class="btn btn-success" onclick="register()">📝 РЕГИСТРАЦИЯ</button>
+<button class="btn" onclick="login()">🚀 ВОЙТИ</button>
+<div id="authMessage" style="color:#ff0;margin:20px;font-weight:700"></div>
+<p style="font-size:0.8rem;margin-top:20px">💡 test уже есть с паролем 123456</p>
+</div>
+
+<div class="container" style="display:none" id="mainContent">
+<h1>🚀 ALEKSIN GAMES v5.4 ✅ ТВОИ РЕКОРДЫ ЗАЩИЩЕНЫ</h1>
 
 <div class="game-grid">
 <button class="btn" onclick="showGame('leaderboards')">🏆 ЛИДЕРБОРДЫ</button>
@@ -41,44 +63,57 @@ input{padding:12px;border:2px solid rgba(255,255,255,0.3);border-radius:10px;bac
 <button class="btn" onclick="showGame('guess')">🎯 УГАДАЙ</button>
 </div>
 
+<!-- ЛИДЕРБОРДЫ -->
 <div id="leaderboardTables" class="section">
-<h2>🏆 ТОП-10</h2>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
-<table><thead><tr><th>🐍 Лёгкая</th></tr></thead><tbody id="snakeEasyLB"></tbody></table>
-<table><thead><tr><th>🐍 Средняя</th></tr></thead><tbody id="snakeNormalLB"></tbody></table>
-<table><thead><tr><th>🐍 Сложная</th></tr></thead><tbody id="snakeHardLB"></tbody></table>
-<table><thead><tr><th>🎯 Лёгкая</th></tr></thead><tbody id="guessEasyLB"></tbody></table>
+<h2>🏆 ТОП-10 ПО ВСЕМ ИГРАМ</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;max-height:600px;overflow-y:auto">
+<table><thead><tr><th>🐍 Змейка Лёгкая</th></tr></thead><tbody id="snakeEasyLB"></tbody></table>
+<table><thead><tr><th>🐍 Змейка Средняя</th></tr></thead><tbody id="snakeNormalLB"></tbody></table>
+<table><thead><tr><th>🐍 Змейка Сложная</th></tr></thead><tbody id="snakeHardLB"></tbody></table>
+<table><thead><tr><th>🎯 Угадайка Лёгкая</th></tr></thead><tbody id="guessEasyLB"></tbody></table>
+<table><thead><tr><th>🎯 Угадайка Средняя</th></tr></thead><tbody id="guessNormalLB"></tbody></table>
+<table><thead><tr><th>🎯 Угадайка Сложная</th></tr></thead><tbody id="guessHardLB"></tbody></table>
 </div>
 </div>
 
+<!-- ТУРНИР -->
 <div id="tournamentSection" class="section">
-<h2>⚔️ ТУРНИР 24ч</h2>
-<div style="font-size:1.5rem">⏰ <span id="tourTimer">--:--</span></div>
-<table class="tour-table"><thead><tr><th>#</th><th>ИГРОК</th><th>ОЧКИ</th></tr></thead><tbody id="tournamentLB"></tbody></table>
-<button class="btn" onclick="resetTournament()">🔄 СБРОСИТЬ</button>
+<h2>⚔️ ТУРНИР 24ч (00:00 МСК)</h2>
+<div style="font-size:1.5rem;margin:20px">⏰ До конца: <span id="tourTimer">--:--:--</span></div>
+<h3 style="color:#00ff00">🏆 ТОП-20 (ТОП-3 = ПРИЗЫ 🥇🥈🥉)</h3>
+<div style="max-height:500px;overflow-y:auto">
+<table class="tour-table"><thead><tr><th>МЕСТО</th><th>ИГРОК</th><th>ОЧКИ</th></tr></thead><tbody id="tournamentLB"></tbody></table>
+</div>
+<button class="btn btn-danger" onclick="resetTournament()" style="margin:20px">🔄 СБРОСИТЬ ТУРНИР</button>
 </div>
 
+<!-- ЧАТ -->
 <div id="chatSection" class="section">
 <h2>💬 ГЛОБАЛЬНЫЙ ЧАТ</h2>
 <div id="chatMessages"></div>
 <div style="margin:20px">
-<input id="chatInput" placeholder="Напиши..." style="width:60%">
-<button class="btn" onclick="sendMessage()">📤</button>
+<input id="chatInput" placeholder="Напиши сообщение... (Enter)" style="width:60%;font-size:16px">
+<button class="btn" onclick="sendMessage()">📤 ОТПРАВИТЬ</button>
+<button class="btn btn-danger" onclick="clearChat()">🗑️ ОЧИСТИТЬ</button>
 </div>
 </div>
 
+<!-- ЗМЕЙКА -->
 <div id="snakeSection" class="section">
-<h2>🐍 ЗМЕЙКА</h2>
+<h2>🐍 ЗМЕЙКА PRO</h2>
 <div class="game-grid">
 <button class="btn" onclick="startSnake('easy')">Лёгкая</button>
 <button class="btn" onclick="startSnake('normal')">Средняя</button>
 <button class="btn" onclick="startSnake('hard')">Сложная</button>
 </div>
-<canvas id="gameCanvas" width="400" height="400" style="position:relative;display:block;margin:10px auto"></canvas>
-<div id="snakeScore" style="position:absolute;top:10px;left:10px;font-size:1.5rem;color:#00ff00;font-weight:700;background:rgba(0,0,0,0.7);padding:5px">Счёт: 0</div>
-<button class="btn" onclick="stopSnake()" style="position:absolute;top:10px;right:10px">⏹️</button>
+<div style="position:relative;display:inline-block">
+<canvas id="gameCanvas" width="400" height="400"></canvas>
+<div id="snakeScore" style="position:absolute;top:10px;left:10px;font-size:1.5rem;font-weight:700;color:#00ff00">Счёт: 0</div>
+</div>
+<button class="btn btn-danger" onclick="stopSnake()" style="margin:20px">⏹️ СТОП</button>
 </div>
 
+<!-- УГАДАЙКА -->
 <div id="guessSection" class="section">
 <h2>🎯 УГАДАЙ ЧИСЛО</h2>
 <div class="game-grid">
@@ -87,44 +122,194 @@ input{padding:12px;border:2px solid rgba(255,255,255,0.3);border-radius:10px;bac
 <button class="btn" onclick="setDifficulty('hard')">Сложная (1-100000)</button>
 </div>
 <div style="font-size:2rem;margin:20px">Число от 1 до <span id="rangeMax">1000</span></div>
-<input type="number" id="guessInput" placeholder="Твоё число" style="width:200px">
+<input type="number" id="guessInput" placeholder="Введи число">
 <button class="btn" onclick="makeGuess()">🔍 УГАДАТЬ</button>
-<div id="guessResult" style="font-size:1.5rem;margin:20px"></div>
+<div id="guessResult"></div>
 <div id="guessAttempts">Попыток: 0</div>
 </div>
 </div>
 
 <script>
+let currentUser = null;
+let authToken = null;
 let snake = [{x:10,y:10}], snakeDir = {x:1,y:0}, snakeScore = 0, snakeRunning = false, snakeInterval;
 let currentSnakeDiff = 'easy', speeds = {easy:200, normal:150, hard:100};
 let secretNumber, guessCount = 0, currentGuessDiff = 'easy';
 const ranges = {easy:1000, normal:10000, hard:100000};
 
 async function api(endpoint, options = {}) {
+    const config = {
+        method: options.method || 'GET',
+        headers: {'Content-Type': 'application/json', 'Authorization': authToken || ''},
+        body: options.body
+    };
     try {
-        const res = await fetch('/api' + endpoint, {
-            method: options.method || 'GET',
-            headers: {'Content-Type': 'application/json'},
-            body: options.body
-        });
+        const res = await fetch('/api' + endpoint, config);
         return await res.json();
-    } catch {
+    } catch(e) {
+        showError('Сервер недоступен');
         return {error: 'Сервер недоступен'};
     }
 }
 
+// 🔐 АВТОРИЗАЦИЯ
+async function register() {
+    const username = document.getElementById('usernameInput').value.trim();
+    const password = document.getElementById('passwordInput').value;
+    const msg = document.getElementById('authMessage');
+    
+    if (username.length < 3) return msg.textContent = '❌ Логин минимум 3 символа';
+    if (password.length < 4) return msg.textContent = '❌ Пароль минимум 4 символа';
+    
+    msg.textContent = '🔄 Регистрация...';
+    const result = await api('/register', {method: 'POST', body: JSON.stringify({username, password})});
+    
+    if (result.success) {
+        currentUser = result.user;
+        authToken = result.token;
+        enterGame();
+    } else {
+        msg.textContent = '❌ ' + (result.error || 'Ошибка регистрации');
+    }
+}
+
+async function login() {
+    const username = document.getElementById('usernameInput').value.trim();
+    const password = document.getElementById('passwordInput').value;
+    const msg = document.getElementById('authMessage');
+    
+    msg.textContent = '🔄 Вход...';
+    const result = await api('/login', {method: 'POST', body: JSON.stringify({username, password})});
+    
+    if (result.success) {
+        currentUser = result.user;
+        authToken = result.token;
+        enterGame();
+    } else {
+        msg.textContent = '❌ ' + (result.error || 'Неверный логин/пароль');
+    }
+}
+
+function enterGame() {
+    document.getElementById('statusBar').textContent = `👋 ${currentUser}`;
+    document.getElementById('logoutBtn').classList.add('active');
+    document.getElementById('authSection').classList.remove('active');
+    document.getElementById('mainContent').style.display = 'block';
+    updateAll();
+}
+
+function logout() {
+    currentUser = null;
+    authToken = null;
+    document.getElementById('statusBar').textContent = '🔐 ВХОД НЕОБХОДИМ';
+    document.getElementById('logoutBtn').classList.remove('active');
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('authSection').classList.add('active');
+    document.getElementById('usernameInput').value = '';
+    document.getElementById('passwordInput').value = '';
+    document.getElementById('authMessage').textContent = '';
+}
+
 function showGame(game) {
+    if (!currentUser) return showError('🔐 Войди в аккаунт!');
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(game + 'Section' || 'leaderboardTables').classList.add('active');
+    document.getElementById(game === 'leaderboards' ? 'leaderboardTables' : game + 'Section').classList.add('active');
     if (game === 'leaderboards') updateLeaderboards();
     if (game === 'tournament') updateTournamentTable();
     if (game === 'chat') updateChat();
 }
 
+async function updateLeaderboards() {
+    const tables = [
+        ['snakeEasyLB', 'snake', 'easy'],
+        ['snakeNormalLB', 'snake', 'normal'], 
+        ['snakeHardLB', 'snake', 'hard'],
+        ['guessEasyLB', 'guess', 'easy'],
+        ['guessNormalLB', 'guess', 'normal'],
+        ['guessHardLB', 'guess', 'hard']
+    ];
+    
+    for (let [id, game, diff] of tables) {
+        const data = await api(`/leaderboards/${game}/${diff}`);
+        const tbody = document.getElementById(id);
+        if (!data || Object.keys(data).length === 0) {
+            tbody.innerHTML = '<tr><td>👑 Будь первым!</td></tr>';
+        } else {
+            const sorted = Object.entries(data).sort(([,a],[,b])=>b-a).slice(0,10);
+            tbody.innerHTML = sorted.map(([user,score],i)=>`<tr><td>${i+1}. ${user}: ${score}</td></tr>`).join('');
+        }
+    }
+}
+
+async function updateTournamentTable() {
+    const data = await api('/tournament');
+    const tbody = document.getElementById('tournamentLB');
+    if (!data || Object.keys(data).length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3">⚔️ Турнир пуст!</td></tr>';
+    } else {
+        const sorted = Object.entries(data).sort(([,a],[,b])=>b-a).slice(0,20);
+        tbody.innerHTML = sorted.map(([user,score],i)=>{
+            const medal = i<3 ? ['🥇','🥈','🥉'][i] : `${i+1}`;
+            return `<tr><td>${medal}</td><td>${user}</td><td>${score}</td></tr>`;
+        }).join('');
+    }
+}
+
+async function sendMessage() {
+    const msg = document.getElementById('chatInput').value.trim();
+    if (!msg) return;
+    
+    const result = await api('/chat', {method: 'POST', body: JSON.stringify({message: msg})});
+    if (result.success) {
+        document.getElementById('chatInput').value = '';
+        updateChat();
+    }
+}
+
+async function updateChat() {
+    const data = await api('/chat');
+    const chat = document.getElementById('chatMessages');
+    chat.innerHTML = (data || []).map(m => 
+        `<div><strong style="color:#00ff00">${m.user}</strong> 
+         <span style="float:right;color:#aaa;font-size:0.8rem">${m.time}</span><br>${m.message}</div>`
+    ).join('');
+    chat.scrollTop = chat.scrollHeight;
+}
+
+async function resetTournament() {
+    if (!confirm('🔄 Сбросить турнир?')) return;
+    await api('/tournament/reset', {method: 'POST'});
+    updateTournamentTable();
+}
+
+async function clearChat() {
+    if (!confirm('🗑️ Очистить чат?')) return;
+    // Клиентская очистка пока без API
+    document.getElementById('chatMessages').innerHTML = '';
+}
+
+function showError(msg) {
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:red;color:white;padding:15px;border-radius:10px;z-index:10001';
+    errorDiv.textContent = msg;
+    document.body.appendChild(errorDiv);
+    setTimeout(() => errorDiv.remove(), 3000);
+}
+
+async function updateAll() {
+    updateLeaderboards();
+    updateTournamentTable();
+    updateChat();
+}
+
+// 🐍 ЗМЕЙКА
 async function startSnake(diff) {
+    if (!currentUser) return showError('🔐 Войди!');
     currentSnakeDiff = diff;
+    
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
+    canvas.width = 400; canvas.height = 400;
     const grid = 20;
     
     snake = [{x:10,y:10}]; snakeDir = {x:1,y:0}; snakeScore = 0; snakeRunning = true;
@@ -135,7 +320,8 @@ async function startSnake(diff) {
         ctx.fillStyle = '#000'; ctx.fillRect(0,0,400,400);
         
         const head = {x:snake[0].x + snakeDir.x, y:snake[0].y + snakeDir.y};
-        if (head.x < 0 || head.x > 19 || head.y < 0 || head.y > 19 || snake.some(s => s.x === head.x && s.y === head.y)) {
+        if (head.x < 0 || head.x > 19 || head.y < 0 || head.y > 19 || 
+            snake.some(s => s.x === head.x && s.y === head.y)) {
             gameOver(); return;
         }
         
@@ -151,24 +337,10 @@ async function startSnake(diff) {
         });
         ctx.fillStyle = '#ff0000';
         ctx.fillRect(food.x*grid, food.y*grid, grid-2, grid-2);
-        
         document.getElementById('snakeScore').textContent = `Счёт: ${snakeScore}`;
     }
     
-    // Touch controls
-    let touchStart = {x:0,y:0};
-    canvas.ontouchstart = e => touchStart = {x:e.touches[0].clientX, y:e.touches[0].clientY};
-    canvas.ontouchend = e => {
-        const dx = touchStart.x - e.changedTouches[0].clientX;
-        const dy = touchStart.y - e.changedTouches[0].clientY;
-        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
-            snakeDir = dx > 0 && snakeDir.x !== 1 ? {x:-1,y:0} : dx < 0 && snakeDir.x !== -1 ? {x:1,y:0} : snakeDir;
-        } else if (Math.abs(dy) > 30) {
-            snakeDir = dy > 0 && snakeDir.y !== 1 ? {x:0,y:-1} : dy < 0 && snakeDir.y !== -1 ? {x:0,y:1} : snakeDir;
-        }
-    };
-    
-    canvas.onkeydown = e => {
+    document.onkeydown = e => {
         if (e.key === 'ArrowUp' && snakeDir.y !== 1) snakeDir = {x:0,y:-1};
         if (e.key === 'ArrowDown' && snakeDir.y !== -1) snakeDir = {x:0,y:1};
         if (e.key === 'ArrowLeft' && snakeDir.x !== 1) snakeDir = {x:-1,y:0};
@@ -179,90 +351,73 @@ async function startSnake(diff) {
     snakeInterval = setInterval(gameLoop, speeds[diff]);
 }
 
-function stopSnake() { snakeRunning = false; if (snakeInterval) clearInterval(snakeInterval); }
+function stopSnake() { 
+    snakeRunning = false; 
+    if (snakeInterval) clearInterval(snakeInterval); 
+}
 
 async function gameOver() {
-    snakeRunning = false; if (snakeInterval) clearInterval(snakeInterval);
+    snakeRunning = false; 
+    if (snakeInterval) clearInterval(snakeInterval);
+    
     if (snakeScore > 0) {
-        await api('/scores', {method: 'POST', body: JSON.stringify({game: 'snake', difficulty: currentSnakeDiff, score: snakeScore})});
+        await api('/scores', {method: 'POST', body: JSON.stringify({
+            game: 'snake', difficulty: currentSnakeDiff, score: snakeScore
+        })});
         await api('/tournament', {method: 'POST', body: JSON.stringify({score: snakeScore})});
         updateLeaderboards(); updateTournamentTable();
     }
-    alert(`🎮 ${snakeScore} очков!`);
+    alert(`🎮 Game Over!\nСчёт: ${snakeScore}`);
 }
 
+// 🎯 УГАДАЙКА
 function setDifficulty(diff) {
-    currentGuessDiff = diff; secretNumber = Math.floor(Math.random() * ranges[diff]) + 1;
-    guessCount = 0; document.getElementById('rangeMax').textContent = ranges[diff];
-    document.getElementById('guessResult').textContent = ''; document.getElementById('guessAttempts').textContent = 'Попыток: 0';
+    if (!currentUser) return showError('🔐 Войди!');
+    currentGuessDiff = diff;
+    secretNumber = Math.floor(Math.random() * ranges[diff]) + 1;
+    guessCount = 0;
+    document.getElementById('rangeMax').textContent = ranges[diff];
+    document.getElementById('guessResult').textContent = '';
+    document.getElementById('guessAttempts').textContent = 'Попыток: 0';
 }
 
 async function makeGuess() {
+    if (!currentUser) return showError('🔐 Войди!');
     const guess = parseInt(document.getElementById('guessInput').value);
-    if (!guess) return alert('Введи число!');
+    if (!guess) return showError('Введи число!');
     
     guessCount++;
     if (guess === secretNumber) {
         const score = Math.max(1000 - guessCount * 100, 100);
         document.getElementById('guessResult').innerHTML = `✅ +${score} очков!`;
-        await api('/scores', {method: 'POST', body: JSON.stringify({game: 'guess', difficulty: currentGuessDiff, score: score})});
+        await api('/scores', {method: 'POST', body: JSON.stringify({
+            game: 'guess', difficulty: currentGuessDiff, score: score
+        })});
         await api('/tournament', {method: 'POST', body: JSON.stringify({score: score})});
         updateLeaderboards(); updateTournamentTable();
-        setTimeout(() => setDifficulty(currentGuessDiff), 1500);
+        setTimeout(() => setDifficulty(currentGuessDiff), 2000);
     } else {
-        document.getElementById('guessResult').textContent = guess < secretNumber ? '📈 Больше!' : '📉 Меньше!';
+        document.getElementById('guessResult').textContent = 
+            guess < secretNumber ? '📈 Больше!' : '📉 Меньше!';
     }
     document.getElementById('guessAttempts').textContent = `Попыток: ${guessCount}`;
     document.getElementById('guessInput').value = '';
 }
 
-async function updateLeaderboards() {
-    const tables = {snakeEasyLB:['snake','easy'], snakeNormalLB:['snake','normal'], snakeHardLB:['snake','hard'], guessEasyLB:['guess','easy']};
-    for (let [id,[game,diff]] of Object.entries(tables)) {
-        const data = await api(`/leaderboards/${game}/${diff}`);
-        const table = document.getElementById(id);
-        table.innerHTML = Object.keys(data || {}).length ? 
-            Object.entries(data).sort(([,a],[,b])=>b-a).slice(0,10).map(([u,s],i)=>`<tr><td>${i+1} ${u}: ${s}</td></tr>`).join('') :
-            '<tr><td>👑 Будь первым!</td></tr>';
-    }
-}
-
-async function updateTournamentTable() {
-    const data = await api('/tournament');
-    const table = document.getElementById('tournamentLB');
-    table.innerHTML = Object.keys(data || {}).length ? 
-        Object.entries(data).sort(([,a],[,b])=>b-a).slice(0,20).map(([u,s],i)=>{
-            const medal = i<3 ? ['🥇','🥈','🥉'][i] : `${i+1}`;
-            return `<tr><td>${medal}</td><td>${u}</td><td>${s}</td></tr>`;
-        }).join('') : '<tr><td colspan="3">⚔️ Турнир пуст!</td></tr>';
-}
-
-async function sendMessage() {
-    const msg = document.getElementById('chatInput').value.trim();
-    if (msg) {
-        await api('/chat', {method: 'POST', body: JSON.stringify({message: msg})});
-        document.getElementById('chatInput').value = '';
-        updateChat();
-    }
-}
-
-async function updateChat() {
-    const msgs = await api('/chat');
-    document.getElementById('chatMessages').innerHTML = (msgs || []).map(m=>`<div><strong>${m.user}</strong> ${m.time}<br>${m.message}</div>`).join('');
-}
-
-async function resetTournament() {
-    await api('/tournament/reset');
-    updateTournamentTable();
-}
-
-// Запуск
+// Инициализация
 setInterval(() => {
-    document.getElementById('tourTimer').textContent = new Date().toLocaleTimeString('ru-RU',{timeZone:'Europe/Moscow',hour12:false});
+    const now = new Date();
+    document.getElementById('tourTimer').textContent = 
+        now.toLocaleTimeString('ru-RU', {timeZone: 'Europe/Moscow', hour12: false});
 }, 1000);
-document.getElementById('chatInput').onkeypress = e => e.key === 'Enter' && sendMessage();
-updateChat(); updateLeaderboards(); updateTournamentTable();
-showGame('leaderboards');
+
+document.getElementById('chatInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') sendMessage();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('usernameInput').focus();
+});
 </script>
 </body>
 </html>
