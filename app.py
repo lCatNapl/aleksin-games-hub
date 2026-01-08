@@ -39,7 +39,7 @@ def index():
     try:
         return open('index.html').read()
     except:
-        return '<h1>🚀 ALEKSIN GAMES v5.4 - ЗАГРУЗИ index.html</h1>'
+        return '<h1>🚀 ALEKSIN GAMES v5.4</h1>'
 
 @app.route('/api/register', methods=['POST'])
 def register():
