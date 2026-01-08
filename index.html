@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>🚀 ALEKSIN GAMES HUB v4.2 ✅ АДМИН ФИКСЫ</title>
+<title>🚀 ALEKSIN GAMES HUB v4.3 ✅ ТУРНИРЫ+ЧАТ+АЧИВКИ</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
@@ -19,10 +19,10 @@ h1{font-size:clamp(2rem,5vw,4rem);text-align:center;background:linear-gradient(4
 @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .game-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;margin:20px 0}
 canvas{border:3px solid rgba(255,255,255,0.3);border-radius:15px;background:#000;box-shadow:0 0 30px rgba(0,255,255,0.5);max-width:100%;height:auto;display:block;margin:10px auto}
-table{width:100%;max-width:350px;margin:10px auto;border-collapse:collapse;background:rgba(255,255,255,0.1);border-radius:15px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
-th,td{padding:10px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.2)}
+table{width:100%;max-width:400px;margin:10px auto;border-collapse:collapse;background:rgba(255,255,255,0.1);border-radius:15px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+th,td{padding:12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.2);font-size:0.9rem}
 th{background:linear-gradient(45deg,rgba(255,0,255,0.4),rgba(0,255,255,0.4));font-weight:700}
-.tour-table{background:rgba(0,255,0,0.2)}
+.tour-table{background:rgba(0,255,0,0.3)}
 #statusBar{position:fixed;top:10px;right:10px;background:rgba(0,255,0,0.3);padding:10px;border-radius:10px;font-weight:700;z-index:1000}
 #logoutContainer{position:fixed;top:10px;left:10px;z-index:9999;background:rgba(0,0,0,0.8);padding:10px;border-radius:15px}
 #logoutBtn{display:none}#logoutBtn.active{display:inline-block !important}
@@ -32,12 +32,11 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 #tourTimer{font-size:2.5rem;color:#00ff00;text-shadow:0 0 20px #00ff00;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 #chatMessages{height:300px;overflow-y:auto;border:2px solid #00ff00;margin:10px auto;padding:15px;background:rgba(0,0,0,0.7);border-radius:15px;max-width:500px;font-size:0.9rem}
-#chatInput{width:70%;max-width:350px}
+.league-badge{display:inline-block;padding:5px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;margin:2px}
+.bronze{background:#cd7f32;color:#fff}.silver{background:#c0c0c0;color:#000}.gold{background:#ffd700;color:#000}
 .achievement{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:linear-gradient(45deg,#ffd700,#ffed4e);color:#000;padding:15px 25px;border-radius:25px;font-weight:900;font-size:1.2rem;z-index:10000;display:none;animation:achievePop 0.5s ease}
 @keyframes achievePop{0%{transform:translateX(-50%) scale(0.5);opacity:0}50%{transform:translateX(-50%) scale(1.1)}100%{transform:translateX(-50%) scale(1);opacity:1}}
 @media (max-width:768px){.container{padding:10px}.btn{padding:10px 18px;font-size:0.9rem}}
-/* ✅ ЗМЕЙКА БЛОКИРОВКА ТОЛЬКО canvas */
-#gameCanvas.snake-playing{touch-action:none !important}
 </style>
 </head>
 <body>
@@ -54,7 +53,7 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 <button class="btn" onclick="login()">🚀 ВОЙТИ</button>
 </div>
 
-<h1>🚀 ALEKSIN GAMES HUB v4.2 ✅ АДМИН ФИКСЫ</h1>
+<h1>🚀 ALEKSIN GAMES HUB v4.3 ✅ ТУРНИРЫ+ЧАТ+АЧИВКИ</h1>
 
 <div class="game-grid">
 <button class="btn" onclick="showGame('leaderboards')">🏆 ЛИДЕРБОРДЫ</button>
@@ -65,10 +64,10 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 <button class="btn" onclick="showGame('guess')">🎯 УГАДАЙ</button>
 </div>
 
-<!-- ЛИДЕРБОРДЫ ✅ 4 ТАБЛИЦЫ -->
+<!-- ЛИДЕРБОРДЫ -->
 <div id="leaderboardTables" class="section">
 <h2>🏆 ТОП-10 ПО ВСЕМ ИГРАМ</h2>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;max-height:600px;overflow-y:auto">
 <table><thead><tr><th>🐍 Змейка Лёгкая</th></tr></thead><tbody id="snakeEasyLB"></tbody></table>
 <table><thead><tr><th>🐍 Змейка Средняя</th></tr></thead><tbody id="snakeNormalLB"></tbody></table>
 <table><thead><tr><th>🐍 Змейка Сложная</th></tr></thead><tbody id="snakeHardLB"></tbody></table>
@@ -78,24 +77,32 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 </div>
 </div>
 
-<!-- ТУРНИР ✅ РАБОТАЕТ -->
+<!-- ТУРНИР ✅ ФИКС -->
 <div id="tournamentSection" class="section">
 <h2>⚔️ ТУРНИР 24ч (00:00 МСК)</h2>
-<div>⏰ До конца: <span id="tourTimer">--:--:--</span></div>
-<h3>🏆 ТОП-100 ТУРНИР (ТОП-5 = ПРИЗЫ)</h3>
-<table class="tour-table"><thead><tr><th>МЕСТО</th><th>ИГРОК</th><th>ОЧКИ</th></tr></thead><tbody id="tournamentLB"></tbody></table>
+<div style="font-size:1.5rem;margin:20px">⏰ До конца: <span id="tourTimer">--:--:--</span></div>
+<h3 style="color:#00ff00">🏆 ТОП-100 (ТОП-5 = ПРИЗЫ 🥇🥈🥉)</h3>
+<div style="max-height:500px;overflow-y:auto">
+<table class="tour-table" style="width:100%">
+<thead><tr><th>МЕСТО</th><th>ИГРОК</th><th>ОЧКИ</th></tr></thead>
+<tbody id="tournamentLB"></tbody>
+</table>
+</div>
+<button class="btn" onclick="resetTournament()" style="margin:20px">🔄 СБРОСИТЬ ТУРНИР (Админ)</button>
 </div>
 
-<!-- ЧАТ ✅ РАБОТАЕТ -->
+<!-- ЧАТ ✅ ФИКС -->
 <div id="chatSection" class="section">
-<h2>💬 ГЛОБАЛЬНЫЙ ЧАТ</h2>
+<h2>💬 ГЛОБАЛЬНЫЙ ЧАТ (все видят всех)</h2>
 <div id="chatMessages"></div>
-<input id="chatInput" placeholder="Напиши сообщение... (Enter)" onkeypress="if(event.key==='Enter') sendMessage()">
+<div style="margin:20px">
+<input id="chatInput" placeholder="Напиши сообщение... (Enter)" style="width:60%;font-size:16px">
 <button class="btn" onclick="sendMessage()">📤 ОТПРАВИТЬ</button>
 <button class="btn" onclick="clearChat()">🗑️ ОЧИСТИТЬ</button>
 </div>
+</div>
 
-<!-- ПРОФИЛЬ ✅ РАБОТАЕТ -->
+<!-- ПРОФИЛЬ ✅ АЧИВКИ -->
 <div id="profileSection" class="section">
 <h2>👤 ПРОФИЛЬ <span id="profileUsername"></span></h2>
 <div style="background:rgba(0,255,0,0.2);padding:20px;border-radius:15px;margin:20px auto;max-width:500px">
@@ -108,22 +115,22 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 <div id="achievements" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px"></div>
 </div>
 
-<!-- ЗМЕЙКА ✅ ГРАНИЦЫ + СВАЙПЫ -->
+<!-- ЗМЕЙКА -->
 <div id="snakeSection" class="section">
 <h2>🐍 ЗМЕЙКА PRO</h2>
 <div class="game-grid">
-<button class="btn" onclick="startSnake('easy')">Лёгкая (200ms)</button>
-<button class="btn" onclick="startSnake('normal')">Средняя (150ms)</button>
-<button class="btn" onclick="startSnake('hard')">Сложная (100ms)</button>
+<button class="btn" onclick="startSnake('easy')">Лёгкая</button>
+<button class="btn" onclick="startSnake('normal')">Средняя</button>
+<button class="btn" onclick="startSnake('hard')">Сложная</button>
 </div>
 <div style="position:relative;display:inline-block">
-<canvas id="gameCanvas" width="400" height="400" tabindex="0"></canvas>
-<div id="snakeScore" style="position:absolute;top:10px;left:10px;font-size:1.5rem;font-weight:700;color:#00ff00;z-index:10">Счёт: 0</div>
+<canvas id="gameCanvas" width="400" height="400"></canvas>
+<div id="snakeScore" style="position:absolute;top:10px;left:10px;font-size:1.5rem;font-weight:700;color:#00ff00">Счёт: 0</div>
 </div>
 <button class="btn" onclick="stopSnake()">⏹️ СТОП</button>
 </div>
 
-<!-- УГАДАЙКА ✅ ИНПУТ РАБОТАЕТ -->
+<!-- УГАДАЙКА -->
 <div id="guessSection" class="section">
 <h2>🎯 УГАДАЙ ЧИСЛО</h2>
 <div class="game-grid">
@@ -132,9 +139,9 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 <button class="btn" onclick="setDifficulty('hard')">Сложная (1-100000)</button>
 </div>
 <div style="font-size:2rem;margin:20px">Число от <span id="rangeMin">1</span> до <span id="rangeMax">1000</span></div>
-<input type="number" id="guessInput" placeholder="Введи число" style="font-size:1.2rem">
+<input type="number" id="guessInput" placeholder="Введи число">
 <button class="btn" onclick="makeGuess()">🔍 УГАДАТЬ</button>
-<div id="guessResult" style="font-size:1.5rem;margin:20px"></div>
+<div id="guessResult"></div>
 <div id="guessAttempts">Попыток: 0</div>
 </div>
 </div>
@@ -142,23 +149,34 @@ input{padding:12px;margin:10px;border:2px solid rgba(255,255,255,0.3);border-rad
 <div id="achievementPopup" class="achievement"></div>
 
 <script>
-// ✅ ГЛОБАЛЬНЫЕ ДАННЫЕ
-let currentUser = localStorage.getItem('aleksinUser') || null;
-let leaderboards = JSON.parse(localStorage.getItem('aleksinLeaderboards')) || {};
-let tournamentScores = JSON.parse(localStorage.getItem('aleksinTournament')) || {};
-let chatMessages = JSON.parse(localStorage.getItem('aleksinChat')) || [];
-let achievements = JSON.parse(localStorage.getItem('aleksinAchievements')) || {};
-let stats = JSON.parse(localStorage.getItem('aleksinStats')) || {};
+// ✅ ФИКС ДАННЫХ - ПРЯМО СЕЙЧАС!
+function initData() {
+    if (!localStorage.getItem('aleksinLeaderboards')) localStorage.setItem('aleksinLeaderboards', '{}');
+    if (!localStorage.getItem('aleksinTournament')) localStorage.setItem('aleksinTournament', '{}');
+    if (!localStorage.getItem('aleksinChat')) localStorage.setItem('aleksinChat', '[]');
+    if (!localStorage.getItem('aleksinStats')) localStorage.setItem('aleksinStats', '{}');
+    if (!localStorage.getItem('aleksinAchievements')) localStorage.setItem('aleksinAchievements', '{}');
+}
 
-// ✅ ЗМЕЙКА
+// ✅ ГЛОБАЛЬНЫЕ
+let currentUser = localStorage.getItem('aleksinUser') || null;
+let leaderboards = JSON.parse(localStorage.getItem('aleksinLeaderboards') || '{}');
+let tournamentScores = JSON.parse(localStorage.getItem('aleksinTournament') || '{}');
+let chatMessages = JSON.parse(localStorage.getItem('aleksinChat') || '[]');
+let achievements = JSON.parse(localStorage.getItem('aleksinAchievements') || '{}');
+let stats = JSON.parse(localStorage.getItem('aleksinStats') || '{}');
+
+// ЗМЕЙКА
 let snake = [{x:10,y:10}], snakeDir = {x:1,y:0}, snakeScore = 0, snakeRunning = false, snakeInterval;
 let currentSnakeDiff = 'easy', speeds = {easy:200, normal:150, hard:100};
+let food = {x:5,y:5};
 
-// ✅ УГАДАЙКА
+// УГАДАЙКА
 let secretNumber, guessCount = 0, currentGuessDiff = 'easy';
 const ranges = {easy:1000, normal:10000, hard:100000};
 
-// Инициализация
+// ✅ СТАРТ
+initData();
 if (currentUser) {
     document.getElementById('statusBar').textContent = `👋 ${currentUser}`;
     document.getElementById('logoutBtn').classList.add('active');
@@ -172,14 +190,21 @@ updateTournamentTable();
 // ✅ НАВИГАЦИЯ
 function showGame(game) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(game === 'leaderboards' ? 'leaderboardTables' : 
-                        game === 'tournament' ? 'tournamentSection' : 
-                        game === 'chat' ? 'chatSection' :
-                        game === 'profile' ? 'profileSection' :
-                        game === 'snake' ? 'snakeSection' :
-                        game === 'guess' ? 'guessSection' : game + 'Section').classList.add('active');
+    const sectionMap = {
+        'leaderboards': 'leaderboardTables',
+        'tournament': 'tournamentSection', 
+        'chat': 'chatSection',
+        'profile': 'profileSection',
+        'snake': 'snakeSection',
+        'guess': 'guessSection'
+    };
+    const sectionId = sectionMap[game] || game + 'Section';
+    document.getElementById(sectionId).classList.add('active');
+    
     if (game === 'leaderboards') updateLeaderboards();
     if (game === 'tournament') updateTournamentTable();
+    if (game === 'chat') updateChat();
+    if (game === 'profile') loadProfile();
 }
 
 // ✅ ЛОГИН
@@ -193,23 +218,35 @@ function login() {
         document.getElementById('logoutBtn').classList.add('active');
         document.getElementById('authSection').classList.remove('active');
         localStorage.setItem('aleksinUser', currentUser);
+        saveAllData();
         loadProfile();
+        showAchievement('firstLogin');
         alert(`✅ Добро пожаловать, Админ ${currentUser}!`);
     }
 }
 
 function logout() {
-    snakeRunning = false;
     if (snakeInterval) clearInterval(snakeInterval);
+    snakeRunning = false;
     currentUser = null;
     document.getElementById('statusBar').textContent = '👋 Гость';
     document.getElementById('logoutBtn').classList.remove('active');
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.getElementById('authSection').classList.add('active');
     localStorage.removeItem('aleksinUser');
+    saveAllData();
 }
 
-// ✅ ЗМЕЙКА ✅ ГРАНИЦЫ + СВАЙПЫ
+// ✅ СОХРАНЕНИЕ
+function saveAllData() {
+    localStorage.setItem('aleksinLeaderboards', JSON.stringify(leaderboards));
+    localStorage.setItem('aleksinTournament', JSON.stringify(tournamentScores));
+    localStorage.setItem('aleksinChat', JSON.stringify(chatMessages));
+    localStorage.setItem('aleksinStats', JSON.stringify(stats));
+    localStorage.setItem('aleksinAchievements', JSON.stringify(achievements));
+}
+
+// ✅ ЗМЕЙКА (ОСТАЕТСЯ КАК В v4.2)
 function startSnake(diff) {
     if (!currentUser) { alert('🔐 Админ, войди!'); return; }
     currentSnakeDiff = diff;
@@ -228,7 +265,6 @@ function startSnake(diff) {
     function generateFood() {
         food = {x:Math.floor(Math.random()*19), y:Math.floor(Math.random()*19)};
     }
-    let food = {x:5,y:5};
     
     function gameLoop() {
         if (!snakeRunning) return;
@@ -238,7 +274,6 @@ function startSnake(diff) {
         
         const head = {x:snake[0].x + snakeDir.x, y:snake[0].y + snakeDir.y};
         
-        // ✅ ПРАВИЛЬНЫЕ ГРАНИЦЫ 0-19
         if (head.x < 0 || head.x > 19 || head.y < 0 || head.y > 19 || 
             snake.some(s => s.x === head.x && s.y === head.y)) {
             gameOver();
@@ -250,11 +285,11 @@ function startSnake(diff) {
         if (head.x === food.x && head.y === food.y) {
             snakeScore += 100;
             generateFood();
+            if (snakeScore >= 1000) showAchievement('snakeMaster');
         } else {
             snake.pop();
         }
         
-        // Отрисовка
         snake.forEach((s,i) => {
             ctx.fillStyle = i === 0 ? '#ff00ff' : '#00ff00';
             ctx.fillRect(s.x*grid, s.y*grid, grid-2, grid-2);
@@ -269,7 +304,7 @@ function startSnake(diff) {
     gameLoop();
     snakeInterval = setInterval(gameLoop, speeds[diff]);
     
-    // ✅ КЛАВИАТУРА + СВАЙПЫ
+    // Управление
     let touchStart = {x:0,y:0};
     canvas.addEventListener('touchstart', e => {
         e.preventDefault();
@@ -322,7 +357,7 @@ function gameOver() {
     alert(`Game Over, Админ! Счёт: ${snakeScore}`);
 }
 
-// ✅ УГАДАЙКА ✅ ИНПУТ РАБОТАЕТ
+// ✅ УГАДАЙКА
 function setDifficulty(diff) {
     currentGuessDiff = diff;
     secretNumber = Math.floor(Math.random() * ranges[diff]) + 1;
@@ -336,12 +371,12 @@ function setDifficulty(diff) {
 function makeGuess() {
     if (!currentUser) { alert('🔐 Админ, войди!'); return; }
     const guess = parseInt(document.getElementById('guessInput').value);
-    if (!guess) { alert('Введи число!'); return; }
+    if (!guess || guess < 1) { alert('Введи число!'); return; }
     
     guessCount++;
     if (guess === secretNumber) {
         const score = Math.max(1000 - guessCount * 100, 100);
-        document.getElementById('guessResult').innerHTML = `✅ Угадал за ${guessCount} попыток! (+${score} очков)`;
+        document.getElementById('guessResult').innerHTML = `✅ Угадал за ${guessCount} попыток! (+${score})`;
         stats[currentUser].wins = (stats[currentUser].wins || 0) + 1;
         
         leaderboards.guess = leaderboards.guess || {};
@@ -351,6 +386,7 @@ function makeGuess() {
         );
         tournamentScores[currentUser] = (tournamentScores[currentUser] || 0) + score;
         
+        if (guessCount <= 5) showAchievement('guessPro');
         saveAllData();
         updateLeaderboards();
         updateTournamentTable();
@@ -367,7 +403,7 @@ function makeGuess() {
     saveAllData();
 }
 
-// ✅ ЛИДЕРБОРДЫ ✅ ВСЕ 6 ТАБЛИЦ
+// ✅ ЛИДЕРБОРДЫ
 function updateLeaderboards() {
     const tables = {
         snakeEasyLB: leaderboards.snake?.easy || {},
@@ -381,30 +417,32 @@ function updateLeaderboards() {
     Object.entries(tables).forEach(([id, data]) => {
         const table = document.getElementById(id);
         if (!data || Object.keys(data).length === 0) {
-            table.innerHTML = '<tr><td>👑 БУДЬ ПЕРВЫМ!</td></tr>';
-            return;
+            table.innerHTML = '<tr><td colspan="1">👑 БУДЬ ПЕРВЫМ!</td></tr>';
+        } else {
+            const sorted = Object.entries(data).sort(([,a],[,b]) => b-a).slice(0,10);
+            table.innerHTML = sorted.map(([user,score],i) => 
+                `<tr><td>${i+1}🏆 ${user}<br><small>${score} очков</small></td></tr>`
+            ).join('');
         }
-        const sorted = Object.entries(data).sort(([,a],[,b]) => b-a).slice(0,10);
-        table.innerHTML = sorted.map(([user,score],i) => 
-            `<tr><td>${i+1}🏆 ${user}: ${score}</td></tr>`
-        ).join('');
     });
 }
 
-// ✅ ТУРНИР ✅ ТОП-100
+// ✅ ТУРНИР ✅ ФИКС ВИДНОСТИ
 function updateTournamentTable() {
     const table = document.getElementById('tournamentLB');
-    const sorted = Object.entries(tournamentScores)
-        .sort(([,a],[,b]) => b-a)
-        .slice(0,100);
+    if (!tournamentScores || Object.keys(tournamentScores).length === 0) {
+        table.innerHTML = '<tr><td colspan="3">⚔️ Турнир пуст! Играй и займи 1 место!</td></tr>';
+        return;
+    }
     
+    const sorted = Object.entries(tournamentScores).sort(([,a],[,b]) => b-a).slice(0,100);
     table.innerHTML = sorted.map(([user,score],i) => {
         const medal = i < 5 ? ['🥇','🥈','🥉','🎖️','🎖️'][i] : `${i+1}`;
         return `<tr><td>${medal}</td><td>${user}</td><td>${score}</td></tr>`;
     }).join('');
 }
 
-// ✅ ЧАТ ✅ РАБОТАЕТ
+// ✅ ЧАТ ✅ ФИКС ВИДНОСТИ
 function sendMessage() {
     const msg = document.getElementById('chatInput').value.trim();
     if (msg && currentUser) {
@@ -415,6 +453,7 @@ function sendMessage() {
             id: Date.now()
         });
         document.getElementById('chatInput').value = '';
+        saveAllData();
         updateChat();
     }
 }
@@ -422,17 +461,19 @@ function sendMessage() {
 function updateChat() {
     const chat = document.getElementById('chatMessages');
     chat.innerHTML = chatMessages.slice(-50).reverse().map(m =>
-        `<div><strong>${m.user}</strong> <small>${m.time}</small><br>${m.msg}</div>`
+        `<div style="margin:5px 0"><strong style="color:#00ff00">${m.user}</strong> 
+        <span style="color:#888;float:right;font-size:0.8rem">${m.time}</span><br>${m.msg}</div>`
     ).join('');
     chat.scrollTop = 0;
 }
 
 function clearChat() {
     chatMessages = [];
+    saveAllData();
     updateChat();
 }
 
-// ✅ ТУРНИР MSK ✅ ТИКАЕТ
+// ✅ ТУРНИР MSK
 function updateTournament() {
     const now = new Date();
     const msk = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Moscow"}));
@@ -443,21 +484,15 @@ function updateTournament() {
     const m = Math.floor((timeLeft%3600000)/60000).toString().padStart(2,'0');
     const s = Math.floor((timeLeft%60000)/1000).toString().padStart(2,'0');
     document.getElementById('tourTimer').textContent = `${h}:${m}:${s}`;
-    
-    // Сброс в 00:00 MSK
-    if (timeLeft < 0) {
-        tournamentScores = {};
-        saveAllData();
-        updateTournamentTable();
-    }
 }
 
-// ✅ ПРОФИЛЬ ✅ РАБОТАЕТ
+// ✅ ПРОФИЛЬ + АЧИВКИ ✅ ФИКС
 function loadProfile() {
     if (!currentUser) return;
-    document.getElementById('profileUsername').textContent = currentUser;
     
+    document.getElementById('profileUsername').textContent = currentUser;
     const userStats = stats[currentUser] || {wins:0, losses:0};
+    
     document.getElementById('totalWins').textContent = userStats.wins || 0;
     document.getElementById('totalLosses').textContent = userStats.losses || 0;
     const winrate = userStats.wins ? Math.round(userStats.wins/(userStats.wins+userStats.losses)*100) : 0;
@@ -474,13 +509,46 @@ function loadProfile() {
     updateAchievements();
 }
 
-// ✅ СОХРАНЕНИЕ
-function saveAllData() {
-    localStorage.setItem('aleksinLeaderboards', JSON.stringify(leaderboards));
-    localStorage.setItem('aleksinTournament', JSON.stringify(tournamentScores));
-    localStorage.setItem('aleksinChat', JSON.stringify(chatMessages));
-    localStorage.setItem('aleksinStats', JSON.stringify(stats));
-    localStorage.setItem('aleksinAchievements', JSON.stringify(achievements));
+function updateAchievements() {
+    const achList = document.getElementById('achievements');
+    const achDefs = {
+        firstLogin: '🎉 Первый вход',
+        snakeMaster: '🐍 Мастер Змейки (1000+ очков)',
+        guessPro: '🎯 Профи Угадайки (5 попыток)'
+    };
+    
+    if (!achievements[currentUser]) achievements[currentUser] = {};
+    
+    achList.innerHTML = Object.entries(achDefs).map(([id, name]) => {
+        const unlocked = achievements[currentUser][id] || false;
+        return `<div style="background:${unlocked ? 'rgba(0,255,0,0.3)' : 'rgba(255,255,255,0.1)'};padding:15px;border-radius:10px;text-align:center">
+            ${unlocked ? '✅' : '🔒'} ${name}
+        </div>`;
+    }).join('');
+}
+
+function showAchievement(id) {
+    if (!currentUser || achievements[currentUser][id]) return;
+    achievements[currentUser] = achievements[currentUser] || {};
+    achievements[currentUser][id] = true;
+    saveAllData();
+    updateAchievements();
+    
+    // Popup
+    const popup = document.getElementById('achievementPopup');
+    popup.textContent = `🏆 Достижение: ${id.toUpperCase().replace(/([A-Z])/g, ' $1').trim()}!`;
+    popup.style.display = 'block';
+    setTimeout(() => popup.style.display = 'none', 3000);
+}
+
+// ✅ АДМИН
+function resetTournament() {
+    if (confirm('🔄 Админ, сбросить турнир?')) {
+        tournamentScores = {};
+        saveAllData();
+        updateTournamentTable();
+        alert('✅ Турнир сброшен!');
+    }
 }
 </script>
 </body>
