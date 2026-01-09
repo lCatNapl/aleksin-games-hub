@@ -1,19 +1,29 @@
 from flask import Flask, request, jsonify, session, redirect, send_file
-import sqlite3, hashlib, re, os
+import sqlite3, hashlib, re
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = 'aleksin-games-2026'
+app.secret_key = 'aleksin-games-super-secret-2026'
 
+# ✅ Транслитерация БЕЗ внешних библиотек
 def to_latin(text):
-    map_dict = {'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'e','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'c','ч':'ch','ш':'sh','щ':'sch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya','А':'A','Б':'B','В':'V','Г':'G','Д':'D','Е':'E','Ё':'E','Ж':'Zh','З':'Z','И':'I','Й':'Y','К':'K','Л':'L','М':'M','Н':'N','О':'O','П':'P','Р':'R','С':'S','Т':'T','У':'U','Ф':'F','Х':'H','Ц':'C','Ч':'Ch','Ш':'Sh','Щ':'Sch','Ъ':'','Ы':'Y','Ь':'','Э':'E','Ю':'Yu','Я':'Ya'}
+    map_dict = {
+        'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'e','ж':'zh','з':'z','и':'i','й':'y',
+        'к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f',
+        'х':'h','ц':'c','ч':'ch','ш':'sh','щ':'sch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya',
+        'А':'A','Б':'B','В':'V','Г':'G','Д':'D','Е':'E','Ё':'E','Ж':'Zh','З':'Z','И':'I','Й':'Y',
+        'К':'K','Л':'L','М':'M','Н':'N','О':'O','П':'P','Р':'R','С':'S','Т':'T','У':'U','Ф':'F',
+        'Х':'H','Ц':'C','Ч':'Ch','Ш':'Sh','Щ':'Sch','Ъ':'','Ы':'Y','Ь':'','Э':'E','Ю':'Yu','Я':'Ya'
+    }
     return re.sub(r'[^a-z0-9]', '_', ''.join(map_dict.get(c, c) for c in text).lower())
 
 def init_db():
     conn = sqlite3.connect('scores.db')
     c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS users (username_orig TEXT UNIQUE, username_lat TEXT UNIQUE, password TEXT)''')
-    c.execute('''CREATE TABLE IF NOT EXISTS scores (username_lat TEXT, game TEXT, difficulty TEXT, score INTEGER, timestamp INTEGER)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS users 
+                 (id INTEGER PRIMARY KEY, username_orig TEXT UNIQUE, username_lat TEXT UNIQUE, password TEXT)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS scores 
+                 (id INTEGER PRIMARY KEY, username_lat TEXT, game TEXT, difficulty TEXT, score INTEGER, timestamp INTEGER)''')
     conn.commit()
     conn.close()
 init_db()
@@ -42,9 +52,9 @@ def register():
         session['username_orig'] = username_orig
         conn.close()
         return redirect('/')
-    except:
+    except sqlite3.IntegrityError:
         conn.close()
-        return 'Пользователь существует!', 400
+        return 'Пользователь уже существует!', 400
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -62,7 +72,7 @@ def login():
         session['username_lat'] = username_lat
         session['username_orig'] = username_orig
         return redirect('/')
-    return 'Ошибка входа!', 400
+    return 'Неверный логин/пароль!', 400
 
 @app.route('/logout')
 def logout():
@@ -73,9 +83,10 @@ def logout():
 def leaderboard_save():
     data = request.get_json()
     username_lat = request.headers.get('username', 'guest')
+    
     conn = sqlite3.connect('scores.db')
     c = conn.cursor()
-    c.execute("INSERT INTO scores VALUES (?, ?, ?, ?, ?)",
+    c.execute("INSERT INTO scores (username_lat, game, difficulty, score, timestamp) VALUES (?, ?, ?, ?, ?)",
               (username_lat, data['game'], data['diff'], data['score'], int(data['timestamp'])))
     conn.commit()
     conn.close()
@@ -85,10 +96,14 @@ def leaderboard_save():
 def leaderboard_get(game, difficulty):
     conn = sqlite3.connect('scores.db')
     c = conn.cursor()
-    c.execute("SELECT username_orig, score FROM scores s LEFT JOIN users u ON s.username_lat=u.username_lat WHERE game=? AND difficulty=? ORDER BY score DESC LIMIT 10", (game, difficulty))
-    scores = [{'name': r[0] or 'guest', 'score': r[1]} for r in c.fetchall()]
+    c.execute("""SELECT u.username_orig, s.score 
+                 FROM scores s LEFT JOIN users u ON s.username_lat = u.username_lat 
+                 WHERE s.game=? AND s.difficulty=? 
+                 ORDER BY s.score DESC, s.timestamp ASC 
+                 LIMIT 10""", (game, difficulty))
+    scores = [{'name': row[0] or 'guest', 'score': row[1]} for row in c.fetchall()]
     conn.close()
     return jsonify(scores)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
