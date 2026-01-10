@@ -5,7 +5,7 @@ import os
 
 app = Flask(__name__)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///scores.db'  # или postgresql:// на Render
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///scores.db'
 db = SQLAlchemy(app)
 
 class Score(db.Model):
