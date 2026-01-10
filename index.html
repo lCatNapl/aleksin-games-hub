@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🌌 ALEKSIN GAMES v6.7.1 ✅ 13/13 РАБОТАЕТ!</title>
+    <title>🌌 ALEKSIN GAMES v7.0 ✅ СИНК ОНЛАЙН + РЕКОРДЫ</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -23,6 +23,11 @@
             background: linear-gradient(45deg, #00ff88 0%, #ffaa00 50%, #00ccff 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
             text-shadow: 0 0 30px rgba(0,255,136,0.5); 
+        }
+        .online-counter {
+            display: inline-flex; align-items: center; gap: 8px; 
+            background: rgba(0,255,136,0.2); padding: 8px 15px; border-radius: 20px; 
+            border: 2px solid #00ff88; font-weight: 700; font-size: 1.1em;
         }
         .nav { 
             display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 10px 0; 
@@ -87,6 +92,7 @@
         .stat-box { background: rgba(0,255,136,0.2); border: 2px solid #00ff88; border-radius: 15px; padding: 25px 15px; text-align: center; }
         .achievement { display: inline-block; background: linear-gradient(45deg, #ffd700, #ffaa00); color: #000; padding: 12px 20px; border-radius: 25px; margin: 10px 5px; font-weight: 700; border: 2px solid #ffd700; font-size: 0.95em; }
         #chat-messages { height: 400px; overflow-y: auto; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 1px solid #00ccff; margin-bottom: 15px; }
+        .guest-only { opacity: 0.5; pointer-events: none; }
         @media (max-width: 480px) { 
             .nav { gap: 5px; padding: 5px; }
             .nav-btn { padding: 12px 12px; font-size: 0.9em; min-width: 80px; }
@@ -101,8 +107,13 @@
     <canvas id="matrix-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;opacity:0.1;"></canvas>
     
     <div class="header">
-        <h1>🌌 ALEKSIN GAMES v6.7.1</h1>
-        <p id="status">🔄 Загрузка...</p>
+        <h1>🌌 ALEKSIN GAMES v7.0</h1>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:15px;align-items:center;">
+            <p id="status">🔄 Загрузка...</p>
+            <div class="online-counter" id="online-counter">
+                👥 <span id="online-count">0</span> онлайн
+            </div>
+        </div>
     </div>
     
     <div class="nav" id="nav">
@@ -147,9 +158,9 @@
 
     <!-- ТОП-10 -->
     <div id="top10" class="content">
-        <h2 style="text-align:center;font-size:clamp(1.8em,8vw,3em);margin-bottom:30px;">🏆 ТОП-10</h2>
+        <h2 style="text-align:center;font-size:clamp(1.8em,8vw,3em);margin-bottom:30px;">🏆 ГЛОБАЛЬНЫЙ ТОП-10</h2>
         <div class="top10-grid" id="top10-container">
-            <div style="text-align:center;padding:40px;color:#888;">🔥 Загрузка...</div>
+            <div style="text-align:center;padding:40px;color:#888;">🔥 Синхронизация...</div>
         </div>
     </div>
 
@@ -216,7 +227,7 @@
     <div id="chat-modal" class="modal" style="display:none;">
         <div class="modal-content" style="height:70vh;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
-                <h3>💬 ГЛОБАЛЬНЫЙ ЧАТ</h3>
+                <h3>💬 ГЛОБАЛЬНЫЙ ЧАТ (<span id="chat-online">0</span> онлайн)</h3>
                 <button onclick="closeChat()" class="exit-btn">X</button>
             </div>
             <div id="chat-messages"></div>
@@ -227,13 +238,19 @@
 
     <script>
         // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
-        let currentUser = localStorage.getItem('username') || 'Гость', isLoggedIn = !!currentUser;
+        let currentUser = localStorage.getItem('username') || 'Гость', isLoggedIn = !!currentUser && currentUser !== 'Гость';
         let currentGame = '', currentDifficulty = 'easy', gameScore = 0, gameRunning = false;
         let snake = [], dx = 1, dy = 0, food = {}, scoreMultiplier = 1;
         let guessNumber = 0, guessAttempts = 0, guessRange = 1000;
         let gameCanvas, gameCtx, gridSize = 20, touchStart = {x: 0, y: 0};
-        let chatMessages = JSON.parse(localStorage.getItem('chatMessages')) || [], top10Data = {};
+        let chatMessages = [], top10Data = {}, onlineUsers = new Set();
+        const GLOBAL_SERVER = 'wss://aleksin-games.onrender.com'; // ТВОЙ Render.com URL
+        let ws = null, heartbeatInterval;
+
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // APPLE CHECK (исключаем iOS)
+        const isApple = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
         // ЗВУКИ
         function playSound(frequency, duration, type = 'sine', volume = 0.3) {
@@ -246,6 +263,76 @@
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
                 oscillator.start(audioCtx.currentTime); oscillator.stop(audioCtx.currentTime + duration);
             } catch(e) {}
+        }
+
+        // WEBSOCKET СИНКРОНИЗАЦИЯ
+        function connectWebSocket() {
+            if (ws) ws.close();
+            
+            ws = new WebSocket(GLOBAL_SERVER.replace('wss://', 'wss://') + '/ws');
+            
+            ws.onopen = () => {
+                console.log('🌐 Подключен к серверу рекордов');
+                sendOnlineStatus(true);
+                heartbeatInterval = setInterval(() => {
+                    if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({type: 'heartbeat'}));
+                }, 30000);
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'leaderboards') {
+                    top10Data = data.data;
+                    loadAllData();
+                } else if (data.type === 'online_users') {
+                    onlineUsers = new Set(data.users);
+                    updateOnlineCounter();
+                } else if (data.type === 'chat') {
+                    chatMessages.push(data.message);
+                    if (document.getElementById('chat-modal').style.display === 'flex') updateChatDisplay();
+                }
+            };
+            
+            ws.onclose = () => {
+                console.log('🌐 Отключен от сервера, переподключение...');
+                clearInterval(heartbeatInterval);
+                setTimeout(connectWebSocket, 5000);
+            };
+            
+            ws.onerror = (error) => console.error('WS Error:', error);
+        }
+
+        function sendOnlineStatus(online) {
+            if (ws && ws.readyState === WebSocket.OPEN && isLoggedIn) {
+                ws.send(JSON.stringify({
+                    type: 'online_status',
+                    username: currentUser,
+                    online: online
+                }));
+            }
+        }
+
+        function sendScore(key, score) {
+            if (ws && ws.readyState === WebSocket.OPEN && isLoggedIn) {
+                ws.send(JSON.stringify({
+                    type: 'score',
+                    game: key,
+                    username: currentUser,
+                    score: score
+                }));
+            } else {
+                saveScoreLocal(key, score);
+            }
+        }
+
+        function sendChatMessageServer(message) {
+            if (ws && ws.readyState === WebSocket.OPEN && isLoggedIn) {
+                ws.send(JSON.stringify({
+                    type: 'chat',
+                    username: currentUser,
+                    message: message
+                }));
+            }
         }
 
         // МАТРИЧНЫЙ ФОН
@@ -273,9 +360,10 @@
             if (document.getElementById('top10').classList.contains('active')) loadTop10();
             if (document.getElementById('tournaments').classList.contains('active')) loadTournament();
             updateStatus();
+            toggleGuestRestrictions();
         }
 
-        async function loadTop10() {
+        function loadTop10() {
             const container = document.getElementById('top10-container');
             const games = [
                 {game: 'snake', diff: 'easy', title: '🐍 Snake Easy', key: 'snake_easy'},
@@ -288,15 +376,16 @@
             let html = '';
             for (let g of games) {
                 const scores = top10Data[g.key] || [];
+                const registeredScores = scores.filter(s => s.username !== 'Гость');
                 html += `
                     <div class="top10-card">
                         <h3 style="text-align:center;font-size:1.6em;margin-bottom:20px;">${g.title}</h3>
-                        ${scores.slice(0, 3).map((p, i) => 
+                        ${registeredScores.slice(0, 10).map((p, i) => 
                             `<div style="margin:10px 0;text-align:center;font-size:1.2em;font-weight:700;" class="rank-${i+1}">
                                 ${i+1}. ${p.username}: ${p.score}
                             </div>`
                         ).join('')}
-                        ${scores.length === 0 ? '<div style="color:#888;">Никто не играл...</div>' : ''}
+                        ${registeredScores.length === 0 ? '<div style="color:#888;">Только зарегистрированные игроки!</div>' : ''}
                     </div>
                 `;
             }
@@ -307,26 +396,49 @@
             const games = ['snake_easy', 'snake_medium', 'snake_hard', 'guess_1000', 'guess_10000', 'guess_100000'];
             games.forEach(key => {
                 const scores = top10Data[key] || [];
+                const registeredScore = scores.find(s => s.username !== 'Гость')?.score || 0;
                 const el = document.getElementById(`lb-${key.replace('_', '-')}-mini`);
-                if (el) el.textContent = scores[0]?.score || 0;
+                if (el) el.textContent = registeredScore;
             });
+        }
+
+        function updateOnlineCounter() {
+            document.getElementById('online-count').textContent = onlineUsers.size;
+            if (document.getElementById('chat-modal').style.display === 'flex') {
+                document.getElementById('chat-online').textContent = onlineUsers.size;
+            }
+        }
+
+        function toggleGuestRestrictions() {
+            const games = document.querySelectorAll('.game-card');
+            if (!isLoggedIn) {
+                games.forEach(game => game.classList.add('guest-only'));
+            } else {
+                games.forEach(game => game.classList.remove('guest-only'));
+            }
         }
 
         function loadTournament() {
             const standings = JSON.parse(localStorage.getItem('tournamentScores') || '[]');
+            const registeredStandings = standings.filter(p => p.username !== 'Гость');
             document.getElementById('tournament-standings').innerHTML = 
-                standings.slice(0, 10).map((p, i) => 
+                registeredStandings.slice(0, 10).map((p, i) => 
                     `<div style="margin:5px 0;"><span style="color:#ffd700;">${i+1}.</span> ${p.username}: ${p.score}</div>`
-                ).join('') || 'Пока нет участников';
+                ).join('') || 'Только зарегистрированные игроки!';
         }
 
         function updateStatus() {
-            document.getElementById('status').textContent = `👋 ${currentUser}`;
+            document.getElementById('status').textContent = `👋 ${currentUser} ${isLoggedIn ? '✅' : '🔓'}`;
             document.getElementById('auth-btn').textContent = `👋 ${currentUser}`;
         }
 
-        // ИГРЫ
+        // ИГРЫ (УПРАВЛЕНИЕ ИСПРАВЛЕНО)
         function startGame(game, diff) {
+            if (!isLoggedIn) {
+                alert('🔓 ВОЙДИ, чтобы играть!');
+                document.getElementById('auth-modal').style.display = 'flex';
+                return;
+            }
             playSound(1200, 0.2); currentGame = game; currentDifficulty = diff; gameRunning = true;
             document.getElementById('game-modal').style.display = 'flex';
             document.getElementById('game-title-big').textContent = game === 'snake' ? `🐍 ЗМЕЙКА ${diff.toUpperCase()}` : `🎯 УГАДАЙКА 1-${diff.replace(/,/g,'')}`;
@@ -353,8 +465,12 @@
 
         function saveScore() {
             const key = `${currentGame}_${currentDifficulty}`;
+            sendScore(key, gameScore);
+        }
+
+        function saveScoreLocal(key, score) {
             const scores = JSON.parse(localStorage.getItem(key) || '[]');
-            scores.push({username: currentUser, score: gameScore, date: new Date().toISOString()});
+            scores.push({username: currentUser, score: score, date: new Date().toISOString()});
             scores.sort((a, b) => b.score - a.score);
             top10Data[key] = scores.slice(0, 10);
             localStorage.setItem(key, JSON.stringify(scores.slice(0, 100)));
@@ -380,7 +496,6 @@
             if (!gameRunning) return;
             gameCtx.fillStyle = '#000'; gameCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
             
-            // СЕТКА
             gameCtx.strokeStyle = 'rgba(0,255,136,0.1)'; gameCtx.lineWidth = 1;
             for (let x = 0; x < gameCanvas.width; x += 20) {
                 gameCtx.beginPath(); gameCtx.moveTo(x, 0); gameCtx.lineTo(x, gameCanvas.height); gameCtx.stroke();
@@ -422,28 +537,51 @@
             setTimeout(gameLoopSnake, 1000 / (snake.length + 8));
         }
 
-        // УГАДАЙКА
+        // УГАДАЙКА (ПОЛЕ ВВОДА)
         function initGuess() {
-            guessRange = parseInt(currentDifficulty); guessNumber = Math.floor(Math.random() * guessRange) + 1;
-            guessAttempts = 0; gameScore = 0; document.getElementById('guess-hint').style.display = 'block';
-            document.getElementById('guess-hint').innerHTML = `<strong>1-${guessRange.toLocaleString()}</strong>`;
+            guessRange = parseInt(currentDifficulty); 
+            guessNumber = Math.floor(Math.random() * guessRange) + 1;
+            guessAttempts = 0; gameScore = 0; 
+            document.getElementById('guess-hint').style.display = 'block';
+            document.getElementById('guess-hint').innerHTML = `
+                <strong>1-${guessRange.toLocaleString()}</strong>
+                <div style="margin-top:15px;display:flex;gap:10px;justify-content:center;">
+                    <input id="guess-input" type="number" placeholder="Твой вариант" style="width:200px;padding:15px;font-size:1.2em;">
+                    <button onclick="makeGuess()" style="padding:15px 25px;font-size:1.2em;">🔍 УГАДАТЬ</button>
+                </div>
+            `;
             updateGuessDisplay();
         }
 
-        function guessInput() {
-            const guess = prompt(`🎯 Попытка ${guessAttempts + 1}\nУгадай число от 1 до ${guessRange.toLocaleString()}:`);
-            if (!guess) return;
-            const num = parseInt(guess);
+        function makeGuess() {
+            const input = document.getElementById('guess-input');
+            const num = parseInt(input.value);
             if (isNaN(num) || num < 1 || num > guessRange) {
-                playSound(400, 0.2); alert(`❌ Число от 1 до ${guessRange.toLocaleString()}!`); return guessInput();
+                playSound(400, 0.2); input.style.borderColor = '#ff6666';
+                setTimeout(() => input.style.borderColor = '#00ff88', 500);
+                return;
             }
-            playSound(1000, 0.15); guessAttempts++;
+            input.value = ''; playSound(1000, 0.15); guessAttempts++;
             if (num === guessNumber) {
                 gameScore = Math.floor((guessRange / guessAttempts) * 10); gameOver();
             } else if (num < guessNumber) {
-                document.getElementById('guess-hint').innerHTML = `<strong>➤ Больше ${num}!</strong><br>1-${guessRange.toLocaleString()}`;
+                document.getElementById('guess-hint').innerHTML = `
+                    <strong style="color:#ffaa44;">➤ Больше ${num}!</strong><br>
+                    <div style="margin-top:15px;">1-${guessRange.toLocaleString()}</div>
+                    <div style="margin-top:15px;display:flex;gap:10px;justify-content:center;">
+                        <input id="guess-input" type="number" placeholder="Твой вариант" style="width:200px;padding:15px;font-size:1.2em;">
+                        <button onclick="makeGuess()" style="padding:15px 25px;font-size:1.2em;">🔍 УГАДАТЬ</button>
+                    </div>
+                `;
             } else {
-                document.getElementById('guess-hint').innerHTML = `<strong>➤ Меньше ${num}!</strong><br>1-${guessRange.toLocaleString()}`;
+                document.getElementById('guess-hint').innerHTML = `
+                    <strong style="color:#ffaa44;">➤ Меньше ${num}!</strong><br>
+                    <div style="margin-top:15px;">1-${guessRange.toLocaleString()}</div>
+                    <div style="margin-top:15px;display:flex;gap:10px;justify-content:center;">
+                        <input id="guess-input" type="number" placeholder="Твой вариант" style="width:200px;padding:15px;font-size:1.2em;">
+                        <button onclick="makeGuess()" style="padding:15px 25px;font-size:1.2em;">🔍 УГАДАТЬ</button>
+                    </div>
+                `;
             }
             updateGuessDisplay();
         }
@@ -465,61 +603,69 @@
         function gameOver() {
             playSound(300, 0.4, 'sawtooth'); gameRunning = false; 
             setTimeout(() => { 
-                saveScore();
                 alert(`🎮 GAME OVER!\n${currentGame === 'snake' ? '🐍 ЗМЕЙКА' : '🎯 УГАДАЙКА'} ${currentDifficulty.toUpperCase()}\n💎 Счёт: ${Math.floor(gameScore)}`); 
                 closeGame(); 
             }, 500);
         }
 
-        // УПРАВЛЕНИЕ
+        // УПРАВЛЕНИЕ ЗМЕЙКИ (WASD + КЛИКИ + СВАЙПЫ)
         document.addEventListener('keydown', e => {
-            if (!gameRunning) return;
-            if (currentGame === 'guess' && e.key === 'Enter') {
-                e.preventDefault(); guessInput();
-            } else if (currentGame === 'snake') {
-                switch(e.key) {
-                    case 'ArrowUp': if (dy !== 1) { dx = 0; dy = -1; playSound(900, 0.08); } break;
-                    case 'ArrowDown': if (dy !== -1) { dx = 0; dy = 1; playSound(900, 0.08); } break;
-                    case 'ArrowLeft': if (dx !== 1) { dx = -1; dy = 0; playSound(900, 0.08); } break;
-                    case 'ArrowRight': if (dx !== -1) { dx = 1; dy = 0; playSound(900, 0.08); } break;
-                }
+            if (!gameRunning || currentGame !== 'snake') return;
+            switch(e.key.toLowerCase()) {
+                case 'w': case 'arrowup': if (dy !== 1) { dx = 0; dy = -1; playSound(900, 0.08); } break;
+                case 's': case 'arrowdown': if (dy !== -1) { dx = 0; dy = 1; playSound(900, 0.08); } break;
+                case 'a': case 'arrowleft': if (dx !== 1) { dx = -1; dy = 0; playSound(900, 0.08); } break;
+                case 'd': case 'arrowright': if (dx !== -1) { dx = 1; dy = 0; playSound(900, 0.08); } break;
             }
         });
 
-        // ТАЧ ДЛЯ МОБИЛЬНЫХ
-        document.addEventListener('touchstart', e => {
-            if (!gameRunning || !gameCanvas || currentGame !== 'snake') return;
-            touchStart.x = e.touches[0].clientX; touchStart.y = e.touches[0].clientY;
-        }, {passive: false});
-        
-        document.addEventListener('touchmove', e => {
-            e.preventDefault();
-            if (!gameRunning || !gameCanvas || currentGame !== 'snake') return;
-            const touchEnd = {x: e.touches[0].clientX, y: e.touches[0].clientY};
-            const diffX = touchEnd.x - touchStart.x; const diffY = touchEnd.y - touchStart.y;
-            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
-                if (diffX > 0 && dx !== -1) { dx = 1; dy = 0; } else if (dx !== 1) { dx = -1; dy = 0; }
-            } else if (Math.abs(diffY) > 30) {
-                if (diffY > 0 && dy !== -1) { dx = 0; dy = 1; } else if (dy !== 1) { dx = 0; dy = -1; }
-            }
-            touchStart = touchEnd;
-        }, {passive: false});
+        gameCanvas?.addEventListener('click', (e) => {
+            if (!gameRunning || currentGame !== 'snake' || isApple) return;
+            const rect = gameCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const blockW = gameCanvas.width / 20;
+            
+            if (x < gameCanvas.width/3 && dx !== 1) { dx = -1; dy = 0; playSound(900, 0.08); }
+            else if (x > gameCanvas.width*2/3 && dx !== -1) { dx = 1; dy = 0; playSound(900, 0.08); }
+            else if (y < gameCanvas.height/2 && dy !== 1) { dx = 0; dy = -1; playSound(900, 0.08); }
+            else if (dy !== -1) { dx = 0; dy = 1; playSound(900, 0.08); }
+        });
+
+        // ТАЧ ДЛЯ НЕ-АППЛ
+        if (!isApple) {
+            document.addEventListener('touchstart', e => {
+                if (!gameRunning || !gameCanvas || currentGame !== 'snake') return;
+                touchStart.x = e.touches[0].clientX; touchStart.y = e.touches[0].clientY;
+            }, {passive: false});
+            
+            document.addEventListener('touchmove', e => {
+                e.preventDefault();
+                if (!gameRunning || !gameCanvas || currentGame !== 'snake') return;
+                const touchEnd = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+                const diffX = touchEnd.x - touchStart.x; const diffY = touchEnd.y - touchStart.y;
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
+                    if (diffX > 0 && dx !== -1) { dx = 1; dy = 0; } else if (dx !== 1) { dx = -1; dy = 0; }
+                } else if (Math.abs(diffY) > 30) {
+                    if (diffY > 0 && dy !== -1) { dx = 0; dy = 1; } else if (dy !== 1) { dx = 0; dy = -1; }
+                }
+                touchStart = touchEnd;
+                playSound(900, 0.08);
+            }, {passive: false});
+        }
 
         // ЧАТ
         function toggleChat() {
             const modal = document.getElementById('chat-modal');
             modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
-            if (modal.style.display === 'flex') loadChat();
-        }
-
-        function loadChat() {
-            chatMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
-            updateChatDisplay();
+            if (modal.style.display === 'flex') {
+                updateChatDisplay();
+                document.getElementById('chat-online').textContent = onlineUsers.size;
+            }
         }
 
         function updateChatDisplay() {
             const container = document.getElementById('chat-messages');
-            if (!container) return;
             container.innerHTML = chatMessages.slice(-50).map(m => 
                 `<div style="margin:5px 0;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;">
                     <strong style="color:#00ff88;">${m.username}</strong> 
@@ -530,14 +676,18 @@
         }
 
         function sendChatMessage() {
+            if (!isLoggedIn) {
+                alert('🔓 ВОЙДИ, чтобы общаться!');
+                return;
+            }
             const input = document.getElementById('chat-input');
             const message = input.value.trim();
             if (!message || message.length > 200) return;
-            chatMessages.push({
-                username: currentUser, message, time: new Date().toLocaleTimeString('ru-RU')
-            });
-            localStorage.setItem('chatMessages', JSON.stringify(chatMessages));
-            input.value = ''; loadChat(); playSound(1000, 0.1);
+            
+            const msg = {username: currentUser, message, time: new Date().toLocaleTimeString('ru-RU')};
+            chatMessages.push(msg);
+            sendChatMessageServer(message);
+            input.value = ''; updateChatDisplay(); playSound(1000, 0.1);
         }
 
         function closeChat() { document.getElementById('chat-modal').style.display = 'none'; }
@@ -552,15 +702,18 @@
                 playSound(400, 0.2); return;
             }
             currentUser = username; isLoggedIn = true; localStorage.setItem('username', username);
-            document.getElementById('status').textContent = `👋 ${currentUser}`;
+            document.getElementById('status').textContent = `👋 ${currentUser} ✅`;
             document.getElementById('auth-btn').textContent = `👋 ${currentUser}`;
             closeAuth(); loadAllData(); playSound(1200, 0.3);
+            sendOnlineStatus(true);
         }
 
         function logoutUser() {
+            sendOnlineStatus(false);
             currentUser = 'Гость'; isLoggedIn = false; localStorage.removeItem('username');
             document.getElementById('status').textContent = '🔄 Загрузка...';
             document.getElementById('auth-btn').textContent = '👋 Гость'; playSound(500, 0.2);
+            loadAllData();
         }
 
         function toggleAuthMode() {
@@ -594,10 +747,16 @@
 
         function loadProfile() {
             document.getElementById('profile-title').textContent = `👤 ПРОФИЛЬ ${currentUser}`;
+            let totalScore = 0;
+            const games = Object.keys(top10Data);
+            games.forEach(key => {
+                const userScore = top10Data[key]?.find(s => s.username === currentUser)?.score || 0;
+                totalScore += userScore;
+            });
             document.getElementById('profile-stats').innerHTML = `
                 <div class="stat-box">
                     <div style="font-size:2em;font-weight:900;">${currentUser}</div>
-                    <div style="color:#ffd700;font-size:1.5em;">${Math.floor(Math.random()*10000)}</div>
+                    <div style="color:#ffd700;font-size:1.5em;">${totalScore.toLocaleString()}</div>
                     <div>Всего очков</div>
                 </div>
             `;
@@ -614,6 +773,11 @@
         }
 
         function joinTournament() {
+            if (!isLoggedIn) {
+                alert('🔓 ВОЙДИ, чтобы участвовать!');
+                document.getElementById('auth-modal').style.display = 'flex';
+                return;
+            }
             playSound(1400, 0.3); startGame('snake', 'easy');
             alert('⚔️ ТУРНИР НАЧАЛСЯ!\nПобеди всех игроков Тулы! 🏆');
         }
@@ -630,7 +794,15 @@
             bindEvents();
             loadAllData();
             updateTournamentTimer();
-            setInterval(() => { loadChat(); loadAllData(); }, 3000);
+            connectWebSocket();
+            
+            // Автообновление каждые 10 сек
+            setInterval(loadAllData, 10000);
+        });
+
+        // ОЧИСТКА ПРИ ВЫХОДЕ
+        window.addEventListener('beforeunload', () => {
+            sendOnlineStatus(false);
         });
     </script>
 </body>
