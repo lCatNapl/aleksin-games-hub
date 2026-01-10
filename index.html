@@ -244,7 +244,7 @@
         let guessNumber = 0, guessAttempts = 0, guessRange = 1000;
         let gameCanvas, gameCtx, gridSize = 20, touchStart = {x: 0, y: 0};
         let chatMessages = [], top10Data = {}, onlineUsers = new Set();
-        const GLOBAL_SERVER = 'wss://aleksin-games.onrender.com'; // ТВОЙ Render.com URL
+        const GLOBAL_SERVER = 'wss://aleksin-games-hub.onrender.com'; // ТВОЙ Render.com URL
         let ws = null, heartbeatInterval;
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
