@@ -265,19 +265,41 @@
             } catch(e) {}
         }
 
-        // WEBSOCKET СИНКРОНИЗАЦИЯ
         function connectWebSocket() {
-            if (ws) ws.close();
-            
-            ws = new WebSocket(GLOBAL_SERVER.replace('wss://', 'wss://') + '/ws');
-            
-            ws.onopen = () => {
-                console.log('🌐 Подключен к серверу рекордов');
-                sendOnlineStatus(true);
-                heartbeatInterval = setInterval(() => {
-                    if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({type: 'heartbeat'}));
-                }, 30000);
-            };
+    if (ws) ws.close();
+    
+    // ✅ ТВОЙ Render URL
+    ws = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/socket.io`);
+    
+    ws.onopen = () => {
+        console.log('🌐 ✅ WebSocket подключен!');
+        sendOnlineStatus(true);
+    };
+    
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'leaderboards') {
+                top10Data = data.data;
+                loadAllData();
+            } else if (data.type === 'online_users') {
+                onlineUsers = new Set(data.users);
+                updateOnlineCounter();
+            } else if (data.type === 'chat') {
+                chatMessages.push(data.message);
+                updateChatDisplay();
+            }
+        } catch(e) {
+            console.log('WebSocket data:', event.data);
+        }
+    };
+    
+    ws.onclose = () => {
+        console.log('🌐 🔄 Переподключение...');
+        setTimeout(connectWebSocket, 3000);
+    };
+}
+
             
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
@@ -464,9 +486,30 @@
         function saveAndExit() { saveScore(); closeGame(); }
 
         function saveScore() {
-            const key = `${currentGame}_${currentDifficulty}`;
-            sendScore(key, gameScore);
-        }
+    const key = `${currentGame}_${currentDifficulty}`;
+    const scoreData = {username: currentUser, score: Math.floor(gameScore), date: new Date().toISOString()};
+    
+    // ✅ ОТПРАВЛЯЕМ НА СЕРВЕР
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+            type: 'score',
+            game: key,
+            username: currentUser,
+            score: Math.floor(gameScore)
+        }));
+    }
+    
+    // ✅ ЛОКАЛЬНО ДЛЯ ТУРНИРА
+    let tournamentScores = JSON.parse(localStorage.getItem('tournamentScores') || '[]');
+    tournamentScores.push(scoreData);
+    tournamentScores.sort((a, b) => b.score - a.score);
+    localStorage.setItem('tournamentScores', JSON.stringify(tournamentScores.slice(0, 100)));
+    
+    loadAllData();
+    playSound(1200, 0.2);
+    alert(`💾 Рекорд ${Math.floor(gameScore)} сохранен для всех игроков! 🏆`);
+}
+
 
         function saveScoreLocal(key, score) {
             const scores = JSON.parse(localStorage.getItem(key) || '[]');
@@ -537,21 +580,33 @@
             setTimeout(gameLoopSnake, 1000 / (snake.length + 8));
         }
 
-        // УГАДАЙКА (ПОЛЕ ВВОДА)
         function initGuess() {
-            guessRange = parseInt(currentDifficulty); 
-            guessNumber = Math.floor(Math.random() * guessRange) + 1;
-            guessAttempts = 0; gameScore = 0; 
-            document.getElementById('guess-hint').style.display = 'block';
-            document.getElementById('guess-hint').innerHTML = `
-                <strong>1-${guessRange.toLocaleString()}</strong>
-                <div style="margin-top:15px;display:flex;gap:10px;justify-content:center;">
-                    <input id="guess-input" type="number" placeholder="Твой вариант" style="width:200px;padding:15px;font-size:1.2em;">
-                    <button onclick="makeGuess()" style="padding:15px 25px;font-size:1.2em;">🔍 УГАДАТЬ</button>
-                </div>
-            `;
-            updateGuessDisplay();
-        }
+    guessRange = parseInt(currentDifficulty); 
+    guessNumber = Math.floor(Math.random() * guessRange) + 1;
+    guessAttempts = 0; gameScore = 0; 
+    document.getElementById('guess-hint').innerHTML = `
+        <strong style="color:#00ff88;font-size:1.8em;">1-${guessRange.toLocaleString()}</strong>
+        <div style="margin-top:15px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+            <input id="guess-input" type="number" placeholder="Твой вариант" style="width:200px;padding:15px;font-size:1.2em;border:2px solid #00ff88;">
+            <button onclick="makeGuess()" style="padding:15px 25px;font-size:1.2em;background:linear-gradient(145deg,#ffaa44,#ff8800);">🔍 УГАДАТЬ</button>
+        </div>
+        <div id="guess-range" style="color:#ffaa44;font-size:1.1em;margin-top:10px;"></div>
+    `;
+    updateGuessRange();
+    updateGuessDisplay();
+}
+
+function updateGuessRange() {
+    const rangeEl = document.getElementById('guess-range');
+    if (guessAttempts === 0) {
+        rangeEl.textContent = `Диапазон: 1-${guessRange.toLocaleString()}`;
+    } else if (lastGuess < guessNumber) {
+        rangeEl.textContent = `${lastGuess + 1}-${guessRange.toLocaleString()}`;
+    } else {
+        rangeEl.textContent = `1-${lastGuess - 1}`;
+    }
+}
+
 
         function makeGuess() {
             const input = document.getElementById('guess-input');
@@ -652,6 +707,19 @@
                 touchStart = touchEnd;
                 playSound(900, 0.08);
             }, {passive: false});
+            // 🔥 КЛИКИ ДЛЯ ЗМЕЙКИ (ТОЛЬКО ОДИН!)
+gameCanvas.addEventListener('click', (e) => {
+    if (!gameRunning || currentGame !== 'snake') return;
+    const rect = gameCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    if (x < gameCanvas.width/3 && dx !== 1) { dx = -1; dy = 0; playSound(900, 0.08); }
+    else if (x > gameCanvas.width*2/3 && dx !== -1) { dx = 1; dy = 0; playSound(900, 0.08); }
+    else if (y < gameCanvas.height/2 && dy !== 1) { dx = 0; dy = -1; playSound(900, 0.08); }
+    else { dx = 0; dy = 1; playSound(900, 0.08); }
+});
+
         }
 
         // ЧАТ
@@ -773,14 +841,15 @@
         }
 
         function joinTournament() {
-            if (!isLoggedIn) {
-                alert('🔓 ВОЙДИ, чтобы участвовать!');
-                document.getElementById('auth-modal').style.display = 'flex';
-                return;
-            }
-            playSound(1400, 0.3); startGame('snake', 'easy');
-            alert('⚔️ ТУРНИР НАЧАЛСЯ!\nПобеди всех игроков Тулы! 🏆');
-        }
+    if (!isLoggedIn) {
+        alert('🔓 ВОЙДИ для турнира!');
+        document.getElementById('auth-modal').style.display = 'flex';
+        return;
+    }
+    playSound(1400, 0.3);
+    startGame('snake', 'easy');  // ТУРНИРНАЯ ЗМЕЙКА
+    document.getElementById('tournament-game-info').textContent = `🐍 ТУРНИР ${currentUser}`;
+}
 
         function restartGame() { 
             playSound(1100, 0.15); 
