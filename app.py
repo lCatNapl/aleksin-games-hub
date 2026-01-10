@@ -1,93 +1,91 @@
 from flask import Flask, send_file
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
-from collections import defaultdict
 import os
-import json
-from datetime import datetime
 import sqlite3
+from datetime import datetime
+from collections import defaultdict
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'aleksin-games-v7-super-secret-key-2026'
+app.config['SECRET_KEY'] = 'aleksin-games-v7-super-secret-2026'
 CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent')
 
-# БАЗА ДАННЫХ
+# ❌ УБИРАЕМ async_mode - используем дефолтный режим
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+leaderboards = defaultdict(list)
+online_users = set()
+
 def init_db():
     conn = sqlite3.connect('aleksin_games.db')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS leaderboards 
-                 (game TEXT, username TEXT, score INTEGER, date TEXT, PRIMARY KEY(game, username))''')
+                 (game TEXT, username TEXT, score INTEGER, date TEXT, 
+                  PRIMARY KEY(game, username))''')
     c.execute('''CREATE TABLE IF NOT EXISTS online_users 
                  (username TEXT PRIMARY KEY, last_seen TEXT)''')
     conn.commit()
     conn.close()
-
-leaderboards = defaultdict(list)
-online_users = set()
 
 @app.route('/')
 def index():
     return send_file('index.html')
 
 @app.route('/ws')
-def ws_endpoint():
-    return "WebSocket server running!"
+def ws_info():
+    return "🚀 ALEKSIN GAMES WebSocket готов!"
 
 @socketio.on('connect')
-def handle_connect():
-    print('👤 Новый игрок подключился')
-    emit('status', {'message': 'Подключен к ALEKSIN GAMES!'})
+def connect():
+    print('👤 Подключился:', request.sid)
+    emit('status', {'message': '✅ Подключен к серверам Тулы!'})
 
 @socketio.on('disconnect')
-def handle_disconnect():
-    print('👤 Игрок отключился')
+def disconnect():
+    print('👤 Отключился:', request.sid)
 
 @socketio.on('score')
 def handle_score(data):
-    print(f'🎮 {data["username"]} забил {data["score"]} в {data["game"]}')
+    print(f'🎮 {data["username"]} | {data["game"]}: {data["score"]}')
     
-    # Сохраняем в БД
     conn = sqlite3.connect('aleksin_games.db')
     c = conn.cursor()
-    game_key = data['game']
-    c.execute("INSERT OR REPLACE INTO leaderboards (game, username, score, date) VALUES (?, ?, ?, ?)",
-              (game_key, data['username'], data['score'], datetime.now().isoformat()))
+    c.execute("INSERT OR REPLACE INTO leaderboards VALUES (?, ?, ?, ?)",
+              (data['game'], data['username'], data['score'], datetime.now().isoformat()))
     conn.commit()
     
-    # Загружаем топ-10
-    c.execute("SELECT username, score FROM leaderboards WHERE game=? ORDER BY score DESC LIMIT 10", (game_key,))
-    top_scores = [{'username': row[0], 'score': row[1]} for row in c.fetchall()]
-    leaderboards[game_key] = top_scores
+    # Топ-10 по игре
+    c.execute("SELECT username, score FROM leaderboards WHERE game=? ORDER BY score DESC LIMIT 10", 
+              (data['game'],))
+    top10 = [{'username': r[0], 'score': r[1]} for r in c.fetchall()]
+    leaderboards[data['game']] = top10
     conn.close()
     
-    # Рассылаем всем
     emit('leaderboards', {'data': dict(leaderboards)}, broadcast=True)
 
 @socketio.on('online_status')
 def handle_online(data):
     if data['online']:
         online_users.add(data['username'])
-        print(f'👋 {data["username"]} онлайн')
     else:
         online_users.discard(data['username'])
-        print(f'👋 {data["username"]} оффлайн')
     
+    print(f'👥 Онлайн: {len(online_users)}')
     emit('online_users', {'users': list(online_users)}, broadcast=True)
 
 @socketio.on('chat')
 def handle_chat(data):
-    message = {
+    msg = {
         'username': data['username'],
-        'message': data['message'],
-        'time': datetime.now().strftime('%H:%M:%S')
+        'message': data['message'][:200],
+        'time': datetime.now().strftime('%H:%M')
     }
-    print(f'💬 {data["username"]}: {data["message"]}')
-    emit('chat', message, broadcast=True)
+    print(f'💬 [{msg["time"]}] {msg["username"]}: {msg["message"]}')
+    emit('chat', msg, broadcast=True)
 
 @socketio.on('heartbeat')
-def handle_heartbeat():
-    pass  # Просто пингов для keep-alive
+def heartbeat():
+    pass
 
 if __name__ == '__main__':
     init_db()
