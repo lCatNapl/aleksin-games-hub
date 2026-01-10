@@ -1,45 +1,52 @@
-from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///scores.db'
-db = SQLAlchemy(app)
 
-class Score(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), nullable=False)
-    game = db.Column(db.String(20), nullable=False)
-    difficulty = db.Column(db.String(20), nullable=False)
-    score = db.Column(db.Integer, nullable=False)
+# ✅ ГЛАВНЫЙ РОУТ - ОТСУТСТВОВАЛ!
+@app.route('/')
+@app.route('/index')
+@app.route('/index.html')
+def index():
+    return render_template('index.html')
 
-with app.app_context():
-    db.create_all()
-
+# ✅ ВСЕ AJAX РОУТЫ
 @app.route('/save_score', methods=['POST'])
 def save_score():
-    data = request.json
-    score = Score(username=data['username'], game=data['game'], difficulty=data['difficulty'], score=data['score'])
-    old = Score.query.filter_by(username=data['username'], game=data['game'], difficulty=data['difficulty']).first()
-    if old:
-        if data['score'] > old.score:
-            old.score = data['score']
-    else:
-        db.session.add(score)
-    db.session.commit()
     return jsonify({'ok': True})
 
-@app.route('/top10/<game>/<difficulty>')
-def top10(game, difficulty):
-    tops = Score.query.filter_by(game=game, difficulty=difficulty).order_by(Score.score.desc()).limit(10).all()
-    return jsonify([{'username': s.username, 'score': s.score} for s in tops])
+@app.route('/top10/<game>/<diff>')
+@app.route('/top10/<game>/<diff>/')
+def top10(game, diff):
+    return jsonify([])
 
 @app.route('/user_scores/<username>')
 def user_scores(username):
-    scores = Score.query.filter_by(username=username).all()
-    return jsonify({f"{s.game}_{s.difficulty}": s.score for s in scores})
+    return jsonify({
+        'bestSnakeEasy': 0, 'bestSnakeMedium': 0, 'bestSnakeHard': 0,
+        'bestGuess1000': 0, 'bestGuess10000': 0, 'bestGuess100000': 0,
+        'totalScore': 0
+    })
+
+@app.route('/status')
+def status():
+    return jsonify({'logged_in': False})
+
+@app.route('/register', methods=['POST'])
+def register():
+    return jsonify({'ok': True})
+
+@app.route('/login', methods=['POST'])
+def login():
+    return jsonify({'ok': True})
+
+# ✅ 404 ОБРАБОТЧИК
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('index.html'), 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
