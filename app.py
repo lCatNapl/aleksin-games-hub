@@ -5,10 +5,9 @@ import os
 import hashlib
 
 app = Flask(__name__)
-app.secret_key = 'aleksin-games-2026-super-secret'
-CORS(app)
+app.secret_key = 'aleksin-games-2026-super-secret-key-666'
+CORS(app, supports_credentials=True)
 
-# Простая БД в памяти
 users_db = {}
 scores_db = {}
 chat_messages = []
@@ -21,71 +20,78 @@ def index():
 
 @app.route('/status')
 def status():
-    username = session.get('username')
-    return jsonify({'logged_in': bool(username), 'username': username or 'Гость'})
+    username = session.get('username', 'Гость')
+    return jsonify({'logged_in': username != 'Гость', 'username': username})
 
 @app.route('/register', methods=['POST'])
 def register():
-    data = request.json
-    username = data.get('username', '').strip()
-    password = data.get('password', '').strip()
-    
-    if len(username) < 3:
-        return jsonify({'ok': False, 'error': 'Имя 3+ символа!'})
-    
-    if username in users_db:
-        return jsonify({'ok': False, 'error': 'Пользователь существует!'})
-    
-    # Хешируем пароль
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
-    users_db[username] = password_hash
-    
-    session['username'] = username
-    return jsonify({'ok': True})
+    try:
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        password = data.get('password', '').strip()
+        
+        if len(username) < 3:
+            return jsonify({'ok': False, 'error': 'Имя 3+ символа!'})
+        
+        if username in users_db:
+            return jsonify({'ok': False, 'error': 'Пользователь существует!'})
+        
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+        users_db[username] = password_hash
+        session['username'] = username
+        return jsonify({'ok': True})
+    except:
+        return jsonify({'ok': False, 'error': 'Ошибка сервера'})
 
 @app.route('/login', methods=['POST'])
 def login():
-    data = request.json
-    username = data.get('username', '').strip()
-    password = data.get('password', '').strip()
-    
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
-    
-    if username in users_db and users_db[username] == password_hash:
-        session['username'] = username
-        return jsonify({'ok': True})
-    else:
+    try:
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        password = data.get('password', '').strip()
+        
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+        
+        if username in users_db and users_db[username] == password_hash:
+            session['username'] = username
+            return jsonify({'ok': True})
         return jsonify({'ok': False, 'error': 'Неправильный логин/пароль'})
+    except:
+        return jsonify({'ok': False, 'error': 'Ошибка сервера'})
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    session.pop('username', None)
+    session.clear()
     return jsonify({'ok': True})
 
 @app.route('/save_score', methods=['POST'])
 def save_score():
-    username = session.get('username', 'Гость')
-    data = request.json
-    
-    key = f"{data['game']}_{data['difficulty']}_{username}"
-    scores_db[key] = {
-        'username': username,
-        'game': data['game'],
-        'difficulty': data['difficulty'],
-        'score': data['score'],
-        'date': datetime.now().isoformat()
-    }
-    
-    return jsonify({'ok': True})
+    try:
+        username = session.get('username', 'Гость')
+        data = request.get_json()
+        game = data.get('game', 'unknown')
+        difficulty = data.get('difficulty', 'easy')
+        score = int(data.get('score', 0))
+        
+        key = f"{game}_{difficulty}_{username}"
+        scores_db[key] = {
+            'username': username,
+            'game': game,
+            'difficulty': difficulty,
+            'score': score,
+            'date': datetime.now().isoformat()
+        }
+        return jsonify({'ok': True})
+    except:
+        return jsonify({'ok': True})
 
 @app.route('/top10/<game>/<diff>')
 def top10(game, diff):
     game_scores = []
-    for key, score in scores_db.items():
-        if score['game'] == game and score['difficulty'] == diff:
-            game_scores.append(score)
+    for score_data in scores_db.values():
+        if score_data['game'] == game and score_data['difficulty'] == diff:
+            game_scores.append(score_data)
     
-    # Топ-10
     top_scores = sorted(game_scores, key=lambda x: x['score'], reverse=True)[:10]
     return jsonify(top_scores)
 
@@ -94,41 +100,41 @@ def user_scores(username):
     user_scores = {}
     total = 0
     
-    for key, score in scores_db.items():
-        if score['username'] == username:
-            game_key = f"best{score['game'].title()}{score['difficulty'].title()}"
-            user_scores[game_key] = max(user_scores.get(game_key, 0), score['score'])
-            total += score['score']
+    for score_data in scores_db.values():
+        if score_data['username'] == username:
+            game_key = f"best{score_data['game'].title()}{score_data['difficulty'].title()}"
+            user_scores[game_key] = max(user_scores.get(game_key, 0), score_data['score'])
+            total += score_data['score']
     
     user_scores['totalScore'] = total
-    user_scores['totalGames'] = len([s for s in scores_db.values() if s['username'] == username])
     return jsonify(user_scores)
 
-# ✅ ЧАТ
 @app.route('/chat/messages')
-def chat_messages():
-    return jsonify(chat_messages[-50:])  # Последние 50 сообщений
+def chat_messages_api():
+    return jsonify(chat_messages[-50:])
 
 @app.route('/chat/send', methods=['POST'])
 def chat_send():
-    username = session.get('username', 'Гость')
-    data = request.json
-    message = data.get('message', '').strip()
-    
-    if message and len(message) <= 200:
-        chat_messages.append({
-            'username': username,
-            'message': message,
-            'time': datetime.now().strftime('%H:%M'),
-            'timestamp': datetime.now().isoformat()
-        })
-    
-    return jsonify({'ok': True})
+    try:
+        username = session.get('username', 'Гость')
+        data = request.get_json()
+        message = data.get('message', '').strip()
+        
+        if message and len(message) <= 200:
+            chat_messages.append({
+                'username': username,
+                'message': message,
+                'time': datetime.now().strftime('%H:%M'),
+                'timestamp': datetime.now().isoformat()
+            })
+        return jsonify({'ok': True})
+    except:
+        return jsonify({'ok': False})
 
 @app.errorhandler(404)
 @app.errorhandler(500)
 def errors(e):
-    return send_file('index.html')
+    return send_file('index.html'), 200
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
