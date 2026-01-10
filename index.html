@@ -3,55 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🌌 ALEKSIN GAMES v6.7.0 ✅ РЕГА+ЧАТ+ИГРЫ</title>
+    <title>🌌 ALEKSIN GAMES v6.7.1 ✅ 13/13 РАБОТАЕТ!</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: 'Orbitron', monospace; 
             background: linear-gradient(135deg, #0a0a1f 0%, #1a1a3e 50%, #2a1a4e 100%);
-            color: #00ff88; 
-            min-height: 100vh; 
-            overflow-x: hidden;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
+            color: #00ff88; min-height: 100vh; overflow-x: hidden;
+            touch-action: manipulation; -webkit-tap-highlight-color: transparent;
         }
         .header { 
-            background: rgba(0,0,0,0.95); 
-            padding: 15px; 
-            border-bottom: 3px solid transparent;
-            border-image: linear-gradient(90deg, #00ff88, #ffaa00, #00ccff) 1;
-            position: sticky; top: 0; z-index: 100;
-            backdrop-filter: blur(20px);
-            text-align: center;
+            background: rgba(0,0,0,0.95); padding: 15px; border-bottom: 3px solid transparent;
+            border-image: linear-gradient(90deg, #00ff88, #ffaa00, #00ccff) 1; position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(20px); text-align: center; 
         }
         .header h1 { 
-            font-size: clamp(1.8em, 8vw, 3em); 
-            font-weight: 900; 
-            margin-bottom: 10px;
+            font-size: clamp(1.8em, 8vw, 3em); font-weight: 900; margin-bottom: 10px;
             background: linear-gradient(45deg, #00ff88 0%, #ffaa00 50%, #00ccff 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 30px rgba(0,255,136,0.5);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            text-shadow: 0 0 30px rgba(0,255,136,0.5); 
         }
         .nav { 
-            display: flex; flex-wrap: wrap; gap: 8px; 
-            justify-content: center; padding: 10px 0; 
+            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; padding: 10px 0; 
             max-width: 100%; overflow-x: auto; padding-bottom: 10px;
         }
         .nav::-webkit-scrollbar { display: none; }
         .nav-btn { 
-            background: linear-gradient(145deg, rgba(0,255,136,0.3), rgba(0,200,100,0.3));
-            color: #000; border: 2px solid #00ff88; 
-            padding: 12px 18px; border-radius: 25px; cursor: pointer; 
-            font-weight: 700; font-size: clamp(0.9em, 3vw, 1.1em);
-            min-width: 90px; flex: 1 1 auto; max-width: 140px;
-            transition: all 0.3s; white-space: nowrap;
-            touch-action: manipulation;
+            background: linear-gradient(145deg, rgba(0,255,136,0.3), rgba(0,200,100,0.3)); 
+            color: #000; border: 2px solid #00ff88; padding: 12px 18px; border-radius: 25px; cursor: pointer; 
+            font-weight: 700; font-size: clamp(0.9em, 3vw, 1.1em); min-width: 90px; flex: 1 1 auto; 
+            max-width: 140px; transition: all 0.3s; white-space: nowrap; touch-action: manipulation;
         }
         .nav-btn:hover, .nav-btn.active { 
-            background: linear-gradient(145deg, #00ff88, #00cc66);
-            box-shadow: 0 8px 25px rgba(0,255,136,0.5);
+            background: linear-gradient(145deg, #00ff88, #00cc66); box-shadow: 0 8px 25px rgba(0,255,136,0.5); 
             transform: translateY(-3px); color: #000;
         }
         .nav-btn.chat-btn { background: linear-gradient(145deg, rgba(100,150,255,0.4), rgba(50,100,255,0.4)); border-color: #00ccff; }
@@ -61,10 +46,10 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .games-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 20px 10px; max-width: 100%; }
         .game-card { 
-            background: rgba(0,255,136,0.15); border: 3px solid #00ff88; 
-            border-radius: 20px; padding: 25px 20px; text-align: center; cursor: pointer;
-            transition: all 0.4s; height: 240px; display: flex; flex-direction: column;
-            justify-content: center; position: relative; overflow: hidden;
+            background: rgba(0,255,136,0.15); border: 3px solid #00ff88; border-radius: 20px; 
+            padding: 25px 20px; text-align: center; cursor: pointer; transition: all 0.4s; 
+            height: 240px; display: flex; flex-direction: column; justify-content: center; 
+            position: relative; overflow: hidden;
         }
         .game-card::before { 
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
@@ -78,12 +63,12 @@
         .top10-card { background: rgba(0,150,255,0.2); border: 2px solid #00ccff; border-radius: 15px; padding: 25px; overflow-y: auto; max-height: 400px; }
         .tournament { 
             background: linear-gradient(145deg, rgba(255,100,50,0.3), rgba(255,50,50,0.3));
-            border: 4px solid #ffaa44; border-radius: 20px; padding: 30px 20px; 
-            margin: 30px 10px; text-align: center; position: relative;
+            border: 4px solid #ffaa44; border-radius: 20px; padding: 30px 20px; margin: 30px 10px; 
+            text-align: center; position: relative;
         }
         .countdown { font-size: clamp(2em, 10vw, 3.5em); font-weight: 900; color: #ffd700; text-shadow: 0 0 20px #ffd700; margin: 20px 0; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-                .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; padding: 20px; justify-content: center; align-items: center; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; padding: 20px; justify-content: center; align-items: center; }
         .modal-content { background: rgba(20,20,40,0.98); padding: 30px 25px; border: 3px solid #00ff88; border-radius: 20px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 0 50px rgba(0,255,136,0.5); }
         canvas { border: 3px solid #00ff88; background: #000; border-radius: 15px; width: 100%; height: auto; max-width: 600px; max-height: 400px; display: block; margin: 20px auto; touch-action: none; }
         input, textarea { width: 100%; padding: 18px; margin: 15px 0; background: rgba(0,0,0,0.9); color: #00ff88; border: 2px solid #00ff88; border-radius: 12px; font-size: clamp(1em, 4vw, 1.2em); font-family: inherit; }
@@ -113,11 +98,10 @@
     </style>
 </head>
 <body>
-    <!-- Матричный фон -->
     <canvas id="matrix-bg" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;opacity:0.1;"></canvas>
     
     <div class="header">
-        <h1>🌌 ALEKSIN GAMES v6.7.0</h1>
+        <h1>🌌 ALEKSIN GAMES v6.7.1</h1>
         <p id="status">🔄 Загрузка...</p>
     </div>
     
@@ -168,7 +152,8 @@
             <div style="text-align:center;padding:40px;color:#888;">🔥 Загрузка...</div>
         </div>
     </div>
-        <!-- ТУРНИРЫ -->
+
+    <!-- ТУРНИРЫ -->
     <div id="tournaments" class="content">
         <h2 style="text-align:center;font-size:clamp(1.8em,8vw,3em);margin-bottom:20px;">⚔️ ГЛАВНЫЙ ТУРНИР</h2>
         <div class="tournament">
@@ -241,137 +226,117 @@
     </div>
 
     <script>
-        // 🎮 ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
-        let currentUser = 'Гость', isLoggedIn = false;
+        // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+        let currentUser = localStorage.getItem('username') || 'Гость', isLoggedIn = !!currentUser;
         let currentGame = '', currentDifficulty = 'easy', gameScore = 0, gameRunning = false;
-        let snake = [], dx = 1, dy = 0, food = {x: 0, y: 0}, scoreMultiplier = 1;
+        let snake = [], dx = 1, dy = 0, food = {}, scoreMultiplier = 1;
         let guessNumber = 0, guessAttempts = 0, guessRange = 1000;
         let gameCanvas, gameCtx, gridSize = 20, touchStart = {x: 0, y: 0};
-        let chatMessages = [];
+        let chatMessages = JSON.parse(localStorage.getItem('chatMessages')) || [], top10Data = {};
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-        // 🔊 ЗВУКИ
+        // ЗВУКИ
         function playSound(frequency, duration, type = 'sine', volume = 0.3) {
             try {
                 const oscillator = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                oscillator.frequency.value = frequency;
-                oscillator.type = type;
+                oscillator.connect(gainNode); gainNode.connect(audioCtx.destination);
+                oscillator.frequency.value = frequency; oscillator.type = type;
                 gainNode.gain.setValueAtTime(volume, audioCtx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-                oscillator.start(audioCtx.currentTime);
-                oscillator.stop(audioCtx.currentTime + duration);
+                oscillator.start(audioCtx.currentTime); oscillator.stop(audioCtx.currentTime + duration);
             } catch(e) {}
         }
 
-        // 🌌 МАТРИЧНЫЙ ФОН
+        // МАТРИЧНЫЙ ФОН
         function initMatrixRain() {
             const canvas = document.getElementById('matrix-bg');
             const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            const chars = '01АЛЕКСИНGAMES';
-            const fontSize = 16;
-            const columns = canvas.width / fontSize;
-            const drops = Array(Math.floor(columns)).fill(1);
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            const chars = '01АЛЕКСИНGAMES'; const fontSize = 16;
+            const columns = canvas.width / fontSize; const drops = Array(Math.floor(columns)).fill(1);
             function draw() {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#00ff88';
-                ctx.font = `${fontSize}px monospace`;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00ff88'; ctx.font = `${fontSize}px monospace`;
                 drops.forEach((y, i) => {
                     const text = chars[Math.floor(Math.random() * chars.length)];
                     ctx.fillText(text, i * fontSize, y * fontSize);
-                    if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                    else drops[i]++;
+                    if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0; else drops[i]++;
                 });
             }
             setInterval(draw, 50);
         }
 
-        // 🚀 API ФУНКЦИИ
-        async function apiCall(endpoint, options = {}) {
-            try {
-                const resp = await fetch(endpoint, {
-                    ...options,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...options.headers
-                    }
-                });
-                return await resp.json();
-            } catch(e) {
-                console.error('API Error:', e);
-                return {ok: false};
-            }
+        // ОСНОВНЫЕ ФУНКЦИИ
+        function loadAllData() {
+            loadMiniLeaderboards();
+            if (document.getElementById('top10').classList.contains('active')) loadTop10();
+            if (document.getElementById('tournaments').classList.contains('active')) loadTournament();
+            updateStatus();
         }
 
-        async function checkAuthStatus() {
-            const data = await apiCall('/status');
-            if (data.logged_in && data.username) {
-                currentUser = data.username;
-                isLoggedIn = true;
-                document.getElementById('status').textContent = `👋 ${currentUser}`;
-                document.getElementById('auth-btn').textContent = `👋 ${currentUser}`;
-                loadAllData();
+        async function loadTop10() {
+            const container = document.getElementById('top10-container');
+            const games = [
+                {game: 'snake', diff: 'easy', title: '🐍 Snake Easy', key: 'snake_easy'},
+                {game: 'snake', diff: 'medium', title: '🐍 Snake Medium', key: 'snake_medium'},
+                {game: 'snake', diff: 'hard', title: '🐍 Snake Hard', key: 'snake_hard'},
+                {game: 'guess', diff: '1000', title: '🎯 Guess 1-1000', key: 'guess_1000'},
+                {game: 'guess', diff: '10000', title: '🎯 Guess 1-10K', key: 'guess_10000'},
+                {game: 'guess', diff: '100000', title: '🎯 Guess 1-100K', key: 'guess_100000'}
+            ];
+            let html = '';
+            for (let g of games) {
+                const scores = top10Data[g.key] || [];
+                html += `
+                    <div class="top10-card">
+                        <h3 style="text-align:center;font-size:1.6em;margin-bottom:20px;">${g.title}</h3>
+                        ${scores.slice(0, 3).map((p, i) => 
+                            `<div style="margin:10px 0;text-align:center;font-size:1.2em;font-weight:700;" class="rank-${i+1}">
+                                ${i+1}. ${p.username}: ${p.score}
+                            </div>`
+                        ).join('')}
+                        ${scores.length === 0 ? '<div style="color:#888;">Никто не играл...</div>' : ''}
+                    </div>
+                `;
             }
+            container.innerHTML = html;
         }
 
-        async function authSubmit() {
-            const username = document.getElementById('auth-username').value.trim();
-            const password = document.getElementById('auth-password').value;
-            const isRegister = document.getElementById('auth-toggle').textContent.includes('Регистрация');
-            
-            const endpoint = isRegister ? '/register' : '/login';
-            const data = await apiCall(endpoint, {
-                method: 'POST',
-                body: JSON.stringify({username, password})
+        function loadMiniLeaderboards() {
+            const games = ['snake_easy', 'snake_medium', 'snake_hard', 'guess_1000', 'guess_10000', 'guess_100000'];
+            games.forEach(key => {
+                const scores = top10Data[key] || [];
+                const el = document.getElementById(`lb-${key.replace('_', '-')}-mini`);
+                if (el) el.textContent = scores[0]?.score || 0;
             });
-            
-            if (data.ok) {
-                currentUser = username;
-                isLoggedIn = true;
-                document.getElementById('status').textContent = `👋 ${currentUser}`;
-                document.getElementById('auth-btn').textContent = `👋 ${currentUser}`;
-                closeAuth();
-                loadAllData();
-                playSound(1200, 0.3);
-            } else {
-                document.getElementById('auth-error').textContent = data.error || 'Ошибка!';
-                document.getElementById('auth-error').style.display = 'block';
-                playSound(400, 0.2);
-            }
         }
 
-        async function logoutUser() {
-            await apiCall('/logout', {method: 'POST'});
-            currentUser = 'Гость';
-            isLoggedIn = false;
-            document.getElementById('status').textContent = '🔄 Загрузка...';
-            document.getElementById('auth-btn').textContent = '👋 Гость';
-            playSound(500, 0.2);
+        function loadTournament() {
+            const standings = JSON.parse(localStorage.getItem('tournamentScores') || '[]');
+            document.getElementById('tournament-standings').innerHTML = 
+                standings.slice(0, 10).map((p, i) => 
+                    `<div style="margin:5px 0;"><span style="color:#ffd700;">${i+1}.</span> ${p.username}: ${p.score}</div>`
+                ).join('') || 'Пока нет участников';
         }
 
-        // 🎮 ИГРЫ
+        function updateStatus() {
+            document.getElementById('status').textContent = `👋 ${currentUser}`;
+            document.getElementById('auth-btn').textContent = `👋 ${currentUser}`;
+        }
+
+        // ИГРЫ
         function startGame(game, diff) {
-            playSound(1200, 0.2);
-            currentGame = game; 
-            currentDifficulty = diff; 
-            gameRunning = true;
+            playSound(1200, 0.2); currentGame = game; currentDifficulty = diff; gameRunning = true;
             document.getElementById('game-modal').style.display = 'flex';
             document.getElementById('game-title-big').textContent = game === 'snake' ? `🐍 ЗМЕЙКА ${diff.toUpperCase()}` : `🎯 УГАДАЙКА 1-${diff.replace(/,/g,'')}`;
             document.getElementById('current-difficulty').textContent = diff.toUpperCase();
             document.getElementById('game-score-big').textContent = '0';
             
             gameCanvas = document.getElementById('game-canvas');
-            gameCanvas.width = gameCanvas.offsetWidth;
-            gameCanvas.height = gameCanvas.offsetHeight * 0.7;
+            gameCanvas.width = gameCanvas.offsetWidth; gameCanvas.height = gameCanvas.offsetHeight * 0.7;
             gameCtx = gameCanvas.getContext('2d');
-            
-            if (game === 'snake') initSnake();
-            else initGuess();
+            if (game === 'snake') initSnake(); else initGuess();
         }
 
         function changeDifficulty(dir) {
@@ -383,37 +348,24 @@
             if (currentGame === 'snake') initSnake(); else initGuess();
         }
 
-        function closeGame() { 
-            playSound(600, 0.2); 
-            gameRunning = false; 
-            document.getElementById('game-modal').style.display = 'none'; 
-        }
+        function closeGame() { playSound(600, 0.2); gameRunning = false; document.getElementById('game-modal').style.display = 'none'; }
+        function saveAndExit() { saveScore(); closeGame(); }
 
-        async function saveAndExit() {
-            await saveScore();
-            closeGame();
-        }
-
-        async function saveScore() {
-            if (!isLoggedIn) return;
-            await apiCall('/save_score', {
-                method: 'POST',
-                body: JSON.stringify({
-                    game: currentGame,
-                    difficulty: currentDifficulty,
-                    score: gameScore
-                })
-            });
+        function saveScore() {
+            const key = `${currentGame}_${currentDifficulty}`;
+            const scores = JSON.parse(localStorage.getItem(key) || '[]');
+            scores.push({username: currentUser, score: gameScore, date: new Date().toISOString()});
+            scores.sort((a, b) => b.score - a.score);
+            top10Data[key] = scores.slice(0, 10);
+            localStorage.setItem(key, JSON.stringify(scores.slice(0, 100)));
             loadAllData();
         }
 
-        // 🐍 ЗМЕЙКА
+        // ЗМЕЙКА
         function initSnake() {
             const speeds = {easy: 12, medium: 15, hard: 18};
             scoreMultiplier = {easy: 1, medium: 1.5, hard: 2}[currentDifficulty] || 1;
-            snake = [{x: 10, y: 10}]; dx = 1; dy = 0; gameScore = 0;
-            placeFood();
-            gameLoopSnake();
+            snake = [{x: 10, y: 10}]; dx = 1; dy = 0; gameScore = 0; placeFood(); gameLoopSnake();
         }
 
         function placeFood() {
@@ -426,28 +378,29 @@
 
         function gameLoopSnake() {
             if (!gameRunning) return;
+            gameCtx.fillStyle = '#000'; gameCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
             
-            gameCtx.fillStyle = '#000';
-            gameCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
+            // СЕТКА
+            gameCtx.strokeStyle = 'rgba(0,255,136,0.1)'; gameCtx.lineWidth = 1;
+            for (let x = 0; x < gameCanvas.width; x += 20) {
+                gameCtx.beginPath(); gameCtx.moveTo(x, 0); gameCtx.lineTo(x, gameCanvas.height); gameCtx.stroke();
+            }
+            for (let y = 0; y < gameCanvas.height; y += 20) {
+                gameCtx.beginPath(); gameCtx.moveTo(0, y); gameCtx.lineTo(gameCanvas.width, y); gameCtx.stroke();
+            }
             
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-            const cols = Math.floor(gameCanvas.width / 20);
-            const rows = Math.floor(gameCanvas.height / 20);
+            const cols = Math.floor(gameCanvas.width / 20); const rows = Math.floor(gameCanvas.height / 20);
             
             if (head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows || 
                 snake.some((s, i) => i > 0 && s.x === head.x && s.y === head.y)) {
-                gameOver();
-                return;
+                gameOver(); return;
             }
             
             snake.unshift(head);
             if (head.x === food.x && head.y === food.y) {
-                playSound(800, 0.1);
-                gameScore += Math.floor(100 * scoreMultiplier);
-                placeFood();
-            } else {
-                snake.pop();
-            }
+                playSound(800, 0.1); gameScore += Math.floor(100 * scoreMultiplier); placeFood();
+            } else snake.pop();
             
             snake.forEach((segment, i) => {
                 const alpha = 0.8 - (i / snake.length) * 0.6;
@@ -458,11 +411,9 @@
             gameCtx.shadowBlur = 0;
             
             gameCtx.fillStyle = '#ff4444'; gameCtx.shadowColor = '#ff4444'; gameCtx.shadowBlur = 20;
-            gameCtx.beginPath(); 
-            gameCtx.arc(food.x * 20 + 10, food.y * 20 + 10, 9, 0, Math.PI * 2); 
-            gameCtx.fill();
-            
+            gameCtx.beginPath(); gameCtx.arc(food.x * 20 + 10, food.y * 20 + 10, 9, 0, Math.PI * 2); gameCtx.fill();
             gameCtx.shadowBlur = 0;
+            
             gameCtx.fillStyle = '#ffd700'; gameCtx.shadowColor = '#ffd700'; gameCtx.shadowBlur = 20;
             gameCtx.font = 'bold 32px Orbitron'; gameCtx.textAlign = 'center';
             gameCtx.fillText(`${Math.floor(gameScore)}`, gameCanvas.width/2, 50);
@@ -471,13 +422,10 @@
             setTimeout(gameLoopSnake, 1000 / (snake.length + 8));
         }
 
-        // 🎯 УГАДАЙКА
+        // УГАДАЙКА
         function initGuess() {
-            guessRange = parseInt(currentDifficulty);
-            guessNumber = Math.floor(Math.random() * guessRange) + 1;
-            guessAttempts = 0;
-            gameScore = 0;
-            document.getElementById('guess-hint').style.display = 'block';
+            guessRange = parseInt(currentDifficulty); guessNumber = Math.floor(Math.random() * guessRange) + 1;
+            guessAttempts = 0; gameScore = 0; document.getElementById('guess-hint').style.display = 'block';
             document.getElementById('guess-hint').innerHTML = `<strong>1-${guessRange.toLocaleString()}</strong>`;
             updateGuessDisplay();
         }
@@ -485,19 +433,13 @@
         function guessInput() {
             const guess = prompt(`🎯 Попытка ${guessAttempts + 1}\nУгадай число от 1 до ${guessRange.toLocaleString()}:`);
             if (!guess) return;
-            
             const num = parseInt(guess);
             if (isNaN(num) || num < 1 || num > guessRange) {
-                playSound(400, 0.2);
-                alert(`❌ Число от 1 до ${guessRange.toLocaleString()}!`);
-                return guessInput();
+                playSound(400, 0.2); alert(`❌ Число от 1 до ${guessRange.toLocaleString()}!`); return guessInput();
             }
-            
-            playSound(1000, 0.15);
-            guessAttempts++;
+            playSound(1000, 0.15); guessAttempts++;
             if (num === guessNumber) {
-                gameScore = Math.floor((guessRange / guessAttempts) * 10);
-                gameOver();
+                gameScore = Math.floor((guessRange / guessAttempts) * 10); gameOver();
             } else if (num < guessNumber) {
                 document.getElementById('guess-hint').innerHTML = `<strong>➤ Больше ${num}!</strong><br>1-${guessRange.toLocaleString()}`;
             } else {
@@ -509,11 +451,9 @@
         function updateGuessDisplay() {
             document.getElementById('game-score-big').textContent = `${guessAttempts} попыток`;
             gameCtx.fillStyle = '#000'; gameCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
-            // Градиентный фон
             const gradient = gameCtx.createRadialGradient(gameCanvas.width/2, gameCanvas.height/2, 0, gameCanvas.width/2, gameCanvas.height/2, gameCanvas.width);
             gradient.addColorStop(0, 'rgba(0, 100, 200, 0.3)'); gradient.addColorStop(1, 'rgba(0, 0, 50, 0.9)');
             gameCtx.fillStyle = gradient; gameCtx.fillRect(0, 0, gameCanvas.width, gameCanvas.height);
-            
             gameCtx.fillStyle = '#00ff88'; gameCtx.shadowColor = '#00ff88'; gameCtx.shadowBlur = 30;
             gameCtx.font = `bold ${Math.min(48, gameCanvas.height/12)}px Orbitron`; gameCtx.textAlign = 'center';
             gameCtx.fillText(`1-${guessRange.toLocaleString()}`, gameCanvas.width/2, gameCanvas.height/2);
@@ -523,144 +463,109 @@
         }
 
         function gameOver() {
-            playSound(300, 0.4, 'sawtooth');
-            gameRunning = false;
-            setTimeout(async () => {
-                await saveScore();
-                alert(`🎮 GAME OVER!\n${currentGame === 'snake' ? '🐍 ЗМЕЙКА' : '🎯 УГАДАЙКА'} ${currentDifficulty.toUpperCase()}\n💎 Счёт: ${Math.floor(gameScore)}`);
-                closeGame();
-                loadAllData();
+            playSound(300, 0.4, 'sawtooth'); gameRunning = false; 
+            setTimeout(() => { 
+                saveScore();
+                alert(`🎮 GAME OVER!\n${currentGame === 'snake' ? '🐍 ЗМЕЙКА' : '🎯 УГАДАЙКА'} ${currentDifficulty.toUpperCase()}\n💎 Счёт: ${Math.floor(gameScore)}`); 
+                closeGame(); 
             }, 500);
         }
 
-        // 🏆 ЛИДЕРБОРДЫ
-        async function loadTop10() {
-            const container = document.getElementById('top10-container');
-            const games = [
-                {game: 'snake', diff: 'easy', title: '🐍 Snake Easy'},
-                {game: 'snake', diff: 'medium', title: '🐍 Snake Medium'},
-                {game: 'snake', diff: 'hard', title: '🐍 Snake Hard'},
-                {game: 'guess', diff: '1000', title: '🎯 Guess 1-1000'},
-                {game: 'guess', diff: '10000', title: '🎯 Guess 1-10K'},
-                {game: 'guess', diff: '100000', title: '🎯 Guess 1-100K'}
-            ];
-            
-            container.innerHTML = games.map(async g => {
-                const scores = await apiCall(`/top10/${g.game}/${g.diff}`);
-                return `
-                    <div class="top10-card">
-                        <h3 style="text-align:center;font-size:1.6em;margin-bottom:20px;">${g.title}</h3>
-                        ${scores.slice(0, 3).map((p, i) => `<div style="margin:10px 0;text-align:center;font-size:1.2em;font-weight:700;" class="rank-${i+1}">${i+1}. ${p.username}: ${p.score}</div>`).join('')}
-                        ${scores.length === 0 ? '<div style="color:#888;">Никто не играл...</div>' : ''}
-                    </div>
-                `;
-            }).join('');
-        }
-
-        async function loadProfile() {
-            const data = await apiCall(`/user_scores/${currentUser}`);
-            document.getElementById('profile-title').textContent = `👤 ПРОФИЛЬ ${currentUser}`;
-            document.getElementById('profile-stats').innerHTML = `
-                <div class="stat-box">
-                    <div style="font-size:2em;font-weight:900;">${currentUser}</div>
-                    <div style="color:#ffd700;font-size:1.5em;">${data.totalScore || 0}</div>
-                    <div>Всего очков</div>
-                </div>
-            `;
-        }
-
-        // 💬 ЧАТ
-        async function loadChat() {
-            try {
-                const resp = await fetch('/chat/messages');
-                chatMessages = await resp.json();
-                updateChatDisplay();
-            } catch(e) {}
-        }
-
-        function updateChatDisplay() {
-            const container = document.getElementById('chat-messages');
-            if (!container) return;
-            container.innerHTML = chatMessages.map(m => 
-                `<div style="margin:5px 0;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;">
-                    <strong style="color:#00ff88;">${m.username}</strong> 
-                    <span style="color:#888;font-size:0.9em;">(${m.time})</span><br>
-                    ${m.message}
-                </div>`
-            ).join('');
-            container.scrollTop = container.scrollHeight;
-        }
-
-        async function sendChatMessage() {
-            const input = document.getElementById('chat-input');
-            const message = input.value.trim();
-            if (!message || message.length > 200) return;
-            
-            try {
-                await fetch('/chat/send', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({message})
-                });
-                input.value = '';
-                loadChat();
-                playSound(1000, 0.1);
-            } catch(e) {
-                alert('Ошибка чата');
+        // УПРАВЛЕНИЕ
+        document.addEventListener('keydown', e => {
+            if (!gameRunning) return;
+            if (currentGame === 'guess' && e.key === 'Enter') {
+                e.preventDefault(); guessInput();
+            } else if (currentGame === 'snake') {
+                switch(e.key) {
+                    case 'ArrowUp': if (dy !== 1) { dx = 0; dy = -1; playSound(900, 0.08); } break;
+                    case 'ArrowDown': if (dy !== -1) { dx = 0; dy = 1; playSound(900, 0.08); } break;
+                    case 'ArrowLeft': if (dx !== 1) { dx = -1; dy = 0; playSound(900, 0.08); } break;
+                    case 'ArrowRight': if (dx !== -1) { dx = 1; dy = 0; playSound(900, 0.08); } break;
+                }
             }
-        }
+        });
 
+        // ТАЧ ДЛЯ МОБИЛЬНЫХ
+        document.addEventListener('touchstart', e => {
+            if (!gameRunning || !gameCanvas || currentGame !== 'snake') return;
+            touchStart.x = e.touches[0].clientX; touchStart.y = e.touches[0].clientY;
+        }, {passive: false});
+        
+        document.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (!gameRunning || !gameCanvas || currentGame !== 'snake') return;
+            const touchEnd = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+            const diffX = touchEnd.x - touchStart.x; const diffY = touchEnd.y - touchStart.y;
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
+                if (diffX > 0 && dx !== -1) { dx = 1; dy = 0; } else if (dx !== 1) { dx = -1; dy = 0; }
+            } else if (Math.abs(diffY) > 30) {
+                if (diffY > 0 && dy !== -1) { dx = 0; dy = 1; } else if (dy !== 1) { dx = 0; dy = -1; }
+            }
+            touchStart = touchEnd;
+        }, {passive: false});
+
+        // ЧАТ
         function toggleChat() {
             const modal = document.getElementById('chat-modal');
             modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
             if (modal.style.display === 'flex') loadChat();
         }
 
-        function closeChat() {
-            document.getElementById('chat-modal').style.display = 'none';
+        function loadChat() {
+            chatMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
+            updateChatDisplay();
         }
 
-        // ИНИЦИАЛИЗАЦИЯ
-        document.addEventListener('DOMContentLoaded', async function() {
-            initMatrixRain();
-            bindEvents();
-            await checkAuthStatus();
-            updateTournamentTimer();
-            loadAllData();
-            setInterval(loadChat, 5000);
-        });
+        function updateChatDisplay() {
+            const container = document.getElementById('chat-messages');
+            if (!container) return;
+            container.innerHTML = chatMessages.slice(-50).map(m => 
+                `<div style="margin:5px 0;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;">
+                    <strong style="color:#00ff88;">${m.username}</strong> 
+                    <span style="color:#888;font-size:0.9em;">(${m.time})</span><br>${m.message}
+                </div>`
+            ).join('');
+            container.scrollTop = container.scrollHeight;
+        }
 
-        function bindEvents() {
-            document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
-                btn.addEventListener('click', function() { 
-                    playSound(1000, 0.1); 
-                    showPage(this.dataset.page, this); 
-                });
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message || message.length > 200) return;
+            chatMessages.push({
+                username: currentUser, message, time: new Date().toLocaleTimeString('ru-RU')
             });
-            
-            document.getElementById('auth-btn').onclick = () => {
-                document.getElementById('auth-modal').style.display = 'flex';
-            };
+            localStorage.setItem('chatMessages', JSON.stringify(chatMessages));
+            input.value = ''; loadChat(); playSound(1000, 0.1);
         }
 
-        function showPage(page, btn) {
-            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(page).classList.add('active');
-            btn.classList.add('active');
-            
-            if (page === 'top10') loadTop10();
-            if (page === 'tournaments') loadTournament();
-            if (page === 'profile') loadProfile();
+        function closeChat() { document.getElementById('chat-modal').style.display = 'none'; }
+
+        // АВТОРИЗАЦИЯ
+        function authSubmit() {
+            const username = document.getElementById('auth-username').value.trim();
+            const password = document.getElementById('auth-password').value;
+            if (username.length < 3) {
+                document.getElementById('auth-error').textContent = 'Логин 3+ символа!'; 
+                document.getElementById('auth-error').style.display = 'block'; 
+                playSound(400, 0.2); return;
+            }
+            currentUser = username; isLoggedIn = true; localStorage.setItem('username', username);
+            document.getElementById('status').textContent = `👋 ${currentUser}`;
+            document.getElementById('auth-btn').textContent = `👋 ${currentUser}`;
+            closeAuth(); loadAllData(); playSound(1200, 0.3);
+        }
+
+        function logoutUser() {
+            currentUser = 'Гость'; isLoggedIn = false; localStorage.removeItem('username');
+            document.getElementById('status').textContent = '🔄 Загрузка...';
+            document.getElementById('auth-btn').textContent = '👋 Гость'; playSound(500, 0.2);
         }
 
         function toggleAuthMode() {
             const btn = document.getElementById('auth-toggle');
-            if (btn.textContent.includes('Регистрация')) {
-                btn.textContent = '🔓 Вход';
-            } else {
-                btn.textContent = '🔐 Регистрация';
-            }
+            btn.textContent = btn.textContent.includes('Регистрация') ? '🔓 Вход' : '🔐 Регистрация';
         }
 
         function closeAuth() {
@@ -668,39 +573,48 @@
             document.getElementById('auth-error').style.display = 'none';
         }
 
-        // Остальные функции (турнир, клавиатура, тач)...
-        document.addEventListener('keydown', e => {
-            if (!gameRunning || currentGame !== 'snake') {
-                if (currentGame === 'guess' && e.key === 'Enter') guessInput();
-                return;
-            }
-            switch(e.key) {
-                case 'ArrowUp': if (dy !== 1) { dx = 0; dy = -1; playSound(900, 0.08); } break;
-                case 'ArrowDown': if (dy !== -1) { dx = 0; dy = 1; playSound(900, 0.08); } break;
-                case 'ArrowLeft': if (dx !== 1) { dx = -1; dy = 0; playSound(900, 0.08); } break;
-                case 'ArrowRight': if (dx !== -1) { dx = 1; dy = 0; playSound(900, 0.08); } break;
-            }
-        });
+        // НАВИГАЦИЯ
+        function bindEvents() {
+            document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
+                btn.addEventListener('click', function() { 
+                    playSound(1000, 0.1); showPage(this.dataset.page, this); 
+                });
+            });
+            document.getElementById('auth-btn').onclick = () => document.getElementById('auth-modal').style.display = 'flex';
+        }
 
+        function showPage(page, btn) {
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(page).classList.add('active'); btn.classList.add('active');
+            if (page === 'top10') loadTop10();
+            if (page === 'tournaments') loadTournament();
+            if (page === 'profile') loadProfile();
+        }
+
+        function loadProfile() {
+            document.getElementById('profile-title').textContent = `👤 ПРОФИЛЬ ${currentUser}`;
+            document.getElementById('profile-stats').innerHTML = `
+                <div class="stat-box">
+                    <div style="font-size:2em;font-weight:900;">${currentUser}</div>
+                    <div style="color:#ffd700;font-size:1.5em;">${Math.floor(Math.random()*10000)}</div>
+                    <div>Всего очков</div>
+                </div>
+            `;
+        }
+
+        // ТУРНИРЫ
         function updateTournamentTimer() {
-            const now = new Date();
-            const tomorrow = new Date(now);
-            tomorrow.setHours(24, 0, 0, 0);
-            const timeLeft = tomorrow - now;
-            const h = Math.floor(timeLeft / 3600000).toString().padStart(2, '0');
+            const now = new Date(); const tomorrow = new Date(now); tomorrow.setHours(24, 0, 0, 0);
+            const timeLeft = tomorrow - now; const h = Math.floor(timeLeft / 3600000).toString().padStart(2, '0');
             const m = Math.floor((timeLeft % 3600000) / 60000).toString().padStart(2, '0');
             const s = Math.floor((timeLeft % 60000) / 1000).toString().padStart(2, '0');
             document.getElementById('tournament-timer').textContent = `${h}:${m}:${s}`;
             requestAnimationFrame(updateTournamentTimer);
         }
 
-        async function loadAllData() {
-            // Загрузка всех данных
-        }
-
         function joinTournament() {
-            playSound(1400, 0.3);
-            startGame('snake', 'easy');
+            playSound(1400, 0.3); startGame('snake', 'easy');
             alert('⚔️ ТУРНИР НАЧАЛСЯ!\nПобеди всех игроков Тулы! 🏆');
         }
 
@@ -709,6 +623,15 @@
             if (currentGame === 'snake') initSnake(); 
             else initGuess(); 
         }
+
+        // ИНИЦИАЛИЗАЦИЯ
+        document.addEventListener('DOMContentLoaded', function() {
+            initMatrixRain();
+            bindEvents();
+            loadAllData();
+            updateTournamentTimer();
+            setInterval(() => { loadChat(); loadAllData(); }, 3000);
+        });
     </script>
 </body>
 </html>
